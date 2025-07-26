@@ -1,6 +1,6 @@
 :root {
-  --bg-primary: #0088cc;
-  --bg-primary90: #0088cce6;
+  --bg-primary: #000000;
+  --bg-primary90: #000000e6;
   --text-primary: #ffffff;
   --bg-secondary: #2c3e50;
   --bg-secondary70: #2c3e50b3;
@@ -242,7 +242,7 @@ body {
 }
 
 .switch-teen input:checked + .slider {
-  background-color: #2196f3;
+  background-color: #cad4db;
 }
 
 /* switch button */
