@@ -1,0 +1,8 @@
+node_modules
+# Ignore artifacts:
+build
+coverage
+.github
+.github/workflows
+dist
+.github/workflows/dev.yaml
