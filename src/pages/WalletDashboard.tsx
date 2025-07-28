@@ -16,8 +16,7 @@ const WalletDashboard: React.FC = () => {
   const navigation = useNavigate();
   const dispatch = useDispatch();
   const location=useLocation()
-  useEffect(() => {
-    const fetchDashboardData = async () => {
+   const fetchDashboardData = async () => {
       setLoading(true);
       setError(null);
 
@@ -45,6 +44,8 @@ const WalletDashboard: React.FC = () => {
         setLoading(false);
       }
     };
+  useEffect(() => {
+   
 
     fetchDashboardData();
   }, []);
@@ -109,12 +110,10 @@ const WalletDashboard: React.FC = () => {
                   <li>
                     <h4>Total User</h4>
                     <span>
-                      {totalUsers} <i className="fas fa-sync"></i>
+                      {totalUsers} <i onClick={()=>fetchDashboardData()} className="fas fa-sync"></i>
                     </span>
                   </li>
-                  <li>
-                    <span>Click here</span>
-                  </li>
+                  
                 </ul>
               </div>
             </div>
@@ -124,12 +123,10 @@ const WalletDashboard: React.FC = () => {
                   <li>
                     <h4>Active User</h4>
                     <span>
-                      {activeUsers} <i className="fas fa-sync"></i>
+                      {activeUsers} <i onClick={()=>fetchDashboardData()} className="fas fa-sync"></i>
                     </span>
                   </li>
-                  <li>
-                    <span>Click here</span>
-                  </li>
+                 
                 </ul>
               </div>
             </div>
@@ -139,12 +136,10 @@ const WalletDashboard: React.FC = () => {
                   <li>
                     <h4>Weekly User</h4>
                     <span>
-                      {weeklyUsers} <i className="fas fa-sync"></i>
+                      {weeklyUsers} <i onClick={()=>fetchDashboardData()} className="fas fa-sync"></i>
                     </span>
                   </li>
-                  <li>
-                    <span>Click here</span>
-                  </li>
+                 
                 </ul>
               </div>
             </div>
@@ -154,12 +149,10 @@ const WalletDashboard: React.FC = () => {
                   <li>
                     <h4>Monthly User</h4>
                     <span>
-                      {monthlyUsers} <i className="fas fa-sync"></i>
+                      {monthlyUsers} <i onClick={()=>fetchDashboardData()} className="fas fa-sync"></i>
                     </span>
                   </li>
-                  <li>
-                    <span>Click here</span>
-                  </li>
+                 
                 </ul>
               </div>
             </div>

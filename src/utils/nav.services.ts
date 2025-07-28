@@ -25,7 +25,7 @@ export const navMenu = [
     ],
   }, {
 
-    label: "All Matches",
+    label: "Result Panel",
      icon: "bi-archive",
     children: [
       // { label: "Greyhound", to: "/matchList/4339" },
@@ -108,7 +108,7 @@ export const menuItems: MenuItem[] = [
   },
   {
 
-    label: "All Matches",
+    label: "Result Panel",
     dropdown: [
       // { label: "Greyhound", path: "/matchList/4339" },
       // { label: "Horse", path: "/matchList/7" },

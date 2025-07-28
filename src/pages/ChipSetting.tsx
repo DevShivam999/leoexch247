@@ -168,6 +168,7 @@ const ChipSetting = () => {
           wantDeposit: false,
         });
       }
+      fetchSettlementData();
     } catch (error) {
       ErrorHandler({
         err: error,
