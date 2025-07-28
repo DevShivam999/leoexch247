@@ -597,6 +597,10 @@ body {
   border: none;
   transition: all ease 0.3s;
 }
+.Dashboard-card-ul {
+    word-break: break-word;
+}
+ 
 
 .admin-header .menu-link:hover {
   background-color: #ebc108;
