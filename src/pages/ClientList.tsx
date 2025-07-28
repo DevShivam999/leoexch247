@@ -25,6 +25,7 @@ const ClientList = () => {
   const [exportdata, setexportdata] = useState([]);
   const [betHistoryPage, setBetHistoryPage] = useState(1);
   const [betHistoryTotal, setBetHistoryTotal] = useState(1);
+  const [Limit,setLimit]=useState(10)
   const navigation = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -36,7 +37,7 @@ const ClientList = () => {
   const fetchUsers = async (numeric_id: number) => {
     try {
       const response = await instance.get(
-        `users?page=${searchTerm.length>0?0:entriesToShow}&sortBy=&search=${searchTerm}&numeric_id=${numeric_id}&role=&username=&status=&limit=${searchTerm.length>0?"":10}`
+        `users?page=${searchTerm.length>0?0:entriesToShow}&sortBy=&search=${searchTerm}&numeric_id=${numeric_id}&role=&username=&status=&limit=${searchTerm.length>0?"":Limit}`
       );
       const transformed = transformUserData(response.data.results);
 
@@ -81,7 +82,7 @@ const ClientList = () => {
       setEntriesToShow(1)
     }
     fetchUsers(Number(!id ? user.numeric_id : id));
-  }, [entriesToShow, showActiveUsers, location.search,searchTerm]);
+  }, [entriesToShow, showActiveUsers,,Limit, location.search,searchTerm]);
 
   const transformUserData = (users: any) => {
     return users.map((user: any) => {
@@ -202,14 +203,14 @@ const ClientList = () => {
                     />
                   </div>
                 </div>
-                {/* <div className="col-6 mb-3">
+                <div className="col-6 mb-3">
                   <div className="select-box">
                     <label>Show</label>
                     <select
                       className="form-select"
                       aria-label="Default select example"
                       onChange={(e) =>
-                        setEntriesToShow(parseInt(e.target.value))
+                        setLimit(parseInt(e.target.value))
                       }
                     >
                       <option value="10">10</option>
@@ -221,7 +222,7 @@ const ClientList = () => {
                     </select>
                     <label>entries</label>
                   </div>
-                </div> */}
+                </div>
               </div>
 
               <table className="table table-bordered text-center">
@@ -251,6 +252,7 @@ const ClientList = () => {
                         parent_name={parent}
                         key={user?.id}
                         user={user}
+                        fetchUsers={fetchUsers}
                       />
                     )}
                   />
@@ -261,6 +263,7 @@ const ClientList = () => {
                 current={betHistoryPage}
                 total={betHistoryTotal}
                 LEDGER={users}
+                Device={Limit}
                 setPage={setEntriesToShow}
               />
             </div>

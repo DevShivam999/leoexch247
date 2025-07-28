@@ -242,7 +242,7 @@ body {
 }
 
 .switch-teen input:checked + .slider {
-  background-color: #cad4db;
+  background-color: #2b91da;
 }
 
 /* switch button */
@@ -599,7 +599,7 @@ body {
 }
 
 .admin-header .menu-link:hover {
-  background-color: #00aaff;
+  background-color: #ebc108;
   transition: all ease 0.3s;
 }
 

@@ -17,15 +17,15 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fromRef = useRef<HTMLInputElement>(null);
   const toRef = useRef<HTMLInputElement>(null);
   const user = useSelector((p: RootState) => p.changeStore.user);
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
+  
   const Api = async () => {
-    console.log
-    (fromRef.current?.value)
     try {
       const { data } = await instance.get(
         `${type == "Deposit" ? `/admin/getDepositReq?&to=${toRef.current?.value||""}&from=${fromRef.current?.value||""}` : type == "All" ? "/admin/getWalletReq" : `/admin/getwithdrawReq?to=${toRef.current?.value||""}&from=${fromRef.current?.value||""}`}`
@@ -51,6 +51,7 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
     document.title = `${type} Transaction`;
     Api();
   }, []);
+
   const handleAccept = async (id: string, method: string, ok: string) => {
     setLoading(true);
     try {
@@ -59,7 +60,6 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
         status: method,
         type: ok,
       });
-
       Api();
       setLoading(false);
     } catch (err) {
@@ -74,30 +74,38 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
       setLoading(false);
     }
   };
+
   const [filter, setFilter] = useState("1");
-  const [filteredData, setfilteredData] = useState<any[]>([]);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
+
+  // Combined filter and search function
+  const applyFilters = () => {
+    let result = [...data];
+    
+    // Apply status filter if not "1" (all)
+    if (filter !== "1") {
+      result = result.filter(item => item.status === filter);
+    }
+    
+    // Apply search filter if search term exists
+    if (searchTerm.trim() !== "") {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(item => 
+        item.user?.username?.toLowerCase().includes(term)
+      );
+    }
+    
+    setFilteredData(result);
+  };
 
   useEffect(() => {
-    console.log(filter);
+    applyFilters();
+  }, [data, filter, searchTerm]);
 
-    const p = data.filter((item) => {
-      if (filter == "1") return data;
-      return item.status === filter;
-    });
-    setfilteredData(p);
-  }, [data, filter]);
-
-  const handleChange = (e: string) => {
-    if (e.trim() === "") {
-      setfilteredData(data);
-      return;
-    }
-    const searchTerm = e.toLowerCase();
-    const filtered = data.filter((item) =>
-      item.user.username.toLowerCase().includes(searchTerm)
-    );
-    setfilteredData(filtered);
+  const handleSearchChange = (e: string) => {
+    setSearchTerm(e);
   };
+
   return (
     <section className="mian-content">
       <div className="withdrawal-transaction-page">
@@ -117,7 +125,7 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
                     onChange={(e) => setFilter(e.target.value)}
                     aria-label="Default select example"
                   >
-                    <CommanOption />
+                    <CommanOption key={"commmanOption"} />
                   </select>
                 </div>
               </div>
@@ -130,7 +138,10 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
                 </div>
               </div>
               <div className="row align-items-end">
-               <SearchCom handleChange={handleChange} type="Search name/phone"/>
+                <SearchCom 
+                  handleChange={handleSearchChange} 
+                  type="Search name"
+                />
                 <div className="col-md-2 mb-3">
                   <label className="lable-two">Status</label>
                   <select
@@ -146,7 +157,6 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
                 <SearchBtn Api={Api} type="Search" />
                 <div className="col-md-2 mb-3">
                   <h5 className="text-end">
-                    {" "}
                     Total {type}:{" "}
                     <span className="text-green">
                       {filteredData.reduce((acc, item) => {

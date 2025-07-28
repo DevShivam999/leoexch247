@@ -29,7 +29,7 @@ const CommanTable = ({
             "Status",
             "Action",
           ].map((p) => (
-            <TableHead type={p} />
+            <TableHead type={p} key={p}/>
           ))}
         </tr>
       </thead>
@@ -54,7 +54,7 @@ const CommanTable = ({
                 item.amount.toString(),
                 item.status,
               ].map((p) => (
-                <ColorTd amount={p} />
+                <ColorTd amount={p} key={p} />
               ))}
 
               <td className="d-flex gap-2">

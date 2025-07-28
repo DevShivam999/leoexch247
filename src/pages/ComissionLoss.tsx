@@ -226,12 +226,12 @@ const CommissionLoss = () => {
                             </div>
                           </td>
                         )}
-                      <ColorTd amount={item.MILA_HAI.MComm} />
-                      <ColorTd amount={item.MILA_HAI.SComm} />
-                      <ColorTd amount={item.MILA_HAI.TComm} />
-                      <ColorTd amount={item.DENA_HAI.MComm} />
-                      <ColorTd amount={item.DENA_HAI.SComm} />
-                      <ColorTd amount={item.DENA_HAI.TComm} />
+                      <ColorTd amount={item.MILA_HAI?.MComm||0} />
+                      <ColorTd amount={item.MILA_HAI?.SComm||0} />
+                      <ColorTd amount={item.MILA_HAI?.TComm||0} />
+                      <ColorTd amount={item.DENA_HAI?.MComm||0} />
+                      <ColorTd amount={item.DENA_HAI?.SComm||0} />
+                      <ColorTd amount={item.DENA_HAI?.TComm||0} />
                     </tr>
                   ))
                 ) : (

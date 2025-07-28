@@ -51,22 +51,22 @@ export const navMenu = [
       { label: "Client Commission Lenden", to: "/client-commission-lenden" },
     ],
   },
-  // {
-  //   label: "Wallet",
-  //   icon: "bi-wallet-fill",
-  //   children: [
-  //     { label: "Dashboard", to: "/wallet-dashboard" },
-  //     { label: "All Transactions", to: "/all-transaction" },
-  //     { label: "Deposit Transactions", to: "/deposit-transaction" },
-  //     { label: "Total Deposit", to: "/total-deposit" },
-  //     { label: "Withdraw Transaction", to: "/withdrawal-transaction" },
-  //     { label: "Total Withdraw", to: "/total-withdraw" },
-  //     { label: "Deposit Payment Method", to: "/deposit-payment-method" },
-  //     { label: "Site Panel", to: "/site-panel" },
-  //     { label: "Id Request", to: "/id-request" },
-  //     { label: "Bonus", to: "/bonus" },
-  //   ],
-  // },
+  {
+    label: "Wallet",
+    icon: "bi-wallet-fill",
+    children: [
+      { label: "Dashboard", to: "/wallet-dashboard" },
+      { label: "All Transactions", to: "/all-transaction" },
+      { label: "Deposit Transactions", to: "/deposit-transaction" },
+      { label: "Total Deposit", to: "/total-deposit" },
+      { label: "Withdraw Transaction", to: "/withdrawal-transaction" },
+      { label: "Total Withdraw", to: "/total-withdraw" },
+      { label: "Deposit Payment Method", to: "/deposit-payment-method" },
+      { label: "Site Panel", to: "/site-panel" },
+      { label: "Id Request", to: "/id-request" },
+      { label: "Bonus", to: "/bonus" },
+    ],
+  },
 ];
 
 
@@ -118,20 +118,20 @@ export const menuItems: MenuItem[] = [
      
     ],
   },
-  // {
-  //   label: "Wallet",
-  //   dropdown: [
-  //     { label: "Dashboard", path: "/wallet-dashboard" },
-  //     { label: "All Transactions", path: "/all-transaction" },
-  //     { label: "Deposit Transactions", path: "/deposit-transaction" },
-  //     { label: "Total Deposit", path: "/total-deposit" },
-  //     { label: "Withdraw Transaction", path: "/withdrawal-transaction" },
-  //     { label: "Total Withdraw", path: "/total-withdraw" },
-  //     { label: "Deposit Payment Method", path: "/deposit-payment-method" },
-  //     { label: "Site Panel", path: "/site-panel" },
-  //     { label: "Id Request", path: "/id-request" },
-  //     { label: "Bonus", path: "/bonus" },
-  //   ],
-  // },
+  {
+    label: "Wallet",
+    dropdown: [
+      { label: "Dashboard", path: "/wallet-dashboard" },
+      { label: "All Transactions", path: "/all-transaction" },
+      { label: "Deposit Transactions", path: "/deposit-transaction" },
+      { label: "Total Deposit", path: "/total-deposit" },
+      { label: "Withdraw Transaction", path: "/withdrawal-transaction" },
+      { label: "Total Withdraw", path: "/total-withdraw" },
+      { label: "Deposit Payment Method", path: "/deposit-payment-method" },
+      { label: "Site Panel", path: "/site-panel" },
+      { label: "Id Request", path: "/id-request" },
+      { label: "Bonus", path: "/bonus" },
+    ],
+  },
   { label: "Multi Login", path: "/create-partner" },
 ];

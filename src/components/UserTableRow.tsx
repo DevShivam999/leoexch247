@@ -12,10 +12,11 @@ import { success, Tp } from "../utils/Tp";
 
 const UserTableRow = ({
   user,
-
+fetchUsers,
   parent_name,
 }: {
   user: any;
+  fetchUsers: (numeric_id: number) => Promise<void>
   parent_name: {
     parent_balance: number;
     parent_credit: number;
@@ -141,6 +142,7 @@ const UserTableRow = ({
         transitionPassword: parent_name.transaction_password,
       });
       success();
+      fetchUsers(userwith.numeric_id)
       setShowDepositModal((p) => !p);
       setDetails({
         id: "",
@@ -175,6 +177,8 @@ const UserTableRow = ({
       });
 
       success();
+      
+      fetchUsers(userwith.numeric_id)
       setShowWithdrawModal((p) => !p);
       setDetails({
         id: "",

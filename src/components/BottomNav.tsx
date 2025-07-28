@@ -4,10 +4,12 @@ const BottomNav = ({
   LEDGER,
   setPage,
   total,current
+  ,Device=10
 }: {
   LEDGER: any[];
   setPage: React.Dispatch<React.SetStateAction<number>>;
   total:number,
+  Device?:number,
   current:number
 }) => {
   return (
@@ -32,7 +34,7 @@ const BottomNav = ({
                 </button>
               </li>
               {Array.from(
-                { length: Math.ceil(total / 10) },
+                { length: Math.ceil(total / Device) },
                 (_, i) => i + 1
               ).map((p) => (
                 <li key={p} className={`page-item ${p==current&&"active"}`}>
