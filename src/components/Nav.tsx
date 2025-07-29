@@ -115,7 +115,7 @@ const Nav: React.FC = () => {
                   style={{ backgroundColor: "transparent !important" }}
                 >
                   <img src="/user.svg" alt="User icon" />
-                  {User?.firstName ?? "d247"}
+                  {User?.firstName ?? "Leoexch247"}
                 </button>
                 <ul className="dropdown-menu">
                   <li>
@@ -141,7 +141,7 @@ const Nav: React.FC = () => {
                       className="dropdown-item"
                       href={`https://api.whatsapp.com/send?phone=${User?.number}&text=&source=&data=&app_absent=`}
                     >
-                      <i className="fab fa-whatsapp text-success"></i> D247
+                      <i className="fab fa-whatsapp text-success"></i> Leoexch247
                     </a>
                   </li>
                   <li>

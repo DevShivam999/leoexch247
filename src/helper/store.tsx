@@ -5,11 +5,13 @@ import socket from "./SokcetStore";
 import permissionReducer from "./Permissions";
 import Sport from "./Sport";
 import FancyBetData from "./FancyBetData";
+import BannerStore from "./BannerStore";
 
 
 const rootReducer = {
   Sport,
   changeStore,
+  BannerStore,
   socket,
   FancyBetData,
   Permissions: permissionReducer,

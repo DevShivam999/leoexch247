@@ -22,6 +22,7 @@ export const navMenu = [
     children: [
       { label: "Global Settings", to: "/global-settings" },
       { label: "Create Partner", to: "/create-partner" },
+      { label: "Create Banner", to: "/create-banner" },
     ],
   }, {
 
@@ -90,6 +91,7 @@ export const menuItems: MenuItem[] = [
     dropdown: [
       { label: "Global Settings", path: "/global-settings" },
       { label: "Create Partner", path: "/create-partner" },
+      { label: "Create Banner", path: "/create-banner" },
     ],
   },
   {

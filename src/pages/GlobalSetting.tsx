@@ -8,7 +8,6 @@ import ErrorHandler from "../utils/ErrorHandle";
 import { useAppSelector } from "../hook/hook";
 import { success, Tp } from "../utils/Tp";
 import GlobalContactNav from "../components/GlobalContactNav";
-import GlobalSettingsBanner from "../components/GlobalSettingsBanner";
 
 function GlobalSettingsPage() {
   const [settings, setSettings] = useState({
@@ -522,7 +521,7 @@ function GlobalSettingsPage() {
                   Update
                 </button>
               </div>
-              <GlobalSettingsBanner/>
+             
             </div>
           </div>
         </div>

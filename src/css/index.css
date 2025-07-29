@@ -2893,3 +2893,41 @@ div[data-sonner-toast][data-type='error']::before {
     transition: .9s;
     border-bottom: 1px solid #e7e7e7
 }
+/* Modal backdrop animation */
+.modal-backdrop {
+  transition: opacity 0.3s ease-in-out;
+}
+.modal-backdrop.show {
+  opacity: 0.5; /* Adjust as needed */
+}
+.modal-backdrop:not(.show) {
+  opacity: 0;
+}
+
+/* Modal dialog animation */
+.modal {
+  display: block !important; /* Override Bootstrap's default display */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+.modal:not(.show) {
+  opacity: 0;
+  transform: translateY(-50px); /* Start slightly above */
+  pointer-events: none; /* Prevent interaction when hidden */
+}
+.modal.show {
+  opacity: 1;
+  transform: translateY(0); /* Slide to original position */
+}
+
+/* Modal content animation */
+.modal-content {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.modal.show .modal-content {
+  transform: scale(1); /* Normal size */
+  opacity: 1;
+}
+.modal:not(.show) .modal-content {
+  transform: scale(0.95); /* Slightly smaller when hidden */
+  opacity: 0;
+}

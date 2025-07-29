@@ -17,6 +17,7 @@ const EventPL = lazy(() => import("../pages/EventPL"));
 const CommissionLoss = lazy(() => import("../pages/ComissionLoss"));
 const ClientCommissionLedge = lazy(() => import("../pages/ClientCommissionLendge"));
 const CreatePartner = lazy(() => import("../pages/CreatePartner"));
+const Banner = lazy(() => import("../pages/Banner"));
 const WalletDashboard = lazy(() => import("../pages/WalletDashboard"));
 const AllTransaction = lazy(() => import("../pages/AllTransaction"));
 const TotalDeposit = lazy(() => import("../pages/TotalDeposit"));
@@ -55,6 +56,7 @@ export const routeConfig = [
   { path: "/commission-loss", element: <CommissionLoss /> },
   { path: "/client-commission-lenden", element: <ClientCommissionLedge /> },
   { path: "/create-partner", element: <CreatePartner /> },
+  { path: "/create-banner", element: <Banner /> },
   { path: "/wallet-dashboard", element: <WalletDashboard /> },
   { path: "/all-transaction", element: <AllTransaction /> },
   { path: "/deposit-transaction", element: <DepositTansaction /> },

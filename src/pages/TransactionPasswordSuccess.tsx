@@ -26,7 +26,7 @@ const TransactionPasswordSuccess = () => {
         </p>
 
         <p className="text-secondary small">
-          Thank you, Team <strong>D247</strong>
+          Thank you, Team <strong>Leoexch247</strong>
         </p>
 
         <hr className="my-4" />
@@ -47,7 +47,7 @@ const TransactionPasswordSuccess = () => {
         </p>
 
         <p className="text-secondary small">
-          धन्यवाद, टीम <strong>D247</strong>
+          धन्यवाद, टीम <strong>Leoexch247</strong>
         </p>
 
         <button

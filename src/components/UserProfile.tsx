@@ -14,7 +14,7 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
           <h1 className="heading-one">Profile Detail</h1>
           <div className="refcode-row">
             <div className="ref-code-box">
-              https://D247.co/ReferBy/{userData?.referralCode}
+              https://Leoexch247.co/ReferBy/{userData?.referralCode}
               <span className="copy">tap-to-copy</span>
             </div>
             <div className="ref-use text-success">ACTIVE</div>

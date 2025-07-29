@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Loading from "./Loading";
 import { useDispatch } from "react-redux";
@@ -12,16 +12,16 @@ import { success, Tp } from "../utils/Tp";
 
 const UserTableRow = ({
   user,
-fetchUsers,
+  fetchUsers,
   parent_name,
 }: {
   user: any;
-  fetchUsers: (numeric_id: number) => Promise<void>
+  fetchUsers: (numeric_id: number) => Promise<void>;
   parent_name: {
     parent_balance: number;
     parent_credit: number;
     parent_name: string;
-    transaction_password:number,
+    transaction_password: number;
   };
 }) => {
   const location = useLocation();
@@ -52,6 +52,55 @@ fetchUsers,
     ts_password: "",
   });
 
+  // Create refs for each modal
+  const depositModalRef = useRef<HTMLDivElement>(null);
+  const withdrawModalRef = useRef<HTMLDivElement>(null);
+  const exposureModalRef = useRef<HTMLDivElement>(null);
+  const creditModalRef = useRef<HTMLDivElement>(null);
+  const passwordModalRef = useRef<HTMLDivElement>(null);
+  const statusModalRef = useRef<HTMLDivElement>(null);
+  const sportsModalRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside for all modals
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (depositModalRef.current && !depositModalRef.current.contains(event.target as Node) && showDepositModal) {
+        setShowDepositModal(false);
+      }
+      if (withdrawModalRef.current && !withdrawModalRef.current.contains(event.target as Node) && showWithdrawModal) {
+        setShowWithdrawModal(false);
+      }
+      if (exposureModalRef.current && !exposureModalRef.current.contains(event.target as Node) && showExposureLimitModal) {
+        setShowExposureLimitModal(false);
+      }
+      if (creditModalRef.current && !creditModalRef.current.contains(event.target as Node) && showCreditLimitModal) {
+        setShowCreditLimitModal(false);
+      }
+      if (passwordModalRef.current && !passwordModalRef.current.contains(event.target as Node) && showPasswordLimitModal) {
+        setShowPasswordLimitModal(false);
+      }
+      if (statusModalRef.current && !statusModalRef.current.contains(event.target as Node) && showChangeStatusModal) {
+        setShowChangeStatusModal(false);
+      }
+      if (sportsModalRef.current && !sportsModalRef.current.contains(event.target as Node) && showSportsSettingsModal) {
+        setShowSportsSettingsModal(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [
+    showDepositModal,
+    showWithdrawModal,
+    showExposureLimitModal,
+    showCreditLimitModal,
+    showPasswordLimitModal,
+    showChangeStatusModal,
+    showSportsSettingsModal,
+  ]);
+
   //@ts-ignore
   const offuserSupport = (p) => {
     //@ts-ignore
@@ -65,6 +114,7 @@ fetchUsers,
       )
     );
   };
+
   const navi = useNavigate();
   const userwith = useAppSelector((p: RootState) => p.changeStore.user);
   const Permissions = useAppSelector((p: RootState) => p.Permissions);
@@ -92,6 +142,7 @@ fetchUsers,
       Tp(modelError || "");
     }
   }
+
   useEffect(() => {
     if (userwith == null) {
       navi("/login");
@@ -101,6 +152,7 @@ fetchUsers,
       fetchData();
     }
   }, [showSportsSettingsModal]);
+
   useEffect(() => {
     if (showSportsSettingsModal) {
       fetchData().then(() => {
@@ -129,7 +181,7 @@ fetchUsers,
     else setShowCreditLimitModal(true);
   };
 
-  const DepositApiCall = async () => {;
+  const DepositApiCall = async () => {
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
     }
@@ -142,8 +194,8 @@ fetchUsers,
         transitionPassword: parent_name.transaction_password,
       });
       success();
-      fetchUsers(userwith.numeric_id)
-      setShowDepositModal((p) => !p);
+      fetchUsers(userwith.numeric_id);
+      setShowDepositModal(false);
       setDetails({
         id: "",
         pid: "",
@@ -163,6 +215,7 @@ fetchUsers,
       });
     }
   };
+
   const withdrawApiCall = async () => {
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
@@ -178,8 +231,8 @@ fetchUsers,
 
       success();
       
-      fetchUsers(userwith.numeric_id)
-      setShowWithdrawModal((p) => !p);
+      fetchUsers(userwith.numeric_id);
+      setShowWithdrawModal(false);
       setDetails({
         id: "",
         pid: "",
@@ -200,6 +253,7 @@ fetchUsers,
       });
     }
   };
+
   const newPassword = async () => {
     if (parent_name.transaction_password.toString() != userPassword.ts_password) {
       return Tp();
@@ -215,14 +269,14 @@ fetchUsers,
         transitionPassword: userPassword.ts_password,
       });
       success();
-      setShowPasswordLimitModal((p) => !p);
+      setShowPasswordLimitModal(false);
       setUserPassword({
-    numeric_id: 0,
-    password: "",
-    rePassword: "",
-    reset: true,
-    ts_password: "",
-  })
+        numeric_id: 0,
+        password: "",
+        rePassword: "",
+        reset: true,
+        ts_password: "",
+      });
       SetmodelError(null);
     } catch (err) {
       ErrorHandler({
@@ -234,6 +288,7 @@ fetchUsers,
       });
     }
   };
+
   const [userInfo, setUserInfo] = useState<any>(user);
   useEffect(() => {
     setUserInfo(user);
@@ -246,10 +301,11 @@ fetchUsers,
 
     navigate(`${location.pathname}?${searchParams.toString()}`);
   };
+
   return (
     <>
       {/* Deposit Modal */}
-
+      {showDepositModal && <div className="modal-backdrop show"></div>}
       <div
         className={`modal fade modal-one DepositModal ${
           showDepositModal ? "show" : ""
@@ -260,7 +316,7 @@ fetchUsers,
         aria-labelledby="DepositModalLabel"
         aria-hidden={!showDepositModal}
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog" ref={depositModalRef}>
           <div className="modal-content">
             <div className="modal-header">
               <h1
@@ -274,16 +330,16 @@ fetchUsers,
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  (setShowDepositModal(false),
-                    SetmodelError(null),
-                    setDetails({
-                      id: "",
-                      pid: "",
-                      amount: 0,
-                      newAmount: 0,
-                      remark: "",
-                      ts_password: "",
-                    }));
+                  setShowDepositModal(false);
+                  SetmodelError(null);
+                  setDetails({
+                    id: "",
+                    pid: "",
+                    amount: 0,
+                    newAmount: 0,
+                    remark: "",
+                    ts_password: "",
+                  });
                 }}
                 aria-label="Close"
               >
@@ -303,7 +359,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_credit}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -317,7 +372,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_balance}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -326,7 +380,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_balance}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -338,7 +391,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={userDetails.amount}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -347,7 +399,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={userDetails.amount}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -404,23 +455,23 @@ fetchUsers,
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  (setShowDepositModal(false),
-                    SetmodelError(null),
-                    setDetails({
-                      id: "",
-                      pid: "",
-                      amount: 0,
-                      newAmount: 0,
-                      remark: "",
-                      ts_password: "",
-                    }));
+                  setShowDepositModal(false);
+                  SetmodelError(null);
+                  setDetails({
+                    id: "",
+                    pid: "",
+                    amount: 0,
+                    newAmount: 0,
+                    remark: "",
+                    ts_password: "",
+                  });
                 }}
               >
                 <i className="fas fa-undo"></i> Back
               </button>
               <button
                 type="button"
-                onClick={() => DepositApiCall()}
+                onClick={DepositApiCall}
                 className="btn modal-green-btn"
               >
                 Deposit
@@ -431,6 +482,7 @@ fetchUsers,
       </div>
 
       {/* Withdraw Modal */}
+      {showWithdrawModal && <div className="modal-backdrop show"></div>}
       <div
         className={`modal fade modal-one WithdrawModal ${
           showWithdrawModal ? "show" : ""
@@ -441,7 +493,7 @@ fetchUsers,
         aria-labelledby="WithdrawModalLabel"
         aria-hidden={!showWithdrawModal}
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog" ref={withdrawModalRef}>
           <div className="modal-content">
             <div className="modal-header">
               <h1
@@ -455,14 +507,16 @@ fetchUsers,
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  (setShowWithdrawModal(false), SetmodelError(null),setDetails({
-                      id: "",
-                      pid: "",
-                      amount: 0,
-                      newAmount: 0,
-                      remark: "",
-                      ts_password: "",
-                    }));
+                  setShowWithdrawModal(false);
+                  SetmodelError(null);
+                  setDetails({
+                    id: "",
+                    pid: "",
+                    amount: 0,
+                    newAmount: 0,
+                    remark: "",
+                    ts_password: "",
+                  });
                 }}
                 aria-label="Close"
               >
@@ -482,7 +536,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_credit}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -496,7 +549,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_balance}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -505,7 +557,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_balance}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -517,7 +568,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={userDetails.amount}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -526,7 +576,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={userDetails.amount}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -588,21 +637,23 @@ fetchUsers,
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  (setShowWithdrawModal(false), SetmodelError(null),setDetails({
-                      id: "",
-                      pid: "",
-                      amount: 0,
-                      newAmount: 0,
-                      remark: "",
-                      ts_password: "",
-                    }));
+                  setShowWithdrawModal(false);
+                  SetmodelError(null);
+                  setDetails({
+                    id: "",
+                    pid: "",
+                    amount: 0,
+                    newAmount: 0,
+                    remark: "",
+                    ts_password: "",
+                  });
                 }}
               >
                 <i className="fas fa-undo"></i> Back
               </button>
               <button
                 type="button"
-                onClick={() => withdrawApiCall()}
+                onClick={withdrawApiCall}
                 className="btn modal-red-btn"
               >
                 Withdraw
@@ -613,6 +664,7 @@ fetchUsers,
       </div>
 
       {/* Exposure Limit Modal */}
+      {showExposureLimitModal && <div className="modal-backdrop show"></div>}
       <div
         className={`modal fade modal-one ExposureLimitModal ${
           showExposureLimitModal ? "show" : ""
@@ -623,7 +675,7 @@ fetchUsers,
         aria-labelledby="ExposureLimitModalLabel"
         aria-hidden={!showExposureLimitModal}
       >
-        <div className="modal-dialog modal-lg">
+        <div className="modal-dialog modal-lg" ref={exposureModalRef}>
           <div className="modal-content">
             <div className="modal-header">
               <h1
@@ -637,7 +689,8 @@ fetchUsers,
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  (setShowExposureLimitModal(false), SetmodelError(null));
+                  setShowExposureLimitModal(false);
+                  SetmodelError(null);
                 }}
                 aria-label="Close"
               >
@@ -655,7 +708,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_balance}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -665,7 +717,6 @@ fetchUsers,
                   <input
                     type="text"
                     className="mgray-input-box form-control text-end"
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -675,7 +726,6 @@ fetchUsers,
                   <input
                     type="password"
                     className="mgray-input-box form-control text-end"
-                    placeholder="200,000,000"
                   />
                 </div>
               </div>
@@ -685,7 +735,8 @@ fetchUsers,
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  (setShowExposureLimitModal(false), SetmodelError(null));
+                  setShowExposureLimitModal(false);
+                  SetmodelError(null);
                 }}
               >
                 <i className="fas fa-undo"></i> Back
@@ -699,6 +750,7 @@ fetchUsers,
       </div>
 
       {/* Credit Limit Modal */}
+      {showCreditLimitModal && <div className="modal-backdrop show"></div>}
       <div
         className={`modal fade modal-one CreditLimitModal ${
           showCreditLimitModal ? "show" : ""
@@ -709,7 +761,7 @@ fetchUsers,
         aria-labelledby="CreditLimitModalLabel"
         aria-hidden={!showCreditLimitModal}
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog" ref={creditModalRef}>
           <div className="modal-content">
             <div className="modal-header">
               <h1
@@ -723,7 +775,8 @@ fetchUsers,
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  (setShowCreditLimitModal(false), SetmodelError(null));
+                  setShowCreditLimitModal(false);
+                  SetmodelError(null);
                 }}
                 aria-label="Close"
               >
@@ -741,7 +794,6 @@ fetchUsers,
                     disabled
                     className="mgray-input-box form-control text-end"
                     value={parent_name.parent_balance}
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -751,7 +803,6 @@ fetchUsers,
                   <input
                     type="text"
                     className="mgray-input-box form-control text-end"
-                    placeholder="200,000,000"
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -761,7 +812,6 @@ fetchUsers,
                   <input
                     type="password"
                     className="mgray-input-box form-control text-end"
-                    placeholder="200,000,000"
                   />
                 </div>
               </div>
@@ -771,7 +821,8 @@ fetchUsers,
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  (setShowCreditLimitModal(false), SetmodelError(null));
+                  setShowCreditLimitModal(false);
+                  SetmodelError(null);
                 }}
               >
                 <i className="fas fa-undo"></i> Back
@@ -785,6 +836,7 @@ fetchUsers,
       </div>
 
       {/* Password Limit Modal */}
+      {showPasswordLimitModal && <div className="modal-backdrop show"></div>}
       <div
         className={`modal fade modal-one PasswordLimitModal ${
           showPasswordLimitModal ? "show" : ""
@@ -795,7 +847,7 @@ fetchUsers,
         aria-labelledby="PasswordLimitModalLabel"
         aria-hidden={!showPasswordLimitModal}
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog" ref={passwordModalRef}>
           <div className="modal-content">
             <div className="modal-header">
               <h1
@@ -809,7 +861,8 @@ fetchUsers,
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  (setShowPasswordLimitModal(false), SetmodelError(null));
+                  setShowPasswordLimitModal(false);
+                  SetmodelError(null);
                 }}
                 aria-label="Close"
               >
@@ -873,14 +926,15 @@ fetchUsers,
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  (setShowPasswordLimitModal(false), SetmodelError(null));
+                  setShowPasswordLimitModal(false);
+                  SetmodelError(null);
                 }}
               >
                 <i className="fas fa-undo"></i> Back
               </button>
               <button
                 type="button"
-                onClick={() => newPassword()}
+                onClick={newPassword}
                 className="btn modal-submit-btn"
               >
                 Submit <i className="fas fa-sign-in-alt"></i>
@@ -891,6 +945,7 @@ fetchUsers,
       </div>
 
       {/* Change Status Modal */}
+      {showChangeStatusModal && <div className="modal-backdrop show"></div>}
       <div
         className={`modal fade modal-one ChangeStatusModal ${
           showChangeStatusModal ? "show" : ""
@@ -901,7 +956,7 @@ fetchUsers,
         aria-labelledby="ChangeStatusModalLabel"
         aria-hidden={!showChangeStatusModal}
       >
-        <div className="modal-dialog">
+        <div className="modal-dialog" ref={statusModalRef}>
           <div className="modal-content">
             <div className="modal-header">
               <h1
@@ -915,7 +970,8 @@ fetchUsers,
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  (setShowChangeStatusModal(false), SetmodelError(null));
+                  setShowChangeStatusModal(false);
+                  SetmodelError(null);
                 }}
                 aria-label="Close"
               >
@@ -961,7 +1017,8 @@ fetchUsers,
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  (setShowChangeStatusModal(false), SetmodelError(null));
+                  setShowChangeStatusModal(false);
+                  SetmodelError(null);
                 }}
               >
                 <i className="fas fa-undo"></i> Back
@@ -975,6 +1032,7 @@ fetchUsers,
       </div>
 
       {/* Sports Settings Modal */}
+      {showSportsSettingsModal && <div className="modal-backdrop show"></div>}
       <div
         className={`modal fade modal-one SportsSettingsModal ${
           showSportsSettingsModal ? "show" : ""
@@ -985,7 +1043,7 @@ fetchUsers,
         aria-labelledby="SportsSettingsModalLabel"
         aria-hidden={!showSportsSettingsModal}
       >
-        <div className="modal-dialog modal-lg">
+        <div className="modal-dialog modal-lg" ref={sportsModalRef}>
           <div className="modal-content">
             <div className="modal-header">
               <h1
@@ -999,7 +1057,8 @@ fetchUsers,
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  (setShowSportsSettingsModal(false), SetmodelError(null));
+                  setShowSportsSettingsModal(false);
+                  SetmodelError(null);
                 }}
                 aria-label="Close"
               >
@@ -1042,7 +1101,8 @@ fetchUsers,
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  (setShowSportsSettingsModal(false), SetmodelError(null));
+                  setShowSportsSettingsModal(false);
+                  SetmodelError(null);
                 }}
               >
                 <i className="fas fa-undo"></i> Back

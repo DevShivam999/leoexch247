@@ -105,9 +105,9 @@ const AdminLoginPage: React.FC = () => {
         </div>
         <div className="log-copys">
           <p className="login-text">
-            © <span>D247</span>
+            © <span>Leoexch247</span>
             <a href="mailto:info@starexch.com" className="mail-link">
-              info@D247.com
+              info@Leoexch247.com
             </a>
           </p>
         </div>

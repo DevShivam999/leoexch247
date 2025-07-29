@@ -1,5 +1,5 @@
 {
-  "name": "react-d247",
+  "name": "react-Leoexch247",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -22,6 +22,7 @@
     "react-hook-form": "^7.56.4",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
+    "react-lazy-load-image-component": "^1.6.3",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.30.1",
     "socket.io-client": "^4.8.1",
@@ -32,6 +33,7 @@
     "@types/file-saver": "^2.0.7",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/react-lazy-load-image-component": "^1.6.4",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",

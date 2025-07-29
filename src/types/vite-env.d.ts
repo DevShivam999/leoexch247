@@ -581,3 +581,14 @@ interface MatchSession {
   matchId: string;
   marketData: MarketData[]
 }
+
+interface BannerState {
+  data: IBanner[];
+  loading: boolean;
+  error: string | null;
+}
+ interface IBanner {
+  _id: string;
+  image: string;
+  type?: string;
+}
