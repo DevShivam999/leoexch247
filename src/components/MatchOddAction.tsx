@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { MatchSession } from "../types/vite-env";
+import type { MatchSession, Runner } from "../types/vite-env";
 import instance from "../services/AxiosInstance";
 import { success, Tp } from "../utils/Tp";
 import axios from "axios";
@@ -29,8 +29,12 @@ const MatchOddsAction = ({
   const DeclearResult = async (
     marketId: string,
     matchId: string,
-    id: number
+    Runner: Runner[]
   ) => {
+   
+
+    const id=Runner.find((p) => p.runner == selectedWinners[marketId]||p.name == selectedWinners[marketId])?.selectionId||0
+    
     try {
       await instance.post("/betting/declare-odds-result", {
         marketId: marketId,
@@ -117,11 +121,7 @@ const MatchOddsAction = ({
                               DeclearResult(
                                 session.marketId,
                                 session.matchId,
-                                runners.find(
-                                  (p) =>
-                                    p.runner ==
-                                    selectedWinners[session.marketId]
-                                )?.selectionId || 0
+                                runners
                               )
                             }
                           >
