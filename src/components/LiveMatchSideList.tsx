@@ -641,7 +641,8 @@ const LiveMatchSideList = React.memo(
                   </button>
                 </div>
 
-                <div
+                {
+                  isBookModalOpen&&<div
                   className="modal fade modal-one"
                   id="ViewMore-modal"
                   tabIndex={-1}
@@ -923,6 +924,7 @@ const LiveMatchSideList = React.memo(
                     </div>
                   </div>
                 </div>
+                }
 
                 <div className="table-responsive">
                   <table className="table table-two">

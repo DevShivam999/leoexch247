@@ -578,6 +578,7 @@ interface MatchSession {
   name: string
   marketId: string;
   isResult: boolean
+  matchResultStatus:string
   matchId: string;
   marketData: MarketData[]
 }
@@ -590,5 +591,6 @@ interface BannerState {
  interface IBanner {
   _id: string;
   image: string;
+  is_active:boolean
   type?: string;
 }

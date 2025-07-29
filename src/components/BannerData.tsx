@@ -66,7 +66,7 @@ const BannerData = () => {
                         />
                       </td>
                       <td>
-                        <span>Homepage Banner</span>
+                        <span>{banner.is_active&&"🟢"}Homepage Banner</span>
                       </td>
                       <td>
                         <button

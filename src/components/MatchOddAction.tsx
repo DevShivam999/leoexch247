@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MatchSession } from "../types/vite-env";
 import instance from "../services/AxiosInstance";
 import { success, Tp } from "../utils/Tp";
@@ -11,15 +11,26 @@ const MatchOddsAction = ({
 }) => {
   const [selectedWinners, setSelectedWinners] = useState<{
     [marketId: string]: string;
-
   }>({});
-
-  
+  useEffect(() => {
+    for (let i = 0; i < MatchSession.length; i++) {
+      if (MatchSession[i].isResult) {
+        setSelectedWinners((prev) => ({
+          ...prev,
+          [MatchSession[i].marketId]: MatchSession[i].matchResultStatus,
+        }));
+      }
+    }
+  }, []);
 
   const handleSelection = (marketId: string, value: string) => {
     setSelectedWinners((prev) => ({ ...prev, [marketId]: value }));
   };
-  const DeclearResult = async (marketId: string, matchId: string,id:number) => {
+  const DeclearResult = async (
+    marketId: string,
+    matchId: string,
+    id: number
+  ) => {
     try {
       await instance.post("/betting/declare-odds-result", {
         marketId: marketId,
@@ -34,7 +45,7 @@ const MatchOddsAction = ({
           err.response.data.message ||
             "An error occurred while declaring the result."
         );
-      }else{
+      } else {
         Tp("An unknown error occurred while declaring the result.");
         console.error("Error declaring result:", err);
       }
@@ -44,8 +55,7 @@ const MatchOddsAction = ({
     <div style={styles.wrapper}>
       {MatchSession.map((session, sessionIndex) =>
         session.marketData.map((market, marketIndex) => {
-          
-          const runners = market.runners ;
+          const runners = market.runners;
           const selected = selectedWinners[session.marketId] || "";
 
           return (
@@ -64,35 +74,61 @@ const MatchOddsAction = ({
                 </thead>
                 <tbody>
                   <tr>
-                    {[...runners, { name: "Cancelled",runner:"Cancelled" }].map((runner, i) => (
+                    {[
+                      ...runners,
+                      { name: "Cancelled", runner: "Cancelled" },
+                    ].map((runner, i) => (
                       <td style={styles.cell} key={i}>
                         <div style={{ textAlign: "center" }}>
-                          <div>{runner.name||runner.runner}</div>
+                          <div>{runner.name || runner.runner}</div>
                           <input
                             type="radio"
                             name={`winner-${session.marketId}`}
-                            checked={selected === runner.runner|| selected === runner.name}
+                            checked={
+                              selected === runner.runner ||
+                              selected === runner.name
+                            }
                             onChange={() =>
-                              handleSelection(session.marketId, runner.runner|| runner.name)
+                              handleSelection(
+                                session.marketId,
+                                runner.runner || runner.name
+                              )
                             }
                           />
                         </div>
                       </td>
                     ))}
                     <td style={styles.cell}>
-                      <div style={styles.buttonGroup}>
-                        <button style={styles.button}>DELETE BETS</button>
-                        <button style={styles.button}>VOID BETS {session.isResult} </button>
-                        <button
-                          
-                          style={styles.button}
-                          onClick={() =>
-                            !session.isResult&&DeclearResult(session.marketId, session.matchId,runners.find(p=>p.runner==selectedWinners[session.marketId])?.selectionId||0)
-                          }
-                        >
-                        {session.isResult?"DECLARED":"DECLARE"}
-                        </button>
-                      </div>
+                      {session.isResult ? (
+                        <div style={styles.buttonGroup}>
+                          <button style={styles.button}>DECLARED</button>
+                          <button style={styles.button}>Roll Back</button>
+                        </div>
+                      ) : (
+                        <div style={styles.buttonGroup}>
+                          <button style={styles.button}>DELETE BETS</button>
+                          <button style={styles.button}>
+                            VOID BETS {session.isResult}{" "}
+                          </button>
+                          <button
+                            style={styles.button}
+                            onClick={() =>
+                              !session.isResult &&
+                              DeclearResult(
+                                session.marketId,
+                                session.matchId,
+                                runners.find(
+                                  (p) =>
+                                    p.runner ==
+                                    selectedWinners[session.marketId]
+                                )?.selectionId || 0
+                              )
+                            }
+                          >
+                            {session.isResult ? "DECLARED" : "DECLARE"}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 </tbody>
