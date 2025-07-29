@@ -124,6 +124,7 @@ const ClientList = () => {
     },
     [showActiveUsers, location.search]
   );
+  
 
   return (
     <section className="main-content ">

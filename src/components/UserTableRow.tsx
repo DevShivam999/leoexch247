@@ -64,25 +64,53 @@ const UserTableRow = ({
   // Handle click outside for all modals
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (depositModalRef.current && !depositModalRef.current.contains(event.target as Node) && showDepositModal) {
+      if (
+        depositModalRef.current &&
+        !depositModalRef.current.contains(event.target as Node) &&
+        showDepositModal
+      ) {
         setShowDepositModal(false);
       }
-      if (withdrawModalRef.current && !withdrawModalRef.current.contains(event.target as Node) && showWithdrawModal) {
+      if (
+        withdrawModalRef.current &&
+        !withdrawModalRef.current.contains(event.target as Node) &&
+        showWithdrawModal
+      ) {
         setShowWithdrawModal(false);
       }
-      if (exposureModalRef.current && !exposureModalRef.current.contains(event.target as Node) && showExposureLimitModal) {
+      if (
+        exposureModalRef.current &&
+        !exposureModalRef.current.contains(event.target as Node) &&
+        showExposureLimitModal
+      ) {
         setShowExposureLimitModal(false);
       }
-      if (creditModalRef.current && !creditModalRef.current.contains(event.target as Node) && showCreditLimitModal) {
+      if (
+        creditModalRef.current &&
+        !creditModalRef.current.contains(event.target as Node) &&
+        showCreditLimitModal
+      ) {
         setShowCreditLimitModal(false);
       }
-      if (passwordModalRef.current && !passwordModalRef.current.contains(event.target as Node) && showPasswordLimitModal) {
+      if (
+        passwordModalRef.current &&
+        !passwordModalRef.current.contains(event.target as Node) &&
+        showPasswordLimitModal
+      ) {
         setShowPasswordLimitModal(false);
       }
-      if (statusModalRef.current && !statusModalRef.current.contains(event.target as Node) && showChangeStatusModal) {
+      if (
+        statusModalRef.current &&
+        !statusModalRef.current.contains(event.target as Node) &&
+        showChangeStatusModal
+      ) {
         setShowChangeStatusModal(false);
       }
-      if (sportsModalRef.current && !sportsModalRef.current.contains(event.target as Node) && showSportsSettingsModal) {
+      if (
+        sportsModalRef.current &&
+        !sportsModalRef.current.contains(event.target as Node) &&
+        showSportsSettingsModal
+      ) {
         setShowSportsSettingsModal(false);
       }
     };
@@ -230,7 +258,7 @@ const UserTableRow = ({
       });
 
       success();
-      
+
       fetchUsers(userwith.numeric_id);
       setShowWithdrawModal(false);
       setDetails({
@@ -255,7 +283,9 @@ const UserTableRow = ({
   };
 
   const newPassword = async () => {
-    if (parent_name.transaction_password.toString() != userPassword.ts_password) {
+    if (
+      parent_name.transaction_password.toString() != userPassword.ts_password
+    ) {
       return Tp();
     }
     try {
@@ -305,7 +335,7 @@ const UserTableRow = ({
   return (
     <>
       {/* Deposit Modal */}
-      {showDepositModal && <div className="modal-backdrop show"></div>}
+      {showDepositModal &&<> <div className="modal-backdrop show"></div>
       <div
         className={`modal fade modal-one DepositModal ${
           showDepositModal ? "show" : ""
@@ -480,9 +510,11 @@ const UserTableRow = ({
           </div>
         </div>
       </div>
+      </>
+}
 
       {/* Withdraw Modal */}
-      {showWithdrawModal && <div className="modal-backdrop show"></div>}
+      {showWithdrawModal &&<> <div className="modal-backdrop show"></div>
       <div
         className={`modal fade modal-one WithdrawModal ${
           showWithdrawModal ? "show" : ""
@@ -662,9 +694,11 @@ const UserTableRow = ({
           </div>
         </div>
       </div>
+      </>
+      }
 
       {/* Exposure Limit Modal */}
-      {showExposureLimitModal && <div className="modal-backdrop show"></div>}
+      {showExposureLimitModal &&<> <div className="modal-backdrop show"></div>
       <div
         className={`modal fade modal-one ExposureLimitModal ${
           showExposureLimitModal ? "show" : ""
@@ -748,9 +782,10 @@ const UserTableRow = ({
           </div>
         </div>
       </div>
-
+</>
+}
       {/* Credit Limit Modal */}
-      {showCreditLimitModal && <div className="modal-backdrop show"></div>}
+    {showCreditLimitModal &&<> <div className="modal-backdrop show"></div>
       <div
         className={`modal fade modal-one CreditLimitModal ${
           showCreditLimitModal ? "show" : ""
@@ -834,9 +869,9 @@ const UserTableRow = ({
           </div>
         </div>
       </div>
-
+</>}
       {/* Password Limit Modal */}
-      {showPasswordLimitModal && <div className="modal-backdrop show"></div>}
+      {showPasswordLimitModal &&<> <div className="modal-backdrop show"></div>
       <div
         className={`modal fade modal-one PasswordLimitModal ${
           showPasswordLimitModal ? "show" : ""
@@ -943,9 +978,12 @@ const UserTableRow = ({
           </div>
         </div>
       </div>
-
+    </>
+}
       {/* Change Status Modal */}
-      {showChangeStatusModal && <div className="modal-backdrop show"></div>}
+      {showChangeStatusModal &&
+      <>
+      <div className="modal-backdrop show"></div>
       <div
         className={`modal fade modal-one ChangeStatusModal ${
           showChangeStatusModal ? "show" : ""
@@ -1030,94 +1068,101 @@ const UserTableRow = ({
           </div>
         </div>
       </div>
+      </>
+      }
 
       {/* Sports Settings Modal */}
-      {showSportsSettingsModal && <div className="modal-backdrop show"></div>}
-      <div
-        className={`modal fade modal-one SportsSettingsModal ${
-          showSportsSettingsModal ? "show" : ""
-        }`}
-        style={{ display: showSportsSettingsModal ? "block" : "none" }}
-        id="SportsSettingsModal"
-        tabIndex={-1}
-        aria-labelledby="SportsSettingsModalLabel"
-        aria-hidden={!showSportsSettingsModal}
-      >
-        <div className="modal-dialog modal-lg" ref={sportsModalRef}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1
-                className="modal-title"
-                style={{ color: `${modelError ? "red" : "black"}` }}
-                id="SportsSettingsModalLabel"
-              >
-                {modelError ? modelError : "Sports Settings"}
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => {
-                  setShowSportsSettingsModal(false);
-                  SetmodelError(null);
-                }}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            {sportcheck.length > 0 ? (
-              <div className="modal-body">
-                <div className="row">
-                  {sportcheck.map(
-                    (p: { sportType: string; isEnable: boolean }) => (
-                      <>
-                        <div className="col-6 mb-3 text-center">
-                          <h5 className="ssmodal-heading">{p.sportType}</h5>
-                        </div>
-                        <div className="col-6 mb-3 text-center">
-                          <label className="switch switch-onoff">
-                            <input
-                              type="checkbox"
-                              onClick={() => offuserSupport(p?.sportType)}
-                              checked={p.isEnable}
-                              id="togBtn"
-                            />
-                            <div className="slider round"></div>
-                          </label>
-                        </div>
-                      </>
-                    )
-                  )}
+      {showSportsSettingsModal && (
+        <>
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one SportsSettingsModal ${
+              showSportsSettingsModal ? "show" : ""
+            }`}
+            style={{ display: showSportsSettingsModal ? "block" : "none" }}
+            id="SportsSettingsModal"
+            tabIndex={-1}
+            aria-labelledby="SportsSettingsModalLabel"
+            aria-hidden={showSportsSettingsModal}
+            role="dialog"
+          >
+            <div className="modal-dialog modal-lg" ref={sportsModalRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="SportsSettingsModalLabel"
+                  >
+                    {modelError ? modelError : "Sports Settings"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      setShowSportsSettingsModal(false);
+                      SetmodelError(null);
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                {sportcheck.length > 0 ? (
+                  <div className="modal-body">
+                    <div className="row">
+                      {sportcheck.map(
+                        (p: { sportType: string; isEnable: boolean }) => (
+                          <>
+                            <div className="col-6 mb-3 text-center">
+                              <h5 className="ssmodal-heading">{p.sportType}</h5>
+                            </div>
+                            <div className="col-6 mb-3 text-center">
+                              <label className="switch switch-onoff">
+                                <input
+                                  type="checkbox"
+                                  onClick={() => offuserSupport(p?.sportType)}
+                                  checked={p.isEnable}
+                                  id="togBtn"
+                                />
+                                <div className="slider round"></div>
+                              </label>
+                            </div>
+                          </>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <Loading />
+                  </div>
+                )}
+
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      setShowSportsSettingsModal(false);
+                      SetmodelError(null);
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button
+                    onClick={() => setsubmitusermatch((p) => !p)}
+                    type="button"
+                    className="btn modal-submit-btn"
+                  >
+                    Submit <i className="fas fa-sign-in-alt"></i>
+                  </button>
                 </div>
               </div>
-            ) : (
-              <div>
-                <Loading />
-              </div>
-            )}
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                onClick={() => {
-                  setShowSportsSettingsModal(false);
-                  SetmodelError(null);
-                }}
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button
-                onClick={() => setsubmitusermatch((p) => !p)}
-                type="button"
-                className="btn modal-submit-btn"
-              >
-                Submit <i className="fas fa-sign-in-alt"></i>
-              </button>
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* User Table Row */}
       <tr>
@@ -1220,10 +1265,10 @@ const UserTableRow = ({
             >
               C
             </button>
-             <Link to={`/UserSettings/${userInfo.id}`} className="btn-listin-button">
-              
-             
-            
+            <Link
+              to={`/UserSettings/${userInfo.id}`}
+              className="btn-listin-button"
+            >
               S
             </Link>
             <button
