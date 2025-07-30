@@ -9,12 +9,12 @@ export const Tp = (text = "Transition Password do not match!") => {
 };
 
 
-export const success = () => {
+export const success = (text="Done!") => {
     const toastId = toast.loading("Processing...");
 
     setTimeout(() => {
         toast.dismiss(toastId); 
-        toast.success("Done!", {
+        toast.success(text, {
             id: toastId, 
             position: "top-center",
         });

@@ -436,12 +436,12 @@ const UserTableRow = ({
                 </div>
                 <div className="col-8 mb-3">
                   <input
-                    type="number"
+                    type="text"
                     className="mgray-input-box form-control text-end"
                     placeholder=""
                     value={userDetails.newAmount}
                     onChange={(e) =>
-                      setDetails((p) => ({
+                     !isNaN(Number(e.target.value))&& setDetails((p) => ({
                         ...p,
                         newAmount: Number(e.target.value),
                       }))
@@ -619,7 +619,7 @@ const UserTableRow = ({
                     className="mgray-input-box form-control text-end"
                     value={userDetails.newAmount}
                     onChange={(e) =>
-                      setDetails((p) => ({
+                     !isNaN(Number(e.target.value))&& setDetails((p) => ({
                         ...p,
                         newAmount: Number(e.target.value),
                       }))

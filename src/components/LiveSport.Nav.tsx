@@ -147,14 +147,14 @@ const LiveSportNav = () => {
                                 ))
                               ) : (
                                 <li className="accordion-inner-item accordion-item">
-                                 <div className="skeleton-wrapper">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="skeleton-item">
-          <div className="dot" />
-          <div className="skeleton-box" />
-        </div>
-      ))}
-    </div>
+                                  <div className="skeleton-wrapper">
+                                    {[...Array(5)].map((_, i) => (
+                                      <div key={i} className="skeleton-item">
+                                        <div className="dot" />
+                                        <div className="skeleton-box" />
+                                      </div>
+                                    ))}
+                                  </div>
                                 </li>
                               )}
                             </ul>
