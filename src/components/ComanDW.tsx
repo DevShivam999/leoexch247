@@ -80,7 +80,8 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
 
   // Combined filter and search function
   const applyFilters = () => {
-    let result = [...data];
+    let result = data;
+    
     
     // Apply status filter if not "1" (all)
     if (filter !== "1") {
@@ -94,8 +95,7 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
         item.user?.username?.toLowerCase().includes(term)
       );
     }
-    
-    setFilteredData(result);
+  setFilteredData(result.map(p => ({ ...p, amount: p.amount ?? 0 })));
   };
 
   useEffect(() => {
@@ -169,7 +169,7 @@ const CommonDW = ({ type, show = false }: { type: string; show?: boolean }) => {
             </>
           )}
           <div className="table-responsive">
-            <CommanTable
+           <CommanTable
               error={error ?? ""}
               filteredData={filteredData}
               username={user.username}

@@ -3,6 +3,7 @@ import type { MatchSession, Runner } from "../types/vite-env";
 import instance from "../services/AxiosInstance";
 import { success, Tp } from "../utils/Tp";
 import axios from "axios";
+import RollBack from "./RollBack";
 
 const MatchOddsAction = ({
   MatchSession,
@@ -26,15 +27,19 @@ const MatchOddsAction = ({
   const handleSelection = (marketId: string, value: string) => {
     setSelectedWinners((prev) => ({ ...prev, [marketId]: value }));
   };
+ 
   const DeclearResult = async (
     marketId: string,
     matchId: string,
     Runner: Runner[]
   ) => {
-   
+    const id =
+      Runner.find(
+        (p) =>
+          p.runner == selectedWinners[marketId] ||
+          p.name == selectedWinners[marketId]
+      )?.selectionId || 0;
 
-    const id=Runner.find((p) => p.runner == selectedWinners[marketId]||p.name == selectedWinners[marketId])?.selectionId||0
-    
     try {
       await instance.post("/betting/declare-odds-result", {
         marketId: marketId,
@@ -106,7 +111,8 @@ const MatchOddsAction = ({
                       {session.isResult ? (
                         <div style={styles.buttonGroup}>
                           <button style={styles.button}>DECLARED</button>
-                          <button style={styles.button}>Roll Back</button>
+                          <RollBack button={styles.button} market={session.marketId} match={session.matchId}/>
+                         
                         </div>
                       ) : (
                         <div style={styles.buttonGroup}>

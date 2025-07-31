@@ -90,17 +90,16 @@ const ClientList = () => {
         typeof num === "number" ? num.toLocaleString("en-IN") : num;
 
       return {
-        id: user._id,
+       id: user._id,
         username: user.username,
         position: user.commperrole || "User",
-        creditReference: formatNumber(user.credit),
-        balance: formatNumber(user.totalBalance),
+        creditReference: formatNumber(user?.creditRef||0),
+        exposerLimitRef: formatNumber(user?.exposerLimitRef||0),
+         balance: formatNumber(user.credit),
         clientPL: formatNumber(user.profitLossCredit),
         myPL: formatNumber(user.profitLossBalance),
         exposure: formatNumber(user.exposerLimit),
-        availableBalance: formatNumber(
-          user.credit + user.profitLossBalance + user?.exposerLimit||0
-        ),
+        availableBalance: formatNumber(user.credit+user.exposerLimit),
         uSt: user.status,
         bSt: user.betStatus,
         defaultValue: "0",
@@ -227,19 +226,20 @@ const ClientList = () => {
               </div>
 
               <table className="table table-bordered text-center">
-                <thead>
+               <thead>
                   <tr>
                     <th>UserName</th>
                     <th>Profile</th>
-                    <th className="text-end">Credit Reference</th>
-                    <th className="text-end">Balance</th>
-                    <th className="text-end">Client (P/L)</th>
-                    <th className="text-end">My (P/L)</th>
-                    <th className="text-end">Exposure</th>
-                    <th className="text-end">Available Balance</th>
+                    <th>Credit Referance</th>
+                    <th>Balance</th>
+                    <th>Client (P/L)</th>
+                    <th>My (P/L)</th>
+                    <th>Exposure</th>
+                    <th>Exposure Limit</th>
+                    <th>Available Balance</th>
                     <th>U St</th>
                     <th>B St</th>
-                    <th>Default</th>
+                    <th>Defalut</th>
                     <th>Account Type</th>
                     <th>Action</th>
                   </tr>

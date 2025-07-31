@@ -8,6 +8,7 @@ import instance from "../services/AxiosInstance";
 import { useAppSelector } from "../hook/hook";
 import ErrorHandler from "../utils/ErrorHandle";
 import SearchCom from "../components/SearchCom";
+import { success } from "../utils/Tp";
 
 
 export const formatDateTime = (dateTimeString: string): string => {
@@ -136,7 +137,8 @@ const CurrentBet: React.FC = () => {
   };
 
   const handleAllDelete = () => {
-    for (let i = 0; i < currentBets.length; i++) {
+    try {
+      for (let i = 0; i < currentBets.length; i++) {
       if (currentBets[i].isSelect) {
         handleDeleteBet(
           currentBets[i].matchId,
@@ -144,6 +146,12 @@ const CurrentBet: React.FC = () => {
           currentBets[i]._id,
         );
       }
+    }
+    success("All bets are Delete")
+    } catch (error) {
+      ErrorHandler({err:error,dispatch,navigation,pathname:location.pathname,setError})
+     console.log(error);
+      
     }
   };
   const handleSearchChange = (newSearchTerm: string) => {
@@ -188,14 +196,10 @@ const CurrentBet: React.FC = () => {
     }
    
   }, [limit]); 
-  useEffect(() => {
-    const newDelelte = currentBets.filter((p) => p.isSelect == true);
-    if (newDelelte.length > 0) {
-      setAllDelete(true);
-    } else {
-      setAllDelete(false);
-    }
-  }, [currentBets]);
+  useEffect(()=>{
+allDelete&&setCurrentBets(p=>p.map(o=>({...o,isSelect:true})))
+  },[allDelete])
+;
   return (
     <section className="mian-content">
       <div className="current-bets-page">
@@ -337,9 +341,9 @@ const CurrentBet: React.FC = () => {
                     <thead>
                       <tr>
                         {/* THE FIX IS HERE: Ensure no whitespace between <th> tags */}
-                        <th>
-                          <input type="checkbox" />
-                        </th>
+                        {currentBets.length>0&&<th>
+                          <input type="checkbox" onChange={()=>setAllDelete(p=>!p)} />
+                        </th>}
                         <th>Event Type</th>
                         <th>Event Name</th>
                         <th>User Name</th>

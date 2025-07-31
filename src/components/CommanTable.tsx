@@ -51,7 +51,7 @@ const CommanTable = ({
                 item.IFSC ?? "-",
                 item.type ?? "-",
                 `${item.user.username}/${username}`,
-                item.amount.toString(),
+                item.amount,
                 item.status,
               ].map((p) => (
                 <ColorTd amount={p} key={p} />

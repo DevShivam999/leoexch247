@@ -1165,7 +1165,7 @@ const UserTableRow = ({
       )}
 
       {/* User Table Row */}
-      <tr>
+       <tr>
         {userInfo.accountType.toString().toLowerCase() == "user" ? (
           <td>{userInfo.username}</td>
         ) : (
@@ -1210,6 +1210,7 @@ const UserTableRow = ({
           {userInfo.myPL}
         </td>
         <td>{userInfo.exposure}</td>
+        <td>{userInfo.exposerLimitRef||0}</td>
         <td>{userInfo.availableBalance}</td>
         <td>
           <UserStatus
@@ -1252,7 +1253,7 @@ const UserTableRow = ({
             <button
               className="btn-listin-button"
               onClick={() =>
-                fnShowModel(userInfo.pid, userInfo.id, userInfo.balance, "E")
+                fnShowModel(userInfo.pid, userInfo.id, userInfo.exposerLimitRef, "E")
               }
             >
               E
@@ -1260,17 +1261,16 @@ const UserTableRow = ({
             <button
               className="btn-listin-button"
               onClick={() =>
-                fnShowModel(userInfo.pid, userInfo.id, userInfo.balance, "C")
+                fnShowModel(
+                  userInfo.pid,
+                  userInfo.id,
+                  userInfo.creditReference,
+                  "C"
+                )
               }
             >
               C
             </button>
-            <Link
-              to={`/UserSettings/${userInfo.id}`}
-              className="btn-listin-button"
-            >
-              S
-            </Link>
             <button
               className="btn-listin-button"
               onClick={() => {
