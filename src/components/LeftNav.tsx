@@ -20,7 +20,7 @@ const LeftNav = () => {
       dispatch(removeUser());
     }
      socket.emit("competitionData", {});
-    // socket.emit("competitionDataHRGR", {});
+    socket.emit("competitionDataHRGR", {});
 
 
 socket.on("competitionData", (data) => {
@@ -28,10 +28,10 @@ socket.on("competitionData", (data) => {
   
 });
 
-// socket.on("competitionDataHRGR", (data) => {
-//     dispatch(getSport({sport:data}))
+socket.on("competitionDataHRGR", (data) => {
+    dispatch(getSport({sport:data}))
  
-// });
+});
 
 
   }, []);

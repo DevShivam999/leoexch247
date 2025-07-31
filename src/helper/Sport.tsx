@@ -3,15 +3,15 @@ import type { SportType } from "../types/vite-env";
 
 const initialState: { sport: SportType[] } = {
   sport: [
-    // {
-    //   comp_name: "greyhound",
-    //   matches: [],
-    // },
+    {
+      comp_name: "greyhound",
+      matches: [],
+    },
 
-    // {
-    //   comp_name: "horse",
-    //   matches: [],
-    // },
+    {
+      comp_name: "horse",
+      matches: [],
+    },
     {
       comp_name: "football",
       eventData: [],
