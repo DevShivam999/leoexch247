@@ -6,6 +6,7 @@ import permissionReducer from "./Permissions";
 import Sport from "./Sport";
 import FancyBetData from "./FancyBetData";
 import BannerStore from "./BannerStore";
+import BetsResult from "./BetsResult";
 
 
 const rootReducer = {
@@ -13,6 +14,7 @@ const rootReducer = {
   changeStore,
   BannerStore,
   socket,
+  BetsResult,
   FancyBetData,
   Permissions: permissionReducer,
 };

@@ -4,15 +4,20 @@ import instance from "../services/AxiosInstance";
 import { success, Tp } from "../utils/Tp";
 import axios from "axios";
 import RollBack from "./RollBack";
+import { fetchBetsResult } from "../api/fetchUserPermissions";
+import { useParams } from "react-router-dom";
+import useAppDispatch from "../hook/hook";
 
 const MatchOddsAction = ({
   MatchSession,
 }: {
   MatchSession: MatchSession[];
 }) => {
+  const {id}=useParams()
   const [selectedWinners, setSelectedWinners] = useState<{
     [marketId: string]: string;
   }>({});
+  const dispatch=useAppDispatch()
   useEffect(() => {
     for (let i = 0; i < MatchSession.length; i++) {
       if (MatchSession[i].isResult) {
@@ -33,7 +38,7 @@ const MatchOddsAction = ({
     matchId: string,
     Runner: Runner[]
   ) => {
-    const id =
+    const Id =
       Runner.find(
         (p) =>
           p.runner == selectedWinners[marketId] ||
@@ -44,10 +49,12 @@ const MatchOddsAction = ({
       await instance.post("/betting/declare-odds-result", {
         marketId: marketId,
         matchId: matchId,
-        selectionId: id,
+        selectionId: Id,
         status: selectedWinners[marketId] || "",
       });
       success();
+      
+            dispatch(fetchBetsResult(id||""))
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         Tp(

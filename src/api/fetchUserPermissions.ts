@@ -34,3 +34,21 @@ export const fetchBanner = createAsyncThunk(
     }
   },
 );
+export const fetchBetsResult = createAsyncThunk(
+  "Results/fetchBetsResult",
+  async (id:string, thunkAPI) => {
+    try {
+      
+            const [result, match] = await Promise.all([
+        instance.get(`betting/resultmarketmatch?matchId=${id}`),
+        instance.get(`betting/match-session?matchId=${id}&search=`),
+      ]);
+
+      return {sessionMatch:[...result.data.marketTypes,...result.data.bookmarketTypes],matches:match.data.results,name:result.data.name}
+    } catch (err: any) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data || "Failed to fetch permissions",
+      );
+    }
+  },
+);

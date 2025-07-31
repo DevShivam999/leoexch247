@@ -1,8 +1,13 @@
 
+import { useParams } from "react-router-dom";
 import instance from "../services/AxiosInstance";
 import { success } from "../utils/Tp";
+import { fetchBetsResult } from "../api/fetchUserPermissions";
+import useAppDispatch from "../hook/hook";
 
 const RollBack = ({ button, market, match }:{button:any,market:string,match:string}) => {
+  const {id}=useParams()
+  const dispatch=useAppDispatch()
   const RollBackApi = async (marketId: string, matchId: string) => {
     try {
       await instance.post("betting/rollback-odds-result", {
@@ -10,6 +15,8 @@ const RollBack = ({ button, market, match }:{button:any,market:string,match:stri
         marketId: marketId,
       });
       success();
+      
+            dispatch(fetchBetsResult(id||""))
     } catch (error) {
       console.log(error);
     }
