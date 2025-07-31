@@ -102,7 +102,6 @@ const ClientList = () => {
         availableBalance: formatNumber(user.credit+user.exposerLimit),
         uSt: user.status,
         bSt: user.betStatus,
-        defaultValue: "0",
         accountType: user.roles[0],
         isActive: user.status,
         numeric_id: user.numeric_id,
@@ -230,7 +229,7 @@ const ClientList = () => {
                   <tr>
                     <th>UserName</th>
                     <th>Profile</th>
-                    <th>Credit Referance</th>
+                    <th>Credit Reference</th>
                     <th>Balance</th>
                     <th>Client (P/L)</th>
                     <th>My (P/L)</th>
@@ -239,7 +238,6 @@ const ClientList = () => {
                     <th>Available Balance</th>
                     <th>U St</th>
                     <th>B St</th>
-                    <th>Defalut</th>
                     <th>Account Type</th>
                     <th>Action</th>
                   </tr>

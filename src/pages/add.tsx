@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useAppSelector } from "../hook/hook";
 import type { RootState } from "../helper/store";
@@ -7,10 +7,15 @@ import instance from "../services/AxiosInstance";
 import ErrorHandler from "../utils/ErrorHandle";
 import { useDispatch } from "react-redux";
 
+interface Commsion {
+  up: number;
+  down: number;
+  user: number;
+}
 const AddPartner = () => {
   const dispatch = useDispatch();
 
-  const  Permissions  = useAppSelector((p: RootState) => p.Permissions);
+  const Permissions = useAppSelector((p: RootState) => p.Permissions);
   const { user, token } = useAppSelector((p: RootState) => p.changeStore);
   const [permissions, setPermissions] = useState({
     userDeposit: false,
@@ -27,6 +32,40 @@ const AddPartner = () => {
   const [clientName, setClientName] = useState<string>("");
   const [userPassword, setUserPassword] = useState<string>("");
   const [retypePassword, setRetypePassword] = useState<string>("");
+  const Api = async () => {
+    const data = await instance.get(
+      `user/commission?numeric_id=${user.numeric_id}`
+    );
+  for (const key in data.data) {
+      if (Object.prototype.hasOwnProperty.call(data.data, key)) {
+        const element = data.data[key];
+        if (element.sportsType == "cricket") {
+          setCricketDownlineCommission({
+            up: element.upline,
+            down: element.downline,
+            user: 0,
+          });
+        }
+        if (element.sportsType == "football") {
+          setFootballDownlineCommission({
+            up: element.upline,
+            down: element.downline,
+            user: 0,
+          });
+        }
+        if (element.sportsType == "tennis") {
+          setTennisDownlineCommission({
+            up: element.upline,
+            down: element.downline,
+            user: 0,
+          });
+        }
+      }
+    }
+  };
+  useEffect(() => {
+    Api();
+  }, []);
   useMemo(() => {
     if (Permissions.permissions) {
       const obj: Record<string, any> = {};
@@ -43,14 +82,15 @@ const AddPartner = () => {
   const [fullName, setFullName] = useState<string>("");
 
   const [accountType, setAccountType] = useState<string>("");
-  const [creditReference, setCreditReference] = useState<string>("0");
+  const [creditReference, setCreditReference] = useState<string>("");
+  // const [ExposerReference, setExposerReference] = useState<string>("");
 
   const [cricketDownlineCommission, setCricketDownlineCommission] =
-    useState<string>("0");
+    useState<Commsion>({ up: 0, down: 0, user: 0 });
   const [footballDownlineCommission, setFootballDownlineCommission] =
-    useState<string>("0");
+    useState<Commsion>({ up: 0, down: 0, user: 0 });
   const [tennisDownlineCommission, setTennisDownlineCommission] =
-    useState<string>("0");
+    useState<Commsion>({ up: 0, down: 0, user: 0 });
 
   const [matchOddsCommission, setMatchOddsCommission] = useState<string>("0");
   const [fancyCommission, setFancyCommission] = useState<string>("0");
@@ -76,10 +116,10 @@ const AddPartner = () => {
       setError("Please fill in all required personal and account details.");
       return;
     }
-if(Number(TransactionPassword)!=Permissions.transactionPassword){
-setError("TransactionPassword do not match.");
+    if (Number(TransactionPassword) != Permissions.transactionPassword) {
+      setError("TransactionPassword do not match.");
       return;
-}
+    }
     if (userPassword !== retypePassword) {
       setError("Passwords do not match.");
       return;
@@ -106,47 +146,55 @@ setError("TransactionPassword do not match.");
           masterPassword: retypePassword,
           lastName: "",
           password: userPassword,
-          credit: Number(creditReference),
+          credit: creditReference,
           city: "",
           parentId: user._id,
+          // exposerLimit:ExposerReference,
           TransactionPassword,
         }
       );
-      
 
       if (accountType != "user") {
         if (
-          cricketDownlineCommission == "0" &&
-          footballDownlineCommission == "0" &&
-          tennisDownlineCommission == "0"
+          cricketDownlineCommission.user == 0 &&
+          footballDownlineCommission.user == 0 &&
+          tennisDownlineCommission.user == 0
         ) {
           setError("set the value  of DownLine");
-          return
+          return;
+        }
+        if(
+          cricketDownlineCommission.up <= cricketDownlineCommission.user ||
+          footballDownlineCommission.up <= footballDownlineCommission.user ||
+          tennisDownlineCommission.up <= tennisDownlineCommission.user
+        ) {
+          setError("Upline commission must be greater than Downline commission.");
+          return;
         }
         const commissionPromises = [];
         const commissionEndpoint = `user/commission?numeric_id=${user.numeric_id}`;
 
         commissionPromises.push(
           instance.post(commissionEndpoint, {
-            downline: cricketDownlineCommission,
+            downline: cricketDownlineCommission.user,
             sportsType: "cricket",
-            upline: 1,
+            upline: cricketDownlineCommission.up,
             userId: response.data._id,
           })
         );
         commissionPromises.push(
           instance.post(commissionEndpoint, {
-            downline: footballDownlineCommission,
+            downline: footballDownlineCommission.user,
             sportsType: "football",
-            upline: 1,
+            upline: footballDownlineCommission.up,
             userId: response.data._id,
           })
         );
         commissionPromises.push(
           instance.post(commissionEndpoint, {
-            downline: tennisDownlineCommission,
+            downline: tennisDownlineCommission.user,
             sportsType: "tennis",
-            upline: 1,
+            upline: tennisDownlineCommission.up,
             userId: response.data._id,
           })
         );
@@ -179,9 +227,9 @@ setError("TransactionPassword do not match.");
         setFullName("");
         setAccountType("");
         setCreditReference("");
-        setCricketDownlineCommission("0");
-        setFootballDownlineCommission("0");
-        setTennisDownlineCommission("0");
+        setCricketDownlineCommission(({ up: 0, down: 0, user: 0 }));
+        setFootballDownlineCommission(({ up: 0, down: 0, user: 0 }));;
+        setTennisDownlineCommission(({ up: 0, down: 0, user: 0 }));
         setMatchOddsCommission("0");
         setFancyCommission("0");
       } else {
@@ -234,7 +282,6 @@ setError("TransactionPassword do not match.");
                     <input
                       type="text"
                       className="form-control form-control-two"
-                     
                       placeholder="Client Name"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
@@ -336,21 +383,29 @@ setError("TransactionPassword do not match.");
                       )}
                     </select>
                   </div>
-                
-                    <div className="col-lg-6 mb-4">
-                      <label className="form-label-two">
-                        Credit Reference:
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control form-control-two"
-                        id="CreditReference"
-                        placeholder="Credit Reference"
-                        value={creditReference}
-                        onChange={(e) => setCreditReference(e.target.value)}
-                      />
-                    </div>
-                 
+
+                  <div className="col-lg-6 mb-4">
+                    <label className="form-label-two">Credit Reference:</label>
+                    <input
+                      type="number"
+                      className="form-control form-control-two"
+                      id="CreditReference"
+                      placeholder="Credit Reference"
+                      value={creditReference}
+                      onChange={(e) => setCreditReference(e.target.value)}
+                    />
+                  </div>
+                  {/* <div className="col mb-4">
+                    <label className="form-label-two">Exposer Limit:</label>
+                    <input
+                      type="number"
+                      className="form-control form-control-two"
+                      id="ExposerLimit"
+                      placeholder="Exposer Limit"
+                      value={ExposerReference}
+                      onChange={(e) => setExposerReference(e.target.value)}
+                    />
+                  </div> */}
                 </div>
               </div>
               {accountType != "user" && (
@@ -370,9 +425,9 @@ setError("TransactionPassword do not match.");
                         <tbody>
                           <tr>
                             <td>Upline</td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>1</td>
+                           <td>{cricketDownlineCommission.up}</td>
+                            <td>{footballDownlineCommission.up}</td>
+                            <td>{tennisDownlineCommission.up}</td>
                           </tr>
                           <tr>
                             <td>Downline</td>
@@ -380,9 +435,9 @@ setError("TransactionPassword do not match.");
                               <input
                                 type="text"
                                 className="table-input-one"
-                                value={cricketDownlineCommission}
-                                onChange={(e) =>
-                                  setCricketDownlineCommission(e.target.value)
+                                value={cricketDownlineCommission.user}
+                                onChange={(e) =>!isNaN(Number(e.target.value))&&Number(e.target.value)>=0&&
+                                  setCricketDownlineCommission(p=>({...p,user:Number(e.target.value)}))
                                 }
                               />
                             </td>
@@ -390,9 +445,9 @@ setError("TransactionPassword do not match.");
                               <input
                                 type="text"
                                 className="table-input-one"
-                                value={footballDownlineCommission}
-                                onChange={(e) =>
-                                  setFootballDownlineCommission(e.target.value)
+                                value={footballDownlineCommission.user}
+                                onChange={(e) =>Number(e.target.value)>=0&&
+                                  setFootballDownlineCommission(p=>({...p,user:Number(e.target.value)}))
                                 }
                               />
                             </td>
@@ -400,18 +455,18 @@ setError("TransactionPassword do not match.");
                               <input
                                 type="text"
                                 className="table-input-one"
-                                value={tennisDownlineCommission}
-                                onChange={(e) =>
-                                  setTennisDownlineCommission(e.target.value)
+                                value={tennisDownlineCommission.user}
+                                onChange={(e) =>Number(e.target.value)>=0&&
+                                  setTennisDownlineCommission(p=>({...p,user:Number(e.target.value)}))
                                 }
                               />
                             </td>
                           </tr>
                           <tr>
                             <td>Our</td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>1</td>
+                            <td>{cricketDownlineCommission.up-cricketDownlineCommission.user}</td>
+                            <td>{footballDownlineCommission.up-footballDownlineCommission.user}</td>
+                            <td>{tennisDownlineCommission.up-tennisDownlineCommission.user}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -456,6 +511,7 @@ setError("TransactionPassword do not match.");
                       </table>
                     </div>
                   </div>
+
                   <h4 className="page-card-title">Permissions</h4>
                   <div className="col-12 mb-5">
                     <ul className="add-partner-ul">
@@ -489,13 +545,11 @@ setError("TransactionPassword do not match.");
                       Transaction Password
                     </label>
                     <input
-                      type="password"
+                      type="text"
                       className="form-control form-control-two"
-                  
                       required
                       onChange={(e) => setTransactionPassword(e.target.value)}
-                      placeholder="
-Transaction Password"
+                      placeholder="Transaction Password"
                     />
                     <div className="mt-2 text-end">
                       <button

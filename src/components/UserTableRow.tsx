@@ -1300,7 +1300,6 @@ const UserTableRow = ({
             type={false}
           />
         </td>
-        <td>{userInfo.defaultValue}</td>
         <td>{RoleSwitch(userInfo.accountType)}</td>
         <td>
           <div className="btn-list">
