@@ -27,6 +27,7 @@ const AdminLoginPage: React.FC = () => {
     if(loading) return
     setLoading(true)
     const login = await Login_Api(data);
+    setLoading(false)
     if(!login) return
    
     if (login.result) {

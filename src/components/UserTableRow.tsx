@@ -210,12 +210,12 @@ const UserTableRow = ({
   };
 
   const DepositApiCall = async () => {
-    if (modelLoading) return;
-    setmodelLoading(true);
-
+    
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
     }
+    if (modelLoading) return;
+    setmodelLoading(true);
     try {
       await instance.post(`user/deposit-credit`, {
         amount: userDetails.newAmount,
@@ -250,12 +250,12 @@ const UserTableRow = ({
   };
 
   const withdrawApiCall = async () => {
-    if (modelLoading) return;
-    setmodelLoading(true);
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
     }
     try {
+      if (modelLoading) return;
+      setmodelLoading(true);
       await instance.post(`user/withdraw-balance`, {
         amount: userDetails.newAmount,
         parentId: userDetails.pid,

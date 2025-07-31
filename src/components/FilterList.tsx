@@ -1,4 +1,4 @@
-// components/FilteredList.tsx
+
 import React from "react";
 
 type FilteredListProps<T> = {
@@ -19,22 +19,3 @@ function FilteredList<T>({
 
 export default FilteredList;
 
-// ------ Without TypeScript ---------
-
-// import React from 'react';
-
-// const FilteredList = ({ items, filterFunction, renderItem }) => {
-//   const filteredItems = filterFunction
-//     ? items.filter(filterFunction)
-//     : items;
-
-//   return (
-//     <ul>
-//       {filteredItems.map((item, index) => (
-//         <li key={index}>{renderItem(item)}</li>
-//       ))}
-//     </ul>
-//   );
-// };
-
-// export default FilteredList;
