@@ -82,7 +82,6 @@ function GlobalSettingsPage() {
     ],
     transactionPassword: "",
   });
-  // const marketTypeMap = ["Match Odds", "Bookmaker", "fancy"];
   const user = useSelector((p: RootState) => p.changeStore.user);
   const transactionPassword = useAppSelector(
     (p: RootState) => p.Permissions.transactionPassword
@@ -283,16 +282,7 @@ function GlobalSettingsPage() {
     fetchSettings();
   }, [user.numeric_id]);
 
-  // const handleMinMaxBetChange = (
-  //   index: number,
-  //   field: string,
-  //   value: number,
-  // ) => {
-  //   const newMinMaxBets = [...settings.minMaxBets];
-  //   //@ts-ignore
-  //   newMinMaxBets[index][field] = value;
-  //   setSettings({ ...settings, minMaxBets: newMinMaxBets });
-  // };
+
 
   const handleBetDelayChange = (
     index: number,
