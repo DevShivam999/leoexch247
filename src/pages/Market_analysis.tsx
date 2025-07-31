@@ -18,6 +18,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
   const user = useAppSelector((p: RootState) => p.changeStore.user);
   const navigation = useNavigate();
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (apiResponse?.results) {
@@ -39,6 +40,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
       })
     );
     setMatches(updatedMatches);
+    setLoading(false);
   };
   useEffect(() => {
     if (matches.length > 0) {
@@ -48,6 +50,8 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
 
   const BetLockApi = async (matchId: string, isUser = true) => {
     try {
+      if (loading) return;
+      setLoading(true);
       await instance.post(`/admin/blockbet?matchId=${matchId}`, {
         matchId: Number(matchId),
         userId: user._id,

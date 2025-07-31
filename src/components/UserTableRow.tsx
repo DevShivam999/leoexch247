@@ -44,6 +44,7 @@ const UserTableRow = ({
     remark: "",
     ts_password: "",
   });
+  const [modelLoading, setmodelLoading] = useState(false);
   const dispatch = useDispatch();
   const [userPassword, setUserPassword] = useState({
     numeric_id: 0,
@@ -53,7 +54,6 @@ const UserTableRow = ({
     ts_password: "",
   });
 
- 
   const depositModalRef = useRef<HTMLDivElement>(null);
   const withdrawModalRef = useRef<HTMLDivElement>(null);
   const exposureModalRef = useRef<HTMLDivElement>(null);
@@ -62,7 +62,6 @@ const UserTableRow = ({
   const statusModalRef = useRef<HTMLDivElement>(null);
   const sportsModalRef = useRef<HTMLDivElement>(null);
 
- 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -211,6 +210,9 @@ const UserTableRow = ({
   };
 
   const DepositApiCall = async () => {
+    if (modelLoading) return;
+    setmodelLoading(true);
+
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
     }
@@ -242,10 +244,14 @@ const UserTableRow = ({
         pathname: location.pathname,
         setError: SetmodelError,
       });
+    } finally {
+      setmodelLoading(false);
     }
   };
 
   const withdrawApiCall = async () => {
+    if (modelLoading) return;
+    setmodelLoading(true);
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
     }
@@ -280,10 +286,14 @@ const UserTableRow = ({
         pathname: location.pathname,
         setError: SetmodelError,
       });
+    } finally {
+      setmodelLoading(false);
     }
   };
 
   const newPassword = async () => {
+    if(modelLoading) return
+setmodelLoading(true)
     if (
       parent_name.transaction_password.toString() != userPassword.ts_password
     ) {
@@ -317,6 +327,8 @@ const UserTableRow = ({
         pathname: location.pathname,
         setError: SetmodelError,
       });
+    }finally{
+      setmodelLoading(false)
     }
   };
 
@@ -329,11 +341,13 @@ const UserTableRow = ({
   const addIdToQuery = (id: string) => {
     const searchParams = new URLSearchParams(location.search);
     searchParams.set("id", id);
-    
+
     navigate(`${location.pathname}?${searchParams.toString()}`);
   };
   const [creditLimit, setCreditLimit] = useState(0);
-   const CreditLimit = async () => {
+  const CreditLimit = async () => {
+    if(modelLoading) return
+setmodelLoading(true)
     if (userDetails.ts_password != String(parent_name.transaction_password)) {
       return Tp();
     }
@@ -363,10 +377,14 @@ const UserTableRow = ({
         pathname: location.pathname,
         setError: SetmodelError,
       });
+    }finally{
+      setmodelLoading(false)
     }
   };
-  
+
   const ExposerLimitApi = async () => {
+    if(modelLoading) return
+setmodelLoading(true)
     if (userDetails.ts_password != String(parent_name.transaction_password)) {
       return Tp();
     }
@@ -396,763 +414,801 @@ const UserTableRow = ({
         pathname: location.pathname,
         setError: SetmodelError,
       });
+    }finally{
+      setmodelLoading(false)
     }
   };
 
   return (
     <>
       {/* Deposit Modal */}
-      {showDepositModal &&<> <div className="modal-backdrop show"></div>
-      <div
-        className={`modal fade modal-one DepositModal ${
-          showDepositModal ? "show" : ""
-        }`}
-        style={{ display: showDepositModal ? "block" : "none" }}
-        id="DepositModal"
-        tabIndex={-1}
-        aria-labelledby="DepositModalLabel"
-        aria-hidden={!showDepositModal}
-      >
-        <div className="modal-dialog" ref={depositModalRef}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1
-                className="modal-title"
-                style={{ color: `${modelError ? "red" : "black"}` }}
-                id="DepositModalLabel"
-              >
-                {modelError ? modelError : "Deposit"}
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => {
-                  setShowDepositModal(false);
-                  SetmodelError(null);
-                  setDetails({
-                    id: "",
-                    pid: "",
-                    amount: 0,
-                    newAmount: 0,
-                    remark: "",
-                    ts_password: "",
-                  });
-                }}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-4 mb-3">
-                  <label className="form-label">
-                    {parent_name.parent_name} [CR]
-                  </label>
+      {showDepositModal && (
+        <>
+          {" "}
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one DepositModal ${
+              showDepositModal ? "show" : ""
+            }`}
+            style={{ display: showDepositModal ? "block" : "none" }}
+            id="DepositModal"
+            tabIndex={-1}
+            aria-labelledby="DepositModalLabel"
+            aria-hidden={!showDepositModal}
+          >
+            <div className="modal-dialog" ref={depositModalRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="DepositModalLabel"
+                  >
+                    {modelError ? modelError : "Deposit"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      setShowDepositModal(false);
+                      SetmodelError(null);
+                      setDetails({
+                        id: "",
+                        pid: "",
+                        amount: 0,
+                        newAmount: 0,
+                        remark: "",
+                        ts_password: "",
+                      });
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_credit}
-                  />
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-4 mb-3">
+                      <label className="form-label">
+                        {parent_name.parent_name} [CR]
+                      </label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={parent_name.parent_credit}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">
+                        {parent_name.parent_name}
+                      </label>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={parent_name.parent_balance}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={parent_name.parent_balance}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">SUPSC</label>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.amount}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.amount}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Amount</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        className="mgray-input-box form-control text-end"
+                        placeholder=""
+                        value={userDetails.newAmount}
+                        onChange={(e) =>
+                          !isNaN(Number(e.target.value)) &&
+                          setDetails((p) => ({
+                            ...p,
+                            newAmount: Number(e.target.value),
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Remark</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <textarea
+                        name=""
+                        id=""
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.remark}
+                        placeholder=""
+                        onChange={(e) =>
+                          setDetails((p) => ({ ...p, remark: e.target.value }))
+                        }
+                        rows={5}
+                      ></textarea>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Transaction Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.ts_password}
+                        placeholder=""
+                        onChange={(e) =>
+                          setDetails((p) => ({
+                            ...p,
+                            ts_password: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">
-                    {parent_name.parent_name}
-                  </label>
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_balance}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_balance}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">SUPSC</label>
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.amount}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.amount}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Amount</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    className="mgray-input-box form-control text-end"
-                    placeholder=""
-                    value={userDetails.newAmount}
-                    onChange={(e) =>
-                     !isNaN(Number(e.target.value))&& setDetails((p) => ({
-                        ...p,
-                        newAmount: Number(e.target.value),
-                      }))
-                    }
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Remark</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <textarea
-                    name=""
-                    id=""
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.remark}
-                    placeholder=""
-                    onChange={(e) =>
-                      setDetails((p) => ({ ...p, remark: e.target.value }))
-                    }
-                    rows={5}
-                  ></textarea>
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Transaction Password</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.ts_password}
-                    placeholder=""
-                    onChange={(e) =>
-                      setDetails((p) => ({ ...p, ts_password: e.target.value }))
-                    }
-                  />
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      setShowDepositModal(false);
+                      SetmodelError(null);
+                      setDetails({
+                        id: "",
+                        pid: "",
+                        amount: 0,
+                        newAmount: 0,
+                        remark: "",
+                        ts_password: "",
+                      });
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={DepositApiCall}
+                    className="btn modal-green-btn"
+                  >
+                    Deposit
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                onClick={() => {
-                  setShowDepositModal(false);
-                  SetmodelError(null);
-                  setDetails({
-                    id: "",
-                    pid: "",
-                    amount: 0,
-                    newAmount: 0,
-                    remark: "",
-                    ts_password: "",
-                  });
-                }}
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button
-                type="button"
-                onClick={DepositApiCall}
-                className="btn modal-green-btn"
-              >
-                Deposit
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
-      </>
-}
+        </>
+      )}
 
       {/* Withdraw Modal */}
-      {showWithdrawModal &&<> <div className="modal-backdrop show"></div>
-      <div
-        className={`modal fade modal-one WithdrawModal ${
-          showWithdrawModal ? "show" : ""
-        }`}
-        style={{ display: showWithdrawModal ? "block" : "none" }}
-        id="WithdrawModal"
-        tabIndex={-1}
-        aria-labelledby="WithdrawModalLabel"
-        aria-hidden={!showWithdrawModal}
-      >
-        <div className="modal-dialog" ref={withdrawModalRef}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1
-                className="modal-title"
-                style={{ color: `${modelError ? "red" : "black"}` }}
-                id="WithdrawModalLabel"
-              >
-                {modelError ? modelError : "Withdraw"}
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => {
-                  setShowWithdrawModal(false);
-                  SetmodelError(null);
-                  setDetails({
-                    id: "",
-                    pid: "",
-                    amount: 0,
-                    newAmount: 0,
-                    remark: "",
-                    ts_password: "",
-                  });
-                }}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-4 mb-3">
-                  <label className="form-label">
-                    {parent_name.parent_name} [CR]
-                  </label>
+      {showWithdrawModal && (
+        <>
+          {" "}
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one WithdrawModal ${
+              showWithdrawModal ? "show" : ""
+            }`}
+            style={{ display: showWithdrawModal ? "block" : "none" }}
+            id="WithdrawModal"
+            tabIndex={-1}
+            aria-labelledby="WithdrawModalLabel"
+            aria-hidden={!showWithdrawModal}
+          >
+            <div className="modal-dialog" ref={withdrawModalRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="WithdrawModalLabel"
+                  >
+                    {modelError ? modelError : "Withdraw"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      setShowWithdrawModal(false);
+                      SetmodelError(null);
+                      setDetails({
+                        id: "",
+                        pid: "",
+                        amount: 0,
+                        newAmount: 0,
+                        remark: "",
+                        ts_password: "",
+                      });
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_credit}
-                  />
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-4 mb-3">
+                      <label className="form-label">
+                        {parent_name.parent_name} [CR]
+                      </label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={parent_name.parent_credit}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">
+                        {parent_name.parent_name}
+                      </label>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={parent_name.parent_balance}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={parent_name.parent_balance}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">SUPSC</label>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.amount}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.amount}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Amount</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.newAmount}
+                        onChange={(e) =>
+                          !isNaN(Number(e.target.value)) &&
+                          setDetails((p) => ({
+                            ...p,
+                            newAmount: Number(e.target.value),
+                          }))
+                        }
+                        placeholder=""
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Remark</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <textarea
+                        name=""
+                        id=""
+                        value={userDetails.remark}
+                        onChange={(e) =>
+                          setDetails((p) => ({
+                            ...p,
+                            remark: e.target.value,
+                          }))
+                        }
+                        className="mgray-input-box form-control text-end"
+                        rows={5}
+                      ></textarea>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Transaction Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        value={userDetails.ts_password}
+                        onChange={(e) =>
+                          setDetails((p) => ({
+                            ...p,
+                            ts_password: e.target.value,
+                          }))
+                        }
+                        className="mgray-input-box form-control text-end"
+                        placeholder=""
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">
-                    {parent_name.parent_name}
-                  </label>
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_balance}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_balance}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">SUPSC</label>
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.amount}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.amount}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Amount</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.newAmount}
-                    onChange={(e) =>
-                     !isNaN(Number(e.target.value))&& setDetails((p) => ({
-                        ...p,
-                        newAmount: Number(e.target.value),
-                      }))
-                    }
-                    placeholder=""
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Remark</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <textarea
-                    name=""
-                    id=""
-                    value={userDetails.remark}
-                    onChange={(e) =>
-                      setDetails((p) => ({
-                        ...p,
-                        remark: e.target.value,
-                      }))
-                    }
-                    className="mgray-input-box form-control text-end"
-                    rows={5}
-                  ></textarea>
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Transaction Password</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    value={userDetails.ts_password}
-                    onChange={(e) =>
-                      setDetails((p) => ({
-                        ...p,
-                        ts_password: e.target.value,
-                      }))
-                    }
-                    className="mgray-input-box form-control text-end"
-                    placeholder=""
-                  />
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      setShowWithdrawModal(false);
+                      SetmodelError(null);
+                      setDetails({
+                        id: "",
+                        pid: "",
+                        amount: 0,
+                        newAmount: 0,
+                        remark: "",
+                        ts_password: "",
+                      });
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={withdrawApiCall}
+                    className="btn modal-red-btn"
+                  >
+                    Withdraw
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                onClick={() => {
-                  setShowWithdrawModal(false);
-                  SetmodelError(null);
-                  setDetails({
-                    id: "",
-                    pid: "",
-                    amount: 0,
-                    newAmount: 0,
-                    remark: "",
-                    ts_password: "",
-                  });
-                }}
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button
-                type="button"
-                onClick={withdrawApiCall}
-                className="btn modal-red-btn"
-              >
-                Withdraw
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
-      </>
-      }
+        </>
+      )}
 
       {/* Exposure Limit Modal */}
-      {showExposureLimitModal &&<> <div className="modal-backdrop show"></div>
-      <div
-        className={`modal fade modal-one ExposureLimitModal ${
-          showExposureLimitModal ? "show" : ""
-        }`}
-        style={{ display: showExposureLimitModal ? "block" : "none" }}
-        id="ExposureLimitModal"
-        tabIndex={-1}
-        aria-labelledby="ExposureLimitModalLabel"
-        aria-hidden={!showExposureLimitModal}
-      >
-        <div className="modal-dialog modal-lg" ref={exposureModalRef}>
-         <div className="modal-content">
-            <div className="modal-header">
-              <h1
-                className="modal-title"
-                style={{ color: `${modelError ? "red" : "black"}` }}
-                id="ExposureLimitModalLabel"
-              >
-                {modelError ? modelError : "Exposure Limit"}
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => {
-                  (setShowExposureLimitModal(false), SetmodelError(null));
-                }}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-4 mb-3">
-                  <label className="form-label">Old Limit</label>
+      {showExposureLimitModal && (
+        <>
+          {" "}
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one ExposureLimitModal ${
+              showExposureLimitModal ? "show" : ""
+            }`}
+            style={{ display: showExposureLimitModal ? "block" : "none" }}
+            id="ExposureLimitModal"
+            tabIndex={-1}
+            aria-labelledby="ExposureLimitModalLabel"
+            aria-hidden={!showExposureLimitModal}
+          >
+            <div className="modal-dialog modal-lg" ref={exposureModalRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="ExposureLimitModalLabel"
+                  >
+                    {modelError ? modelError : "Exposure Limit"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      (setShowExposureLimitModal(false), SetmodelError(null));
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.amount}
-                    
-                  />
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Old Limit</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.amount}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">New Limit</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.newAmount}
+                        onChange={(e) =>
+                          !isNaN(Number(e.target.value)) &&
+                          setDetails((p) => ({
+                            ...p,
+                            newAmount: Number(e.target.value),
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Transaction Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.ts_password}
+                        onChange={(e) =>
+                          setDetails((p) => ({
+                            ...p,
+                            ts_password: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">New Limit</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    className="mgray-input-box form-control text-end"
-                    
-                    value={userDetails.newAmount}
-                    onChange={(e)=>!isNaN(Number(e.target.value))&&setDetails(p=>({...p,newAmount:Number(e.target.value)}))}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Transaction Password</label>
-                </div>
-                <div className="col-8 mb-3">
-                   <input
-                    type="password"
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.ts_password}
-                    onChange={(e) =>
-                      setDetails((p) => ({ ...p, ts_password: e.target.value }))
-                    }
-                  />
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      (setShowExposureLimitModal(false), SetmodelError(null));
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => ExposerLimitApi()}
+                    className="btn modal-submit-btn"
+                  >
+                    Submit <i className="fas fa-sign-in-alt"></i>
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                onClick={() => {
-                  (setShowExposureLimitModal(false), SetmodelError(null));
-                }}
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button type="button" onClick={()=>ExposerLimitApi()} className="btn modal-submit-btn">
-                Submit <i className="fas fa-sign-in-alt"></i>
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
-</>
-}
+        </>
+      )}
       {/* Credit Limit Modal */}
-    {showCreditLimitModal &&<> <div className="modal-backdrop show"></div>
-      <div
-        className={`modal fade modal-one CreditLimitModal ${
-          showCreditLimitModal ? "show" : ""
-        }`}
-        style={{ display: showCreditLimitModal ? "block" : "none" }}
-        id="CreditLimitModal"
-        tabIndex={-1}
-        aria-labelledby="CreditLimitModalLabel"
-        aria-hidden={!showCreditLimitModal}
-      >
-        <div className="modal-dialog" ref={creditModalRef}>
-         <div className="modal-content">
-            <div className="modal-header">
-              <h1
-                className="modal-title"
-                style={{ color: `${modelError ? "red" : "black"}` }}
-                id="CreditLimitModalLabel"
-              >
-                {modelError ? modelError : "Credit Limit"}
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => {
-                  (setShowCreditLimitModal(false), SetmodelError(null));
-                }}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-4 mb-3">
-                  <label className="form-label">Old Limit</label>
+      {showCreditLimitModal && (
+        <>
+          {" "}
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one CreditLimitModal ${
+              showCreditLimitModal ? "show" : ""
+            }`}
+            style={{ display: showCreditLimitModal ? "block" : "none" }}
+            id="CreditLimitModal"
+            tabIndex={-1}
+            aria-labelledby="CreditLimitModalLabel"
+            aria-hidden={!showCreditLimitModal}
+          >
+            <div className="modal-dialog" ref={creditModalRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="CreditLimitModalLabel"
+                  >
+                    {modelError ? modelError : "Credit Limit"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      (setShowCreditLimitModal(false), SetmodelError(null));
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    disabled
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.amount}
-                    
-                  />
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Old Limit</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        disabled
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.amount}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">New Limit</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        value={creditLimit}
+                        onChange={(e) =>
+                          !isNaN(Number(e.target.value)) &&
+                          setCreditLimit(Number(e.target.value))
+                        }
+                        className="mgray-input-box form-control text-end"
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Transaction Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        className="mgray-input-box form-control text-end"
+                        value={userDetails.ts_password}
+                        onChange={(e) =>
+                          setDetails((p) => ({
+                            ...p,
+                            ts_password: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">New Limit</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    value={creditLimit}
-                    onChange={(e) =>!isNaN(Number(e.target.value))&& setCreditLimit(Number(e.target.value))}
-                    className="mgray-input-box form-control text-end"
-                    
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Transaction Password</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    className="mgray-input-box form-control text-end"
-                    value={userDetails.ts_password}
-                    onChange={(e) =>
-                      setDetails((p) => ({ ...p, ts_password: e.target.value }))
-                    }
-                  />
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      (setShowCreditLimitModal(false), SetmodelError(null));
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => CreditLimit()}
+                    className="btn modal-submit-btn"
+                  >
+                    Submit <i className="fas fa-sign-in-alt"></i>
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                onClick={() => {
-                  (setShowCreditLimitModal(false), SetmodelError(null));
-                }}
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button
-                type="button"
-                onClick={() => CreditLimit()}
-                className="btn modal-submit-btn"
-              >
-                Submit <i className="fas fa-sign-in-alt"></i>
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
-</>}
+        </>
+      )}
       {/* Password Limit Modal */}
-      {showPasswordLimitModal &&<> <div className="modal-backdrop show"></div>
-      <div
-        className={`modal fade modal-one PasswordLimitModal ${
-          showPasswordLimitModal ? "show" : ""
-        }`}
-        style={{ display: showPasswordLimitModal ? "block" : "none" }}
-        id="PasswordLimitModal"
-        tabIndex={-1}
-        aria-labelledby="PasswordLimitModalLabel"
-        aria-hidden={!showPasswordLimitModal}
-      >
-        <div className="modal-dialog" ref={passwordModalRef}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1
-                className="modal-title"
-                style={{ color: `${modelError ? "red" : "black"}` }}
-                id="PasswordLimitModalLabel"
-              >
-                {modelError ? modelError : "Password"}
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => {
-                  setShowPasswordLimitModal(false);
-                  SetmodelError(null);
-                }}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-4 mb-3">
-                  <label className="form-label">New Password</label>
+      {showPasswordLimitModal && (
+        <>
+          {" "}
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one PasswordLimitModal ${
+              showPasswordLimitModal ? "show" : ""
+            }`}
+            style={{ display: showPasswordLimitModal ? "block" : "none" }}
+            id="PasswordLimitModal"
+            tabIndex={-1}
+            aria-labelledby="PasswordLimitModalLabel"
+            aria-hidden={!showPasswordLimitModal}
+          >
+            <div className="modal-dialog" ref={passwordModalRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="PasswordLimitModalLabel"
+                  >
+                    {modelError ? modelError : "Password"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      setShowPasswordLimitModal(false);
+                      SetmodelError(null);
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    onChange={(e) =>
-                      setUserPassword((p) => ({
-                        ...p,
-                        password: e.target.value,
-                      }))
-                    }
-                    value={userPassword.password}
-                    className="mgray-input-box form-control text-end"
-                  />
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-4 mb-3">
+                      <label className="form-label">New Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        onChange={(e) =>
+                          setUserPassword((p) => ({
+                            ...p,
+                            password: e.target.value,
+                          }))
+                        }
+                        value={userPassword.password}
+                        className="mgray-input-box form-control text-end"
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Confirm Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        className="mgray-input-box form-control text-end"
+                        onChange={(e) =>
+                          setUserPassword((p) => ({
+                            ...p,
+                            rePassword: e.target.value,
+                          }))
+                        }
+                        value={userPassword.rePassword}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Transaction Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        onChange={(e) =>
+                          setUserPassword((p) => ({
+                            ...p,
+                            ts_password: e.target.value,
+                          }))
+                        }
+                        value={userPassword.ts_password}
+                        className="mgray-input-box form-control text-end"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Confirm Password</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    className="mgray-input-box form-control text-end"
-                    onChange={(e) =>
-                      setUserPassword((p) => ({
-                        ...p,
-                        rePassword: e.target.value,
-                      }))
-                    }
-                    value={userPassword.rePassword}
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Transaction Password</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    onChange={(e) =>
-                      setUserPassword((p) => ({
-                        ...p,
-                        ts_password: e.target.value,
-                      }))
-                    }
-                    value={userPassword.ts_password}
-                    className="mgray-input-box form-control text-end"
-                  />
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      setShowPasswordLimitModal(false);
+                      SetmodelError(null);
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={newPassword}
+                    className="btn modal-submit-btn"
+                  >
+                    Submit <i className="fas fa-sign-in-alt"></i>
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                onClick={() => {
-                  setShowPasswordLimitModal(false);
-                  SetmodelError(null);
-                }}
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button
-                type="button"
-                onClick={newPassword}
-                className="btn modal-submit-btn"
-              >
-                Submit <i className="fas fa-sign-in-alt"></i>
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
-    </>
-}
+        </>
+      )}
       {/* Change Status Modal */}
-      {showChangeStatusModal &&
-      <>
-      <div className="modal-backdrop show"></div>
-      <div
-        className={`modal fade modal-one ChangeStatusModal ${
-          showChangeStatusModal ? "show" : ""
-        }`}
-        style={{ display: showChangeStatusModal ? "block" : "none" }}
-        id="ChangeStatusModal"
-        tabIndex={-1}
-        aria-labelledby="ChangeStatusModalLabel"
-        aria-hidden={!showChangeStatusModal}
-      >
-        <div className="modal-dialog" ref={statusModalRef}>
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1
-                className="modal-title"
-                style={{ color: `${modelError ? "red" : "black"}` }}
-                id="ChangeStatusModalLabel"
-              >
-                {modelError ? modelError : "Change Status"}
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => {
-                  setShowChangeStatusModal(false);
-                  SetmodelError(null);
-                }}
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-6 mb-3">
-                  <span className="text-yellow fs-5">SUPSC</span>
+      {showChangeStatusModal && (
+        <>
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one ChangeStatusModal ${
+              showChangeStatusModal ? "show" : ""
+            }`}
+            style={{ display: showChangeStatusModal ? "block" : "none" }}
+            id="ChangeStatusModal"
+            tabIndex={-1}
+            aria-labelledby="ChangeStatusModalLabel"
+            aria-hidden={!showChangeStatusModal}
+          >
+            <div className="modal-dialog" ref={statusModalRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="ChangeStatusModalLabel"
+                  >
+                    {modelError ? modelError : "Change Status"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      setShowChangeStatusModal(false);
+                      SetmodelError(null);
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                 </div>
-                <div className="col-6 mb-3 text-end">
-                  <span className="text-green">SUPSC</span>
-                </div>
-                <div className="col-4 mb-3 text-center">
-                  <h5 className="switch-heading">User Active</h5>
-                  <label className="switch switch-onoff">
-                    <input type="checkbox" id="togBtn" />
-                    <div className="slider round"></div>
-                  </label>
-                </div>
-                <div className="col-8 mb-3">
-                  <h5 className="switch-heading">Bet Active</h5>
-                  <label className="switch switch-onoff">
-                    <input type="checkbox" id="togBtn" />
-                    <div className="slider round"></div>
-                  </label>
-                </div>
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-6 mb-3">
+                      <span className="text-yellow fs-5">SUPSC</span>
+                    </div>
+                    <div className="col-6 mb-3 text-end">
+                      <span className="text-green">SUPSC</span>
+                    </div>
+                    <div className="col-4 mb-3 text-center">
+                      <h5 className="switch-heading">User Active</h5>
+                      <label className="switch switch-onoff">
+                        <input type="checkbox" id="togBtn" />
+                        <div className="slider round"></div>
+                      </label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <h5 className="switch-heading">Bet Active</h5>
+                      <label className="switch switch-onoff">
+                        <input type="checkbox" id="togBtn" />
+                        <div className="slider round"></div>
+                      </label>
+                    </div>
 
-                <div className="col-4 mb-3">
-                  <label className="form-label">Transaction Password</label>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Transaction Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        className="mgray-input-box form-control text-end"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    className="mgray-input-box form-control text-end"
-                  />
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      setShowChangeStatusModal(false);
+                      SetmodelError(null);
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button type="button" className="btn modal-submit-btn">
+                    Submit <i className="fas fa-sign-in-alt"></i>
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                onClick={() => {
-                  setShowChangeStatusModal(false);
-                  SetmodelError(null);
-                }}
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button type="button" className="btn modal-submit-btn">
-                Submit <i className="fas fa-sign-in-alt"></i>
-              </button>
-            </div>
           </div>
-        </div>
-      </div>
-      </>
-      }
+        </>
+      )}
 
       {/* Sports Settings Modal */}
       {showSportsSettingsModal && (
@@ -1248,7 +1304,7 @@ const UserTableRow = ({
       )}
 
       {/* User Table Row */}
-       <tr>
+      <tr>
         {userInfo.accountType.toString().toLowerCase() == "user" ? (
           <td>{userInfo.username}</td>
         ) : (
@@ -1274,13 +1330,14 @@ const UserTableRow = ({
         </td>
         <td>{userInfo.creditReference}</td>
         <td>{userInfo.balance}</td>
-       
-   
-        <ColorTd amount={  parseFloat(userInfo.clientPL.replace(/,/g, ""))}/>
-        <ColorTd amount={ parseFloat(userInfo.myPL.replace(/,/g, ""))}/>
-        <ColorTd amount={ parseFloat(userInfo.exposure.replace(/,/g, ""))}/>
-        <ColorTd amount={parseInt(userInfo.exposerLimitRef.replace(/,/g, ""))||0}/>
-       
+
+        <ColorTd amount={parseFloat(userInfo.clientPL.replace(/,/g, ""))} />
+        <ColorTd amount={parseFloat(userInfo.myPL.replace(/,/g, ""))} />
+        <ColorTd amount={parseFloat(userInfo.exposure.replace(/,/g, ""))} />
+        <ColorTd
+          amount={parseInt(userInfo.exposerLimitRef.replace(/,/g, "")) || 0}
+        />
+
         <td>{userInfo.availableBalance}</td>
         <td>
           <UserStatus
@@ -1322,7 +1379,12 @@ const UserTableRow = ({
             <button
               className="btn-listin-button"
               onClick={() =>
-                fnShowModel(userInfo.pid, userInfo.id, userInfo.exposerLimitRef, "E")
+                fnShowModel(
+                  userInfo.pid,
+                  userInfo.id,
+                  userInfo.exposerLimitRef,
+                  "E"
+                )
               }
             >
               E

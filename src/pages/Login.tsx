@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import logo from "/logo.png";
 import { Login_Api } from "../api/Login_Api";
@@ -15,6 +15,7 @@ const AdminLoginPage: React.FC = () => {
   useEffect(() => {
     document.title = "Login";
   }, []);
+  const [loading,setLoading]=useState(false)
   const navigation=useNavigate()
   const dispatch = useDispatch();
   const {
@@ -23,6 +24,8 @@ const AdminLoginPage: React.FC = () => {
     formState: { errors },
   } = useForm<ILoginFormInputs>();
   const onSubmit: SubmitHandler<ILoginFormInputs> = async (data) => {
+    if(loading) return
+    setLoading(true)
     const login = await Login_Api(data);
     if(!login) return
    
@@ -30,6 +33,7 @@ const AdminLoginPage: React.FC = () => {
       
         dispatch(setUser({user:JSON.parse(localStorage.getItem("user") || "")}));
         dispatch(setToken({token:JSON.parse(localStorage.getItem("token") || "")}));
+        setLoading(false)
       if (login.data) {
         let location = localStorage.getItem("Location");
         localStorage.removeItem("Location");

@@ -387,12 +387,12 @@ const AddPartner = () => {
                   <div className="col-lg-6 mb-4">
                     <label className="form-label-two">Credit Reference:</label>
                     <input
-                      type="number"
+                      type="text"
                       className="form-control form-control-two"
                       id="CreditReference"
                       placeholder="Credit Reference"
                       value={creditReference}
-                      onChange={(e) => setCreditReference(e.target.value)}
+                      onChange={(e) =>Number(e.target.value)>=0&& setCreditReference(e.target.value)}
                     />
                   </div>
                   {/* <div className="col mb-4">
