@@ -9,6 +9,7 @@ import { RoleSwitch } from "../utils/RoleSwitch";
 import ErrorHandler from "../utils/ErrorHandle";
 import UserStatus from "./UserStatus";
 import { success, Tp } from "../utils/Tp";
+import ColorTd from "./ColorTd";
 
 const UserTableRow = ({
   user,
@@ -52,7 +53,7 @@ const UserTableRow = ({
     ts_password: "",
   });
 
-  // Create refs for each modal
+ 
   const depositModalRef = useRef<HTMLDivElement>(null);
   const withdrawModalRef = useRef<HTMLDivElement>(null);
   const exposureModalRef = useRef<HTMLDivElement>(null);
@@ -61,7 +62,7 @@ const UserTableRow = ({
   const statusModalRef = useRef<HTMLDivElement>(null);
   const sportsModalRef = useRef<HTMLDivElement>(null);
 
-  // Handle click outside for all modals
+ 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -328,8 +329,74 @@ const UserTableRow = ({
   const addIdToQuery = (id: string) => {
     const searchParams = new URLSearchParams(location.search);
     searchParams.set("id", id);
-
+    
     navigate(`${location.pathname}?${searchParams.toString()}`);
+  };
+  const [creditLimit, setCreditLimit] = useState(0);
+   const CreditLimit = async () => {
+    if (userDetails.ts_password != String(parent_name.transaction_password)) {
+      return Tp();
+    }
+    try {
+      await instance.post("/admin/credit-reference", {
+        amount: creditLimit,
+        userid: userDetails.id,
+      });
+
+      fetchUsers(userwith.numeric_id);
+      setShowCreditLimitModal(false);
+      setCreditLimit(0);
+      SetmodelError(null);
+      setDetails({
+        id: "",
+        pid: "",
+        amount: 0,
+        newAmount: 0,
+        remark: "",
+        ts_password: "",
+      });
+    } catch (err) {
+      ErrorHandler({
+        err,
+        dispatch,
+        navigation: navi,
+        pathname: location.pathname,
+        setError: SetmodelError,
+      });
+    }
+  };
+  
+  const ExposerLimitApi = async () => {
+    if (userDetails.ts_password != String(parent_name.transaction_password)) {
+      return Tp();
+    }
+    try {
+      await instance.post("/admin/exposureref-reference", {
+        amount: userDetails.newAmount,
+        userid: userDetails.id,
+      });
+
+      fetchUsers(userwith.numeric_id);
+      setShowExposureLimitModal(false);
+      setCreditLimit(0);
+      SetmodelError(null);
+      setDetails({
+        id: "",
+        pid: "",
+        amount: 0,
+        newAmount: 0,
+        remark: "",
+        ts_password: "",
+      });
+    } catch (err) {
+      ErrorHandler({
+        err,
+        dispatch,
+        navigation: navi,
+        pathname: location.pathname,
+        setError: SetmodelError,
+      });
+    }
   };
 
   return (
@@ -710,7 +777,7 @@ const UserTableRow = ({
         aria-hidden={!showExposureLimitModal}
       >
         <div className="modal-dialog modal-lg" ref={exposureModalRef}>
-          <div className="modal-content">
+         <div className="modal-content">
             <div className="modal-header">
               <h1
                 className="modal-title"
@@ -723,8 +790,7 @@ const UserTableRow = ({
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  setShowExposureLimitModal(false);
-                  SetmodelError(null);
+                  (setShowExposureLimitModal(false), SetmodelError(null));
                 }}
                 aria-label="Close"
               >
@@ -741,25 +807,33 @@ const UserTableRow = ({
                     type="text"
                     disabled
                     className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_balance}
+                    value={userDetails.amount}
+                    
                   />
                 </div>
                 <div className="col-4 mb-3">
-                  <label className="form-label">New Limitt</label>
+                  <label className="form-label">New Limit</label>
                 </div>
                 <div className="col-8 mb-3">
                   <input
                     type="text"
                     className="mgray-input-box form-control text-end"
+                    
+                    value={userDetails.newAmount}
+                    onChange={(e)=>!isNaN(Number(e.target.value))&&setDetails(p=>({...p,newAmount:Number(e.target.value)}))}
                   />
                 </div>
                 <div className="col-4 mb-3">
                   <label className="form-label">Transaction Password</label>
                 </div>
                 <div className="col-8 mb-3">
-                  <input
+                   <input
                     type="password"
                     className="mgray-input-box form-control text-end"
+                    value={userDetails.ts_password}
+                    onChange={(e) =>
+                      setDetails((p) => ({ ...p, ts_password: e.target.value }))
+                    }
                   />
                 </div>
               </div>
@@ -769,13 +843,12 @@ const UserTableRow = ({
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  setShowExposureLimitModal(false);
-                  SetmodelError(null);
+                  (setShowExposureLimitModal(false), SetmodelError(null));
                 }}
               >
                 <i className="fas fa-undo"></i> Back
               </button>
-              <button type="button" className="btn modal-submit-btn">
+              <button type="button" onClick={()=>ExposerLimitApi()} className="btn modal-submit-btn">
                 Submit <i className="fas fa-sign-in-alt"></i>
               </button>
             </div>
@@ -797,21 +870,20 @@ const UserTableRow = ({
         aria-hidden={!showCreditLimitModal}
       >
         <div className="modal-dialog" ref={creditModalRef}>
-          <div className="modal-content">
+         <div className="modal-content">
             <div className="modal-header">
               <h1
                 className="modal-title"
                 style={{ color: `${modelError ? "red" : "black"}` }}
                 id="CreditLimitModalLabel"
               >
-                {modelError ? modelError : "Credit"}
+                {modelError ? modelError : "Credit Limit"}
               </h1>
               <button
                 type="button"
                 className="modal-close"
                 onClick={() => {
-                  setShowCreditLimitModal(false);
-                  SetmodelError(null);
+                  (setShowCreditLimitModal(false), SetmodelError(null));
                 }}
                 aria-label="Close"
               >
@@ -828,16 +900,20 @@ const UserTableRow = ({
                     type="text"
                     disabled
                     className="mgray-input-box form-control text-end"
-                    value={parent_name.parent_balance}
+                    value={userDetails.amount}
+                    
                   />
                 </div>
                 <div className="col-4 mb-3">
-                  <label className="form-label">New Limitt</label>
+                  <label className="form-label">New Limit</label>
                 </div>
                 <div className="col-8 mb-3">
                   <input
                     type="text"
+                    value={creditLimit}
+                    onChange={(e) =>!isNaN(Number(e.target.value))&& setCreditLimit(Number(e.target.value))}
                     className="mgray-input-box form-control text-end"
+                    
                   />
                 </div>
                 <div className="col-4 mb-3">
@@ -847,6 +923,10 @@ const UserTableRow = ({
                   <input
                     type="password"
                     className="mgray-input-box form-control text-end"
+                    value={userDetails.ts_password}
+                    onChange={(e) =>
+                      setDetails((p) => ({ ...p, ts_password: e.target.value }))
+                    }
                   />
                 </div>
               </div>
@@ -856,13 +936,16 @@ const UserTableRow = ({
                 type="button"
                 className="btn modal-back-btn"
                 onClick={() => {
-                  setShowCreditLimitModal(false);
-                  SetmodelError(null);
+                  (setShowCreditLimitModal(false), SetmodelError(null));
                 }}
               >
                 <i className="fas fa-undo"></i> Back
               </button>
-              <button type="button" className="btn modal-submit-btn">
+              <button
+                type="button"
+                onClick={() => CreditLimit()}
+                className="btn modal-submit-btn"
+              >
                 Submit <i className="fas fa-sign-in-alt"></i>
               </button>
             </div>
@@ -1191,26 +1274,13 @@ const UserTableRow = ({
         </td>
         <td>{userInfo.creditReference}</td>
         <td>{userInfo.balance}</td>
-        <td
-          className={
-            parseFloat(userInfo.clientPL.replace(/,/g, "")) < 0
-              ? "text-danger"
-              : "text-success"
-          }
-        >
-          {userInfo.clientPL}
-        </td>
-        <td
-          className={
-            parseFloat(userInfo.myPL.replace(/,/g, "")) < 0
-              ? "text-danger"
-              : "text-success"
-          }
-        >
-          {userInfo.myPL}
-        </td>
-        <td>{userInfo.exposure}</td>
-        <td>{userInfo.exposerLimitRef||0}</td>
+       
+   
+        <ColorTd amount={  parseFloat(userInfo.clientPL.replace(/,/g, ""))}/>
+        <ColorTd amount={ parseFloat(userInfo.myPL.replace(/,/g, ""))}/>
+        <ColorTd amount={ parseFloat(userInfo.exposure.replace(/,/g, ""))}/>
+        <ColorTd amount={parseInt(userInfo.exposerLimitRef.replace(/,/g, ""))||0}/>
+       
         <td>{userInfo.availableBalance}</td>
         <td>
           <UserStatus
