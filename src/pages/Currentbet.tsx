@@ -300,7 +300,7 @@ allDelete&&setCurrentBets(p=>p.map(o=>({...o,isSelect:true})))
                 <i className="fas fa-trophy"></i> SPORTS
               </button>
             </li>
-            <li className="nav-item" role="presentation">
+            {/* <li className="nav-item" role="presentation">
               <button
                 className={`nav-link ${activeTab === "CASINO" ? "active" : ""}`}
                 id="pills-CASINO-tab"
@@ -312,7 +312,7 @@ allDelete&&setCurrentBets(p=>p.map(o=>({...o,isSelect:true})))
               >
                 <i className="fas fa-coins"></i> CASINO
               </button>
-            </li>
+            </li> */}
             {allDelete && (
               <li className="nav-item" role="presentation">
                 <button onClick={() => handleAllDelete()}>All Delete</button>

@@ -48,7 +48,7 @@ const ClientList = () => {
         parent_name: response.data.parent_name,
         parent_balance: response.data.parent_balance,
         parent_credit: response.data.parent_credit,
-        transaction_password: response.data.transaction_password,
+        transaction_password: Permissions.transactionPassword,
       });
       setexportdata(response.data.export);
       setLoading(false);

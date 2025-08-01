@@ -49,7 +49,7 @@ export const navMenu = [
       { label: "Profit And Loss", to: "/profit-and-loss" },
       { label: "Event P|L", to: "/event-pl" },
       { label: "Commission Loss", to: "/commission-loss" },
-      { label: "Client Commission Lenden", to: "/client-commission-lenden" },
+      // { label: "Client Commission Lenden", to: "/client-commission-lenden" },
     ],
   },
   {
@@ -63,9 +63,9 @@ export const navMenu = [
       { label: "Withdraw Transaction", to: "/withdrawal-transaction" },
       { label: "Total Withdraw", to: "/total-withdraw" },
       { label: "Deposit Payment Method", to: "/deposit-payment-method" },
-      { label: "Site Panel", to: "/site-panel" },
-      { label: "Id Request", to: "/id-request" },
-      { label: "Bonus", to: "/bonus" },
+      // { label: "Site Panel", to: "/site-panel" },
+      // { label: "Id Request", to: "/id-request" },
+      // { label: "Bonus", to: "/bonus" },
     ],
   },
 ];

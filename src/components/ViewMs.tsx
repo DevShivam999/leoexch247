@@ -249,6 +249,7 @@ const MarketSettingsModal = ({ setshowModal }: { setshowModal: Function }) => {
       tabIndex={-1}
       aria-labelledby="ms-modalLabel"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+      onClick={() => setshowModal(false)}
     >
       <div className="modal-dialog modal-lg">
         <div className="modal-content">

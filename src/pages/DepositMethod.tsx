@@ -132,7 +132,7 @@ const DepositMethod = () => {
 
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
-  
+  const [showModel,setshowmodel]  =useState(false)
   const handlePaymentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPaymentType(e.target.value);
     setFormData({
@@ -287,6 +287,7 @@ const DepositMethod = () => {
                 data-bs-target="#add-payment-method"
                 onClick={() => {
                   setPaymentType("");
+                  setshowmodel(p=>!p)
                   setFormErrors({});
                 }}
               >
@@ -356,8 +357,7 @@ const DepositMethod = () => {
         </div>
       </div>
 
-      {/* Add Payment Method Modal */}
-      <div
+     {showModel&& <div
         className="modal fade modal-one add-payment-method"
         id="add-payment-method"
         tabIndex={-1}
@@ -719,7 +719,7 @@ const DepositMethod = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
     </section>
   );
 };

@@ -15,7 +15,7 @@ const GameReport = lazy(() => import("../pages/GameReport"));
 const GeneralReport = lazy(() => import("../pages/GeneralReport"));
 const EventPL = lazy(() => import("../pages/EventPL"));
 const CommissionLoss = lazy(() => import("../pages/ComissionLoss"));
-const ClientCommissionLedge = lazy(() => import("../pages/ClientCommissionLendge"));
+// const ClientCommissionLedge = lazy(() => import("../pages/ClientCommissionLendge"));
 const CreatePartner = lazy(() => import("../pages/CreatePartner"));
 const Banner = lazy(() => import("../pages/Banner"));
 const WalletDashboard = lazy(() => import("../pages/WalletDashboard"));
@@ -31,9 +31,9 @@ const SecurityAuthVerification = lazy(() => import("../pages/SecurityAuthVerfica
 const UserDetails = lazy(() => import("../pages/UserDetails"));
 const AddPartner = lazy(() => import("../pages/add"));
 const DepositMethod = lazy(() => import("../pages/DepositMethod"));
-const SitePanel = lazy(() => import("../pages/SitePanel"));
-const RequestId = lazy(() => import("../pages/RequestId"));
-const Bonus = lazy(() => import("../pages/Bonus"));
+// const SitePanel = lazy(() => import("../pages/SitePanel"));
+// const RequestId = lazy(() => import("../pages/RequestId"));
+// const Bonus = lazy(() => import("../pages/Bonus"));
 const DepositTansaction = lazy(() => import("../pages/DepositTansaction"));
 const MatchList = lazy(() => import("../pages/MatchList"));
 const MatchInfo = lazy(() => import("../pages/MatchInfo"));
@@ -54,7 +54,7 @@ export const routeConfig = [
   { path: "/general-report", element: <GeneralReport /> },
   { path: "/event-pl", element: <EventPL /> },
   { path: "/commission-loss", element: <CommissionLoss /> },
-  { path: "/client-commission-lenden", element: <ClientCommissionLedge /> },
+  // { path: "/client-commission-lenden", element: <ClientCommissionLedge /> },
   { path: "/create-partner", element: <CreatePartner /> },
   { path: "/create-banner", element: <Banner /> },
   { path: "/wallet-dashboard", element: <WalletDashboard /> },
@@ -71,13 +71,13 @@ export const routeConfig = [
   { path: "/security-auth-verification", element: <SecurityAuthVerification /> },
   { path: "/user/:id", element: <UserDetails /> },
   { path: "/deposit-payment-method", element: <DepositMethod /> },
-  { path: "/site-panel", element: <SitePanel /> },
-  { path: "/id-request", element: <RequestId /> },
+  // { path: "/site-panel", element: <SitePanel /> },
+  // { path: "/id-request", element: <RequestId /> },
   { path: "/TransactionPasswordSuccess/:id", element: <TransactionPasswordSuccess /> },
   { path: "/matchList/:id", element: <MatchList /> },
   { path: "/matchInfo/:id", element: <MatchInfo /> },
   { path: "/UserSettings/:id", element: <FancyCricketSettings /> },
-  { path: "/bonus", element: <Bonus /> },
+  // { path: "/bonus", element: <Bonus /> },
   { path: "*", element: <NotFound /> },
 ];
 

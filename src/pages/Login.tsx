@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import logo from "/logo.png";
+import logo from "/logo-1.png";
 import { Login_Api } from "../api/Login_Api";
 import { useDispatch } from "react-redux";
 import { setToken, setUser } from "../helper/Changes";

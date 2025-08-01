@@ -19,8 +19,8 @@ const LiveMatchSideList = React.memo(
     const { id, matchName } = useParams();
     const [fancyOrders, setFancyOrders] = useState<FancyOrder[]>([]);
     const navigation = useNavigate();
-    const socket  = useAppSelector((p: RootState) => p.socket);
-    const { user, token } = useAppSelector((p:RootState)=>p.changeStore)
+    const socket = useAppSelector((p: RootState) => p.socket);
+    const { user, token } = useAppSelector((p: RootState) => p.changeStore);
     const dispatch = useDispatch();
 
     const [userBook, setUserBook] = useState<any[]>([]);
@@ -42,7 +42,7 @@ const LiveMatchSideList = React.memo(
     const [selectAllForDeletion, setSelectAllForDeletion] = useState(false);
 
     const BetListApi = useCallback(async () => {
-      if(isBookModalOpen=="book") return
+      if (isBookModalOpen == "book") return;
       try {
         const { data } = await instance.get(
           `betting/orders?matchId=${id}&numeric_id=${user.numeric_id}`
@@ -52,8 +52,8 @@ const LiveMatchSideList = React.memo(
             ...(data.fancy_orders || []),
             ...(data.unmatched_orders || []),
           ].map((bet: FancyOrder) => ({ ...bet, isSelected: false }));
-          
-          dispatch(getFancyData({data:data.fancy_orders}))
+
+          dispatch(getFancyData({ data: data.fancy_orders }));
           setFancyOrders(combinedOrders);
         } else if (data.orders) {
           setFancyOrders(
@@ -65,7 +65,11 @@ const LiveMatchSideList = React.memo(
           setUserBook(
             data.orders.filter((p: any) => p.marketName == "BOOKMAKER")
           );
-               dispatch(getFancyData({data:  data.orders.filter((p: any) => p.oddsType == "Session")}))
+          dispatch(
+            getFancyData({
+              data: data.orders.filter((p: any) => p.oddsType == "Session"),
+            })
+          );
         }
       } catch (err) {
         ErrorHandler({
@@ -276,226 +280,255 @@ const LiveMatchSideList = React.memo(
 
     return (
       <div className="col-lg-4">
-        {isBookModalOpen &&
-          (isBookModalOpen === "user" || isBookModalOpen === "book") && (
-            <div
-              className="modal fade show exposure-modal modal-one"
-              style={{ display: "block" }}
-              tabIndex={-1}
-              role="dialog"
-              aria-labelledby="ExposureModalLabel"
-              aria-modal="true"
-            >
-              <div className="modal-dialog modal-xl" role="document">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    {isBookModalOpen === "user" ? "User Book" : "Book Match"}
-                    <br />
-                    {fancyOrders.length > 0 && fancyOrders[0]?.match.name}
-                    <button
-                      type="button"
-                      className="modal-close"
-                      onClick={() => setIsBookModalOpen(null)}
-                      aria-label="Close"
-                    >
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
-                  <div className="accordion-item">
-                    <table className="table table-two">
-                      {isBookModalOpen != "book" &&
-                        userBook.length > 0 &&
-                        (() => {
-                          const uniqueRunnersMap = new Map(
-                            userBook.flatMap((p) =>
-                              Object.values(p.runners).map((q: any) => [
-                                q?.selectionId ?? q?._id,
-                                {
-                                  name: q?.name || q?.user?.username,
-                                  id: q?._id,
-                                },
-                              ])
-                            )
-                          );
-                          const uniqueRunners = [...uniqueRunnersMap.values()];
-
-                          return (
-                            <>
-                              <thead>
-                               
-                                <tr>
-                                  <th
-                                    style={{
-                                      backgroundColor: "#6c757d",
-                                      color: "white",
-                                    }}
-                                  >
-                                    Username
-                                  </th>
-                                  {uniqueRunners.map((runner, idx) => (
-                                    <th
-                                      key={idx}
-                                      style={{
-                                        backgroundColor: "#6c757d",
-                                        color: "white",
-                                      }}
-                                    >
-                                      {runner.name} 
-                                    </th>
-                                  ))}
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {userBook.length > 0 ? (
-                                  userBook.map((p, i: number) => (
-                                    <tr key={i}>
-                                      <td>
-                                        {p?.username || p?.user?.username}
-                                      </td>
-                                      {uniqueRunners.map((runner) => {
-                                       
-                                        const matchingRunner:any = Object.values(
-                                          p.runners
-                                        ).find((r: any) => r._id === runner.id);
-
-                                        return matchingRunner ? (
-                                          <ColorTd
-                                            key={runner.id}
-                                            amount={matchingRunner?.amount}
-                                          />
-                                        ) : (
-                                          <td key={runner.id}>-</td> 
-                                        );
-                                      })}
-                                    </tr>
-                                  ))
-                                ) : (
-                                  <tr>
-                                    <td colSpan={uniqueRunners.length + 1}>
-                                      No book data available.
-                                    </td>
-                                  </tr>
-                                )}
-                              </tbody>
-                            </>
-                          );
-                        })()}
-
-                      {isBookModalOpen == "book" &&<>
-                      <thead>
-                        <tr>
-                          <th
-                            style={{
-                              backgroundColor: "#6c757d",
-                              color: "white",
-                            }}
-                          >
-                            User Name
-                          </th>
-
+     {isBookModalOpen &&
+  (isBookModalOpen === "user" || isBookModalOpen === "book") && (
+    <>
+      <div
+        className="modal fade show exposure-modal modal-one"
+        tabIndex={-1}
+        role="dialog"
+        aria-labelledby="ExposureModalLabel"
+        aria-modal="true"
+        style={{ display: "block" }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setIsBookModalOpen(null);
+          }
+        }}
+      >
+        <div className="modal-dialog modal-xl" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              {isBookModalOpen === "user" ? "User Book" : "Book Match"}
+              <br />
+              {fancyOrders.length > 0 && fancyOrders[0]?.match.name}
+              <button
+                type="button"
+                className="modal-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsBookModalOpen(null);
+                }}
+                aria-label="Close"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="accordion-item">
+              <table className="table table-two">
+                {isBookModalOpen !== "book" && userBook.length > 0 && (
+                  (() => {
+                    const uniqueRunnersMap = new Map(
+                      userBook.flatMap((p) =>
+                        Object.values(p.runners).map((q: any) => [
+                          q?.selectionId ?? q?._id,
                           {
-                            userBook.length > 0 &&
-                            //@ts-ignore
-                            Object.values(userBook[0].runners).map((p: any) => (
+                            name: q?.name || q?.user?.username,
+                            id: q?._id,
+                          },
+                        ])
+                      )
+                    );
+                    const uniqueRunners = [...uniqueRunnersMap.values()];
+
+                    return (
+                      <>
+                        <thead>
+                          <tr>
+                            <th
+                              style={{
+                                backgroundColor: "#6c757d",
+                                color: "white",
+                              }}
+                            >
+                              Username
+                            </th>
+                            {uniqueRunners.map((runner, idx) => (
                               <th
+                                key={idx}
                                 style={{
                                   backgroundColor: "#6c757d",
                                   color: "white",
                                 }}
                               >
-                                {p?.name || p?.user?.username}
+                                {runner.name}
                               </th>
                             ))}
-                       
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {userBook.length > 0 ? (
-                          userBook.map((p, i: number) => (
-                            <tr key={i}>
-                              <td>{p?.username || p?.user?.username}</td>
-                              {Object.keys(p.runners).map((key) => {
-                                const runner = p.runners[key];
-                                return (
-                                  <ColorTd key={key} amount={runner.amount} />
-                                );
-                              })}
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={3}>No book data available.</td>
                           </tr>
-                        )}
-                      </tbody>
-                      </>}
-                    </table>
-                  </div>
-                </div>
-              </div>
+                        </thead>
+                        <tbody>
+                          {userBook.length > 0 ? (
+                            userBook.map((p, i: number) => (
+                              <tr key={i}>
+                                <td>{p?.username || p?.user?.username}</td>
+                                {uniqueRunners.map((runner) => {
+                                  const matchingRunner: any = Object.values(
+                                    p.runners
+                                  ).find((r: any) => r._id === runner.id);
+
+                                  return matchingRunner ? (
+                                    <ColorTd
+                                      key={runner.id}
+                                      amount={matchingRunner?.amount}
+                                    />
+                                  ) : (
+                                    <td key={runner.id}>-</td>
+                                  );
+                                })}
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={uniqueRunners.length + 1}>
+                                No book data available.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </>
+                    );
+                  })()
+                )}
+
+                {isBookModalOpen === "book" && (
+                  <>
+                    <thead>
+                      <tr>
+                        <th
+                          style={{
+                            backgroundColor: "#6c757d",
+                            color: "white",
+                          }}
+                        >
+                          User Name
+                        </th>
+                        {userBook.length > 0 &&
+                          Object.values(userBook[0].runners).map((p: any) => (
+                            <th
+                              style={{
+                                backgroundColor: "#6c757d",
+                                color: "white",
+                              }}
+                            >
+                              {p?.name || p?.user?.username}
+                            </th>
+                          ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {userBook.length > 0 ? (
+                        userBook.map((p, i: number) => (
+                          <tr key={i}>
+                            <td>{p?.username || p?.user?.username}</td>
+                            {Object.keys(p.runners).map((key) => {
+                              const runner = p.runners[key];
+                              return (
+                                <ColorTd key={key} amount={runner.amount} />
+                              );
+                            })}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={3}>No book data available.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </>
+                )}
+              </table>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
+      {/* Add backdrop overlay */}
+      <div
+        className="modal-backdrop fade show"
+        onClick={() => setIsBookModalOpen(null)}
+      ></div>
+    </>
+  )}
         <ul className="match-Settng-ul">
-          <li>
-            <div className="dropdown button-dark-yellowdown">
-              <button
-                className="btn button-dark-yellow"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Bet Lock
-              </button>
-              <ul className="dropdown-menu">
-                <li>
-                  <span
-                    className="dropdown-item"
-                    onClick={() => BetLockApi(String(id))}
-                  >
-                    All Deactive
-                  </span>
-                </li>
-                <li>
-                  <span
-                    className="dropdown-item"
-                    onClick={() => BetLockApi(String(id), false)}
-                  >
-                    Userwise
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </li>
-          <li>
-            <div className="dropdown button-dark-yellowdown">
-              <button
-                className="btn button-dark-yellow"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Fancy Lock
-              </button>
-              <ul className="dropdown-menu">
-                <li>
-                  <span
-                    className="dropdown-item"
-                    onClick={() => BetLockApi(String(id), true, true)}
-                  >
-                    All Deactive
-                  </span>
-                </li>
-                <li>
-                  <span
-                    className="dropdown-item"
-                    onClick={() => BetLockApi(String(id), false, true)}
-                  >
-                    Userwise
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </li>
+        <li>
+  <div className="dropdown button-dark-yellowdown">
+    <button
+      className="btn button-dark-yellow"
+      type="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      Bet Lock
+    </button>
+    <ul className="dropdown-menu">
+      <li>
+        <a
+          className="dropdown-item"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault(); // Prevent default anchor behavior
+            BetLockApi(String(id));
+          }}
+          data-bs-dismiss="dropdown" // Close dropdown on click
+        >
+          All Deactive
+        </a>
+      </li>
+      <li>
+        <a
+          className="dropdown-item"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            BetLockApi(String(id), false);
+          }}
+          data-bs-dismiss="dropdown"
+        >
+          Userwise
+        </a>
+      </li>
+    </ul>
+  </div>
+</li>
+<li>
+  <div className="dropdown button-dark-yellowdown">
+    <button
+      className="btn button-dark-yellow"
+      type="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      Fancy Lock
+    </button>
+    <ul className="dropdown-menu">
+      <li>
+        <a
+          className="dropdown-item"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            BetLockApi(String(id), true, true);
+          }}
+          data-bs-dismiss="dropdown"
+        >
+          All Deactive
+        </a>
+      </li>
+      <li>
+        <a
+          className="dropdown-item"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            BetLockApi(String(id), false, true);
+          }}
+          data-bs-dismiss="dropdown"
+        >
+          Userwise
+        </a>
+      </li>
+    </ul>
+  </div>
+</li>
           <li>
             <button
               type="button"
@@ -527,7 +560,11 @@ const LiveMatchSideList = React.memo(
               data-bs-toggle="tooltip"
               data-bs-placement="bottom"
               data-bs-title="BookmakerBook"
-              onClick={() =>user.roles[0]=="owner_admin"? setShowMarketSettingsModal((p) => !p):Tp("you don't have permission to change the  setting")}
+              onClick={() =>
+                user.roles[0] == "owner_admin"
+                  ? (setShowMarketSettingsModal((p) => !p),setIsBookModalOpen(null))
+                  : Tp("you don't have permission to change the  setting")
+              }
             >
               MS
             </button>
@@ -641,290 +678,298 @@ const LiveMatchSideList = React.memo(
                   </button>
                 </div>
 
-                {
-                  isBookModalOpen&&<div
-                  className="modal fade modal-one"
-                  id="ViewMore-modal"
-                  tabIndex={-1}
-                  aria-labelledby="exampleModalLabel"
-                  aria-hidden="true"
-                >
-                  <div className="modal-dialog modal-xl">
-                    <div className="modal-content">
-                      <div className="modal-header">
-                        <h1
-                          className="modal-title me-5"
-                          id="ViewMore-modalLabel"
-                        >
-                          View More Bet
-                        </h1>
-                        <button
-                          type="button"
-                          className="modal-close"
-                          data-bs-dismiss="modal"
-                          aria-label="Close"
-                          onClick={() => setIsBookModalOpen(null)}
-                        >
-                          <i className="fas fa-times"></i>
-                        </button>
-                      </div>
-                      <div className="modal-body">
-                        <div className="container-fluid">
-                          <div className="row">
-                            <div className="col-md-6 mb-3 row align-items-center">
-                              <div className="col-3">
-                                <label className="form-label">
-                                  Enter Username
-                                </label>
-                              </div>
-                              <div className="col-4">
-                                <input
-                                  type="text"
-                                  className="form-control view-input"
-                                  placeholder=""
-                                  value={viewMoreFilters.username}
-                                  onChange={(e) =>
-                                    setViewMoreFilters((prev) => ({
-                                      ...prev,
-                                      username: e.target.value,
-                                    }))
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <div className="col-md-6 mb-3 row align-items-center">
-                              <div className="col-3">
-                                <label className="form-label">Amount</label>
-                              </div>
-                              <div className="col-4">
-                                <input
-                                  type="text"
-                                  className="form-control view-input"
-                                  placeholder="Min"
-                                  value={viewMoreFilters.amountMin}
-                                  onChange={(e) =>
-                                    setViewMoreFilters((prev) => ({
-                                      ...prev,
-                                      amountMin: e.target.value,
-                                    }))
-                                  }
-                                />
-                              </div>
-                              <div className="col-4">
-                                <input
-                                  type="text"
-                                  className="form-control view-input"
-                                  placeholder="Max"
-                                  value={viewMoreFilters.amountMax}
-                                  onChange={(e) =>
-                                    setViewMoreFilters((prev) => ({
-                                      ...prev,
-                                      amountMax: e.target.value,
-                                    }))
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <div className="col-md-6 mb-3 row align-items-center">
-                              <div className="col-3">
-                                <label className="form-label">IP Address</label>
-                              </div>
-                              <div className="col-4">
-                                <input
-                                  type="text"
-                                  className="form-control view-input"
-                                  placeholder=""
-                                  value={viewMoreFilters.ipAddress}
-                                  onChange={(e) =>
-                                    setViewMoreFilters((prev) => ({
-                                      ...prev,
-                                      ipAddress: e.target.value,
-                                    }))
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <div className="col-md-6 mb-3 row align-items-center">
-                              <div className="col-3">
-                                <label className="form-label">Show Type</label>
-                              </div>
-                              <div className="col-4">
-                                <select
-                                  className="form-select"
-                                  value={viewMoreFilters.type}
-                                  onChange={(e) =>
-                                    setViewMoreFilters((prev) => ({
-                                      ...prev,
-                                      type: e.target.value,
-                                    }))
-                                  }
-                                >
-                                  <option value="25">Show 25</option>
-                                  <option value="50">Show 50</option>
-                                  <option value="100">Show 100</option>
-                                </select>
-                              </div>
-                              <div className="col-4">
-                                <button
-                                  className="button-dark-yellow btn me-3"
-                                  type="button"
-                                  onClick={applyViewMoreFilters}
-                                >
-                                  Search
-                                </button>
-                                <button
-                                  className="button-dark-yellow btn"
-                                  type="button"
-                                  onClick={() => {
-                                    setViewMoreFilters({
-                                      username: "",
-                                      amountMin: "",
-                                      amountMax: "",
-                                      ipAddress: "",
-                                      type: "25",
-                                    });
-                                    setFilteredViewMoreData(
-                                      fancyOrders.map((bet) => ({
-                                        ...bet,
-                                        isSelected: false,
+                {isBookModalOpen=="viewMore" && (
+                  <div
+                    className="modal fade modal-one"
+                    id="ViewMore-modal"
+                    tabIndex={-1}
+                    aria-labelledby="exampleModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div className="modal-dialog modal-xl">
+                      <div className="modal-content">
+                        <div className="modal-header">
+                          <h1
+                            className="modal-title me-5"
+                            id="ViewMore-modalLabel"
+                          >
+                            View More Bet
+                          </h1>
+                          <button
+                            type="button"
+                            className="modal-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                            onClick={() => setIsBookModalOpen(null)}
+                          >
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </div>
+                        <div className="modal-body">
+                          <div className="container-fluid">
+                            <div className="row">
+                              <div className="col-md-6 mb-3 row align-items-center">
+                                <div className="col-3">
+                                  <label className="form-label">
+                                    Enter Username
+                                  </label>
+                                </div>
+                                <div className="col-4">
+                                  <input
+                                    type="text"
+                                    className="form-control view-input"
+                                    placeholder=""
+                                    value={viewMoreFilters.username}
+                                    onChange={(e) =>
+                                      setViewMoreFilters((prev) => ({
+                                        ...prev,
+                                        username: e.target.value,
                                       }))
-                                    );
-                                    setSelectAllForDeletion(false);
-                                  }}
-                                >
-                                  All View
-                                </button>
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6 mb-3 row align-items-center">
+                                <div className="col-3">
+                                  <label className="form-label">Amount</label>
+                                </div>
+                                <div className="col-4">
+                                  <input
+                                    type="text"
+                                    className="form-control view-input"
+                                    placeholder="Min"
+                                    value={viewMoreFilters.amountMin}
+                                    onChange={(e) =>
+                                      setViewMoreFilters((prev) => ({
+                                        ...prev,
+                                        amountMin: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </div>
+                                <div className="col-4">
+                                  <input
+                                    type="text"
+                                    className="form-control view-input"
+                                    placeholder="Max"
+                                    value={viewMoreFilters.amountMax}
+                                    onChange={(e) =>
+                                      setViewMoreFilters((prev) => ({
+                                        ...prev,
+                                        amountMax: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6 mb-3 row align-items-center">
+                                <div className="col-3">
+                                  <label className="form-label">
+                                    IP Address
+                                  </label>
+                                </div>
+                                <div className="col-4">
+                                  <input
+                                    type="text"
+                                    className="form-control view-input"
+                                    placeholder=""
+                                    value={viewMoreFilters.ipAddress}
+                                    onChange={(e) =>
+                                      setViewMoreFilters((prev) => ({
+                                        ...prev,
+                                        ipAddress: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-md-6 mb-3 row align-items-center">
+                                <div className="col-3">
+                                  <label className="form-label">
+                                    Show Type
+                                  </label>
+                                </div>
+                                <div className="col-4">
+                                  <select
+                                    className="form-select"
+                                    value={viewMoreFilters.type}
+                                    onChange={(e) =>
+                                      setViewMoreFilters((prev) => ({
+                                        ...prev,
+                                        type: e.target.value,
+                                      }))
+                                    }
+                                  >
+                                    <option value="25">Show 25</option>
+                                    <option value="50">Show 50</option>
+                                    <option value="100">Show 100</option>
+                                  </select>
+                                </div>
+                                <div className="col-4">
+                                  <button
+                                    className="button-dark-yellow btn me-3"
+                                    type="button"
+                                    onClick={applyViewMoreFilters}
+                                  >
+                                    Search
+                                  </button>
+                                  <button
+                                    className="button-dark-yellow btn"
+                                    type="button"
+                                    onClick={() => {
+                                      setViewMoreFilters({
+                                        username: "",
+                                        amountMin: "",
+                                        amountMax: "",
+                                        ipAddress: "",
+                                        type: "25",
+                                      });
+                                      setFilteredViewMoreData(
+                                        fancyOrders.map((bet) => ({
+                                          ...bet,
+                                          isSelected: false,
+                                        }))
+                                      );
+                                      setSelectAllForDeletion(false);
+                                    }}
+                                  >
+                                    All View
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="table-responsive">
-                            <table className="table table-two">
-                              <thead>
-                                <tr>
-                                  <th>
-                                    <input
-                                      type="checkbox"
-                                      checked={selectAllForDeletion}
-                                      onChange={handleSelectAllBets}
-                                    />
-                                  </th>
-                                  <th>UserName</th>
-                                  <th>Nation</th>
-                                  <th>M type</th>
-                                  <th>Bet Type</th>
-                                  <th>Amount</th>
-                                  <th>UserRate</th>
-                                  <th>PlaceDate</th>
-                                  <th>IP</th>
-                                  <th>
-                                    BrowserDetails
-                                    {selectAllForDeletion && (
-                                      <>
-                                        <button
-                                          type="button"
-                                          className="btn btn-danger text-white p-2 me-2"
-                                          onClick={() =>
-                                            handleDeleteBet(
-                                              "delete",
-                                              "All",
-                                              null
-                                            )
-                                          }
-                                        >
-                                          Delete Selected
-                                        </button>
-                                        <button
-                                          type="button"
-                                          className="btn btn-danger text-white p-2"
-                                          onClick={() =>
-                                            handleDeleteBet("void", "All", null)
-                                          }
-                                        >
-                                          Void Selected
-                                        </button>
-                                      </>
-                                    )}
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {filteredViewMoreData.length > 0 ? (
-                                  filteredViewMoreData.map((bet) => (
-                                    <tr
-                                      key={bet._id}
-                                      className={`${
-                                        bet.orderType === "Back"
-                                          ? "black-bg"
-                                          : "lay-bg"
-                                      }`}
-                                    >
-                                      <td>
-                                        <input
-                                          type="checkbox"
-                                          checked={bet.isSelected}
-                                          onChange={() =>
-                                            handleIndividualBetSelect(bet._id)
-                                          }
-                                        />
-                                      </td>
-                                      <td>{bet.user.username}</td>
-                                      <td>{bet.match.countryCode}</td>
-                                      <td></td>
-                                      <td>{bet.oddsType}</td>
-                                      <td>{bet.betAmount}</td>
-                                      <td>
-                                        {bet.rate}/{bet.size}
-                                      </td>
-                                      <td>{formatDateTime(bet.created)}</td>
-                                      <td>{bet.user_ip}</td>
-                                      <td>
-                                        {bet.isSelected && (
-                                          <>
-                                            <button
-                                              type="button"
-                                              className="btn btn-danger text-white p-2 me-2"
-                                              onClick={() =>
-                                                handleDeleteBet(
-                                                  "delete",
-                                                  bet.oddsType || "matchOdds",
-                                                  bet._id
-                                                )
-                                              }
-                                            >
-                                              Delete
-                                            </button>
-                                            <button
-                                              type="button"
-                                              className="btn btn-danger text-white p-2"
-                                              onClick={() =>
-                                                handleDeleteBet(
-                                                  "void",
-                                                  bet.oddsType || "matchOdds",
-                                                  bet._id
-                                                )
-                                              }
-                                            >
-                                              Void Delete
-                                            </button>
-                                          </>
-                                        )}
-                                      </td>
-                                    </tr>
-                                  ))
-                                ) : (
+                            <div className="table-responsive">
+                              <table className="table table-two">
+                                <thead>
                                   <tr>
-                                    <td colSpan={10}>No bets to display.</td>
+                                    <th>
+                                      <input
+                                        type="checkbox"
+                                        checked={selectAllForDeletion}
+                                        onChange={handleSelectAllBets}
+                                      />
+                                    </th>
+                                    <th>UserName</th>
+                                    <th>Nation</th>
+                                    <th>M type</th>
+                                    <th>Bet Type</th>
+                                    <th>Amount</th>
+                                    <th>UserRate</th>
+                                    <th>PlaceDate</th>
+                                    <th>IP</th>
+                                    <th>
+                                      BrowserDetails
+                                      {selectAllForDeletion && (
+                                        <>
+                                          <button
+                                            type="button"
+                                            className="btn btn-danger text-white p-2 me-2"
+                                            onClick={() =>
+                                              handleDeleteBet(
+                                                "delete",
+                                                "All",
+                                                null
+                                              )
+                                            }
+                                          >
+                                            Delete Selected
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className="btn btn-danger text-white p-2"
+                                            onClick={() =>
+                                              handleDeleteBet(
+                                                "void",
+                                                "All",
+                                                null
+                                              )
+                                            }
+                                          >
+                                            Void Selected
+                                          </button>
+                                        </>
+                                      )}
+                                    </th>
                                   </tr>
-                                )}
-                              </tbody>
-                            </table>
+                                </thead>
+                                <tbody>
+                                  {filteredViewMoreData.length > 0 ? (
+                                    filteredViewMoreData.map((bet) => (
+                                      <tr
+                                        key={bet._id}
+                                        className={`${
+                                          bet.orderType === "Back"
+                                            ? "black-bg"
+                                            : "lay-bg"
+                                        }`}
+                                      >
+                                        <td>
+                                          <input
+                                            type="checkbox"
+                                            checked={bet.isSelected}
+                                            onChange={() =>
+                                              handleIndividualBetSelect(bet._id)
+                                            }
+                                          />
+                                        </td>
+                                        <td>{bet.user.username}</td>
+                                        <td>{bet.match.countryCode}</td>
+                                        <td></td>
+                                        <td>{bet.oddsType}</td>
+                                        <td>{bet.betAmount}</td>
+                                        <td>
+                                          {bet.rate}/{bet.size}
+                                        </td>
+                                        <td>{formatDateTime(bet.created)}</td>
+                                        <td>{bet.user_ip}</td>
+                                        <td>
+                                          {bet.isSelected && (
+                                            <>
+                                              <button
+                                                type="button"
+                                                className="btn btn-danger text-white p-2 me-2"
+                                                onClick={() =>
+                                                  handleDeleteBet(
+                                                    "delete",
+                                                    bet.oddsType || "matchOdds",
+                                                    bet._id
+                                                  )
+                                                }
+                                              >
+                                                Delete
+                                              </button>
+                                              <button
+                                                type="button"
+                                                className="btn btn-danger text-white p-2"
+                                                onClick={() =>
+                                                  handleDeleteBet(
+                                                    "void",
+                                                    bet.oddsType || "matchOdds",
+                                                    bet._id
+                                                  )
+                                                }
+                                              >
+                                                Void Delete
+                                              </button>
+                                            </>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td colSpan={10}>No bets to display.</td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                }
+                )}
 
                 <div className="table-responsive">
                   <table className="table table-two">

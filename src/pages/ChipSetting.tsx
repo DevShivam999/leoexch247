@@ -41,6 +41,7 @@ const ChipSetting = () => {
     chips: "",
     remark: "",
   });
+  
   const location = useLocation();
   const fetchSettlementData = async () => {
     if (!user.numeric_id || !user._id || !token) {
@@ -183,7 +184,7 @@ const ChipSetting = () => {
 
   return (
     <section className="mian-content">
-      <div
+   {showSettlementModal&&   <div
         className={`modal fade modal-one settlementModal ${
           showSettlementModal ? "show d-block" : ""
         }`}
@@ -244,7 +245,7 @@ const ChipSetting = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>}
 
       <div className="chip-summary-page">
         <div className="container-fluid">

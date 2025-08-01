@@ -74,7 +74,7 @@ const Nav: React.FC = () => {
           style={{ justifyContent: "space-between", flexWrap: "nowrap" }}
         >
           <Link className="navbar-brand" to="/">
-            <img alt="logo" src="/logo.png" style={{ height: "30px" }} />
+            <img alt="logo" src="/logo-1.png" style={{ height: "30px" }} />
           </Link>
           <button
             type="button"

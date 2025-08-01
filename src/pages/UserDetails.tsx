@@ -33,7 +33,6 @@ import type { ActivityLogEntry, CurrentBet } from "../types/vite-env";
 import { useAppSelector } from "../hook/hook";
 import ErrorHandler from "../utils/ErrorHandle";
 import DateInput from "../components/DateInput";
-import Loading from "../components/Loading";
 import BottomNav from "../components/BottomNav";
 import SearchCom from "../components/SearchCom";
 
@@ -186,7 +185,7 @@ const UserDetails = () => {
       const response = await axios.get(
         `${
           import.meta.env.VITE_Api_Url
-        }user/account-statements?page=${LPage}&limit=${20}&numeric_id=${id}&txType=3&from=${LFromDate.current?.value || ""}&to=${LToDate.current?.value || ""}`,
+        }user/account-statements?page=${LPage}&limit=${20}&numeric_id=${id}&txType=${betHistoryStatus=="All"?"":betHistoryStatus}&from=${LFromDate.current?.value || ""}&to=${LToDate.current?.value || ""}`,
         {
           headers: { Authorization: `Token ${token}`, _id: user._id },
         }
@@ -274,10 +273,7 @@ const UserDetails = () => {
     setActiveTab(tabName);
   };
 
-  if (loading) {
-    return <Loading />;
-  }
-
+  
   if (error) {
     return <div className="text-center mt-5 text-danger">{error}</div>;
   }
@@ -417,7 +413,7 @@ const UserDetails = () => {
                   <div className="profile-card-one">
                     <div className="profile-card-body">
                       <div className="row align-items-end">
-                        <div className="col-md-2 mb-3">
+                        {/* <div className="col-md-2 mb-3">
                           <label htmlFor="chooseType" className="lable-two">
                             Choose Type
                           </label>
@@ -431,7 +427,7 @@ const UserDetails = () => {
                             <option value="Declare">Declare</option>
                             <option value="Delete">Delete</option>
                           </select>
-                        </div>
+                        </div> */}
                         <div className="col-md-2 mb-3">
                           <label htmlFor="marketType" className="lable-two">
                             Market Type
@@ -444,12 +440,12 @@ const UserDetails = () => {
                               setBetHistoryStatus(e.target.value)
                             }
                           >
-                            <option value="">All</option>
+                            <option value="All">All</option>
                             <option value="4">Cricket</option>
                             <option value="2">Tennis</option>
                             <option value="1">footbal</option>
-                            <option value="">Virtual</option>
-                            <option value="">Ball by Ball</option>
+                            <option value="All">Virtual</option>
+                            <option value="All">Ball by Ball</option>
                           </select>
                         </div>
                         <DateInput label="From" ref={HFromDate} />
@@ -532,8 +528,8 @@ const UserDetails = () => {
                   <div className="profile-card-one">
                     <div className="profile-card-body">
                       <div className="row align-items-end">
-                        <div className="col-md-2 mb-3">
-                          <label htmlFor="accountType" className="lable-two">
+                        {/* <div className="col-md-2 mb-3"> */}
+                          {/* <label htmlFor="accountType" className="lable-two">
                             Account Type
                           </label>
                           <select
@@ -547,6 +543,7 @@ const UserDetails = () => {
                             <option value="3">Credit Reference</option>
                           </select>
                         </div>
+                        */}
                         <div className="col-md-2 mb-3">
                           <label htmlFor="gameName" className="lable-two">
                             Game Name
@@ -555,6 +552,9 @@ const UserDetails = () => {
                             className="form-select"
                             id="gameName"
                             aria-label="Default select example"
+                             onChange={(e) =>
+                              setBetHistoryStatus(e.target.value)
+                            }
                           >
                             <option defaultValue="All">All</option>
                             <option value="1">Cricket</option>
@@ -563,7 +563,7 @@ const UserDetails = () => {
                             <option value="3">Virtual</option>
                             <option value="3">Ball by Ball</option>
                           </select>
-                        </div>
+                        </div> 
                         <DateInput label="From" ref={LFromDate} />
                         <DateInput label="To" ref={LToDate} />
                         <div className="col-md-2 mb-3">

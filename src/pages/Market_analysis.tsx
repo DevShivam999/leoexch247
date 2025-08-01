@@ -92,7 +92,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
             <i className="fas fa-trophy"></i> SPORTS
           </button>
         </li>
-        <li className="nav-item" role="presentation">
+        {/* <li className="nav-item" role="presentation">
           <button
             className={`nav-link ${activeTab === "casino" ? "active" : ""}`}
             id="pills-CASINO-tab"
@@ -106,7 +106,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
           >
             <i className="fas fa-coins"></i> CASINO
           </button>
-        </li>
+        </li> */}
       </ul>
 
       <div className="tab-content" id="pills-tabContent">

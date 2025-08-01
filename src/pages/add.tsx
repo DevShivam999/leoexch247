@@ -340,8 +340,8 @@ const AddPartner = () => {
                         <>
                           <option value="hyper-hyper">super admin </option>
                           <option value="hyper">admin </option>
-                          <option value="super-master">master </option>
                           <option value="super-super">super master </option>
+                          <option value="super-master">master </option>
                           <option value="master">agent </option>
                           <option value="user">user </option>
                         </>
@@ -349,23 +349,23 @@ const AddPartner = () => {
                       {user.roles[0] == "hyper-hyper" && (
                         <>
                           <option value="hyper">admin </option>
-                          <option value="super-master">master </option>
                           <option value="super-super">super master </option>
+                          <option value="super-master">master </option>
                           <option value="master">agent </option>
                           <option value="user">user </option>
                         </>
                       )}
                       {user.roles[0] == "hyper" && (
                         <>
-                          <option value="super-master">master </option>
                           <option value="super-super">super master </option>
+                          <option value="super-master">master </option>
                           <option value="master">agent </option>
                           <option value="user">user </option>
                         </>
                       )}
                       {user.roles[0] == "super-super" && (
                         <>
-                          <option value="super-super">super master </option>
+                           <option value="super-master">master </option>
                           <option value="master">agent </option>
                           <option value="user">user </option>
                         </>
