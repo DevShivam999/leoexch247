@@ -146,7 +146,7 @@ const AddPartner = () => {
           masterPassword: retypePassword,
           lastName: "",
           password: userPassword,
-          credit: creditReference,
+          credit: creditReference.length>0?creditReference:0,
           city: "",
           parentId: user._id,
           // exposerLimit:ExposerReference,

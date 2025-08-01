@@ -14,7 +14,7 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
           <h1 className="heading-one">Profile Detail</h1>
           <div className="refcode-row">
             <div className="ref-code-box">
-              https://Leoexch247.co/ReferBy/{userData?.referralCode}
+              https://Leoexch247.com/ReferBy/{userData?.referralCode}
               <span className="copy">tap-to-copy</span>
             </div>
             <div className="ref-use text-success">ACTIVE</div>
@@ -44,30 +44,13 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
                     <td>{userData?.balance}</td>
                     <td>Siteurl</td>
                     <td>:</td>
-                    <td>{userData?.siteUrl}</td>
+                    <td>https://Leoexch247.com</td>
                   </tr>
-                  <tr>
-                    <td>Bonus Balance</td>
-                    <td>:</td>
-                    <td>
-                      {userData?.bonusBalance}
-                      <a
-                        href="#"
-                        className="add-bonus-plus"
-                        data-bs-toggle="modal"
-                        data-bs-target="#addbonusModal"
-                      >
-                        <i className="fas fa-plus"></i>
-                      </a>
-                    </td>
-                    <td>Techadmin</td>
-                    <td>:</td>
-                    <td>{userData?.techAdmin}</td>
-                  </tr>
+                
                   <tr>
                     <td>Exposure</td>
                     <td>:</td>
-                    <td className="text-red">{userData?.exposerLimit}</td>
+                    <td className="text-red">{userData?.exposerLimitRef}</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -75,7 +58,7 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
                   <tr>
                     <td>Limit</td>
                     <td>:</td>
-                    <td>{userData?.balance}</td>
+                    <td>{userData?.exposerLimit}</td>
                     <td>Referral code</td>
                     <td>:</td>
                     <td>
@@ -90,7 +73,7 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
                   <tr>
                     <td>Credit Reference</td>
                     <td>:</td>
-                    <td>{userData?.credit}</td>
+                    <td>{userData?.creditRef}</td>
                     <td></td>
                     <td></td>
                     <td></td>

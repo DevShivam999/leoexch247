@@ -26,15 +26,16 @@ const AdminLoginPage: React.FC = () => {
   const onSubmit: SubmitHandler<ILoginFormInputs> = async (data) => {
     if(loading) return
     setLoading(true)
-    const login = await Login_Api(data);
-    setLoading(false)
+   try {
+     const login = await Login_Api(data);
+   
     if(!login) return
    
     if (login.result) {
       
         dispatch(setUser({user:JSON.parse(localStorage.getItem("user") || "")}));
         dispatch(setToken({token:JSON.parse(localStorage.getItem("token") || "")}));
-        setLoading(false)
+    
       if (login.data) {
         let location = localStorage.getItem("Location");
         localStorage.removeItem("Location");
@@ -45,6 +46,13 @@ const AdminLoginPage: React.FC = () => {
         navigation("/firstLogin")
       }
     }
+   } catch (error) {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+   }finally{
+     setLoading(false)
+   }
   };
 
   return (

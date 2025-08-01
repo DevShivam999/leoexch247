@@ -14,8 +14,10 @@ export interface UserData {
   limit: number;
   referralCode: string;
   credit: number;
+  creditRef: number;
   roles: string[];
   exposerLimit: number;
+  exposerLimitRef: number;
   _id: string;
 }
 import { useState, useEffect, useRef } from "react";
@@ -745,84 +747,7 @@ const UserDetails = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      <div
-        className="modal fade modal-one addbonusModal"
-        id="addbonusModal"
-        tabIndex={-1}
-        aria-labelledby="addbonusModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title" id="addbonusModalLabel">
-                Add Bonus
-              </h1>
-              <button
-                type="button"
-                className="modal-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-4 mb-3">
-                  <label className="form-label">Amount</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="text"
-                    className="mgray-input-box form-control text-end"
-                    placeholder=""
-                  />
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Remark</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <textarea
-                    name=""
-                    id=""
-                    className="mgray-input-box form-control"
-                    rows={
-                      5
-                    } 
-                  ></textarea>
-                </div>
-                <div className="col-4 mb-3">
-                  <label className="form-label">Transaction Password</label>
-                </div>
-                <div className="col-8 mb-3">
-                  <input
-                    type="password"
-                    className="mgray-input-box form-control text-end"
-                    placeholder=""
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn modal-back-btn"
-                data-bs-dismiss="modal"
-              >
-                <i className="fas fa-undo"></i> Back
-              </button>
-              <button type="button" className="btn modal-green-btn">
-                Add Bonus <i className="fas fa-sign-in-alt"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      
+      </div>      
     </section>
   );
 };
