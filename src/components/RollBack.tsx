@@ -5,20 +5,24 @@ import { success } from "../utils/Tp";
 import { fetchBetsResult } from "../api/fetchUserPermissions";
 import useAppDispatch from "../hook/hook";
 
-const RollBack = ({ button, market, match }:{button:any,market:string,match:string}) => {
+const RollBack = ({ button, setloading,loading, market, match,url="betting/rollback-odds-result" }:{button?:any,market:string,match:string,url?:string,setloading: React.Dispatch<React.SetStateAction<boolean>>,loading:boolean}) => {
   const {id}=useParams()
   const dispatch=useAppDispatch()
   const RollBackApi = async (marketId: string, matchId: string) => {
+    if(loading) return
     try {
-      await instance.post("betting/rollback-odds-result", {
+      await instance.post(url, {
         matchId: matchId,
         marketId: marketId,
+        selectionId:marketId
       });
       success();
       
             dispatch(fetchBetsResult(id||""))
     } catch (error) {
       console.log(error);
+    }finally{
+      setloading(false)
     }
   };
   return (

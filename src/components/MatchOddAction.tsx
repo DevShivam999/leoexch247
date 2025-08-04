@@ -7,18 +7,22 @@ import RollBack from "./RollBack";
 import { fetchBetsResult } from "../api/fetchUserPermissions";
 import { useParams } from "react-router-dom";
 import useAppDispatch from "../hook/hook";
+import useSocketVDelete   from "./SocketBetDelete";
 
 const MatchOddsAction = ({
   MatchSession,
 }: {
   MatchSession: MatchSession[];
 }) => {
+const SocketVDelete=  useSocketVDelete()
   const {id}=useParams()
   const [selectedWinners, setSelectedWinners] = useState<{
     [marketId: string]: string;
   }>({});
+  const [loading,setLoading]=useState(false)
   const dispatch=useAppDispatch()
   useEffect(() => {
+
     for (let i = 0; i < MatchSession.length; i++) {
       if (MatchSession[i].isResult) {
         setSelectedWinners((prev) => ({
@@ -38,13 +42,14 @@ const MatchOddsAction = ({
     matchId: string,
     Runner: Runner[]
   ) => {
+    if(loading) return
     const Id =
       Runner.find(
         (p) =>
           p.runner == selectedWinners[marketId] ||
           p.name == selectedWinners[marketId]
       )?.selectionId || 0;
-
+setLoading(true)
     try {
       await instance.post("/betting/declare-odds-result", {
         marketId: marketId,
@@ -65,6 +70,8 @@ const MatchOddsAction = ({
         Tp("An unknown error occurred while declaring the result.");
         console.error("Error declaring result:", err);
       }
+    }finally{
+      setLoading(false)
     }
   };
   return (
@@ -118,13 +125,13 @@ const MatchOddsAction = ({
                       {session.isResult ? (
                         <div style={styles.buttonGroup}>
                           <button style={styles.button}>DECLARED</button>
-                          <RollBack button={styles.button} market={session.marketId} match={session.matchId}/>
+                          <RollBack setloading={setLoading} loading={loading} button={styles.button} market={session.marketId} match={session.matchId}/>
                          
                         </div>
                       ) : (
                         <div style={styles.buttonGroup}>
-                          <button style={styles.button}>DELETE BETS</button>
-                          <button style={styles.button}>
+                          <button style={styles.button} onClick={()=>SocketVDelete(id||"",null, "delete",null)}>DELETE BETS</button>
+                          <button style={styles.button} onClick={()=>SocketVDelete(id||"",null, "void",null)}>
                             VOID BETS {session.isResult}{" "}
                           </button>
                           <button

@@ -558,12 +558,14 @@ interface MatchList {
 
 interface Sessions {
   _id: string;
-  matchId: number;
+  matchId: string;
   RunnerName: string;
   date: string;
   status: string;
   created: string;
   selectionId: string
+  winnerRun:number
+  marketId:string
 }
 interface Runner {
   selectionId: number

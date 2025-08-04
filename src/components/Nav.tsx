@@ -120,7 +120,7 @@ const Nav: React.FC = () => {
                 <ul className="dropdown-menu">
                   <li>
                     <Link className="dropdown-item" to="#">
-                      Bal. : <span>{User?.balance ?? 100000}</span>
+                      Bal. : <span>{User.credit-User.upCredit || 100000}</span>
                     </Link>
                   </li>
                   <li>

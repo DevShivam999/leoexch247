@@ -91,15 +91,15 @@ const ClientList = () => {
 
       return {
        id: user._id,
-        username: user.username,
+        username: user.username||"",
         position: user.commperrole || "User",
         creditReference: formatNumber(user?.creditRef||0),
         exposerLimitRef: formatNumber(user?.exposerLimitRef||0),
-         balance: formatNumber(user.credit),
-        clientPL: formatNumber(user.profitLossCredit),
-        myPL: formatNumber(user.profitLossBalance),
-        exposure: formatNumber(user.exposerLimit),
-        availableBalance: formatNumber(user.credit+user.exposerLimit),
+         balance: formatNumber(user.credit||0),
+        clientPL: formatNumber(user.profitLossCredit||0),
+        myPL: formatNumber(user.profitLossBalance||0),
+        exposure: formatNumber(user.exposerLimit||0),
+        availableBalance: formatNumber(user.credit||0+user.exposerLimit||0),
         uSt: user.status,
         bSt: user.betStatus,
         accountType: user.roles[0],
@@ -209,7 +209,8 @@ const ClientList = () => {
                       className="form-select"
                       aria-label="Default select example"
                       onChange={(e) =>
-                        setLimit(parseInt(e.target.value))
+                      (  setLimit(parseInt(e.target.value))
+                        ,setEntriesToShow(1))
                       }
                     >
                       <option value="10">10</option>

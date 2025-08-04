@@ -102,7 +102,24 @@ const AddPartner = () => {
   const navigation = useNavigate();
 
   const [TransactionPassword, setTransactionPassword] = useState("");
-  const handleCreateAccount = async () => {
+    const handleCreateAccount = async () => {
+   if (accountType != "user")  { if (
+      cricketDownlineCommission.user == 0 &&
+      footballDownlineCommission.user == 0 &&
+      tennisDownlineCommission.user == 0
+    ) {
+      setError("set the value  of DownLine");
+      return;
+    }
+    if (
+      cricketDownlineCommission.up <= cricketDownlineCommission.user ||
+      footballDownlineCommission.up <= footballDownlineCommission.user ||
+      tennisDownlineCommission.up <= tennisDownlineCommission.user
+    ) {
+      setError("Upline commission must be greater than Downline commission.");
+      return;
+    }}
+
     setError(null);
     setSuccess(null);
 
@@ -146,7 +163,7 @@ const AddPartner = () => {
           masterPassword: retypePassword,
           lastName: "",
           password: userPassword,
-          credit: creditReference.length>0?creditReference:0,
+          credit: creditReference.length > 0 ? creditReference : 0,
           city: "",
           parentId: user._id,
           // exposerLimit:ExposerReference,
@@ -155,22 +172,6 @@ const AddPartner = () => {
       );
 
       if (accountType != "user") {
-        if (
-          cricketDownlineCommission.user == 0 &&
-          footballDownlineCommission.user == 0 &&
-          tennisDownlineCommission.user == 0
-        ) {
-          setError("set the value  of DownLine");
-          return;
-        }
-        if(
-          cricketDownlineCommission.up <= cricketDownlineCommission.user ||
-          footballDownlineCommission.up <= footballDownlineCommission.user ||
-          tennisDownlineCommission.up <= tennisDownlineCommission.user
-        ) {
-          setError("Upline commission must be greater than Downline commission.");
-          return;
-        }
         const commissionPromises = [];
         const commissionEndpoint = `user/commission?numeric_id=${user.numeric_id}`;
 
@@ -227,9 +228,9 @@ const AddPartner = () => {
         setFullName("");
         setAccountType("");
         setCreditReference("");
-        setCricketDownlineCommission(({ up: 0, down: 0, user: 0 }));
-        setFootballDownlineCommission(({ up: 0, down: 0, user: 0 }));;
-        setTennisDownlineCommission(({ up: 0, down: 0, user: 0 }));
+        setCricketDownlineCommission({ up: 0, down: 0, user: 0 });
+        setFootballDownlineCommission({ up: 0, down: 0, user: 0 });
+        setTennisDownlineCommission({ up: 0, down: 0, user: 0 });
         setMatchOddsCommission("0");
         setFancyCommission("0");
       } else {
