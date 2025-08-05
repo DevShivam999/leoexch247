@@ -1332,7 +1332,7 @@ setmodelLoading(true)
         <td>{userInfo.balance}</td>
 
         <ColorTd amount={parseFloat(userInfo.clientPL.replace(/,/g, ""))} />
-        <ColorTd amount={parseFloat(userInfo.myPL.replace(/,/g, ""))} />
+     
         <ColorTd amount={parseFloat(userInfo.exposure.replace(/,/g, ""))} />
         <ColorTd
           amount={parseInt(userInfo.exposerLimitRef.replace(/,/g, "")) || 0}

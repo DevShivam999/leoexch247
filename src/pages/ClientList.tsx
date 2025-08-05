@@ -93,11 +93,11 @@ const ClientList = () => {
        id: user._id,
         username: user.username||"",
         position: user.commperrole || "User",
-        creditReference: formatNumber(user?.creditRef||0),
+        creditReference: formatNumber(user?.credit||0),
         exposerLimitRef: formatNumber(user?.exposerLimitRef||0),
          balance: formatNumber(user.credit||0),
-        clientPL: formatNumber(user.profitLossCredit||0),
-        myPL: formatNumber(user.profitLossBalance||0),
+        clientPL: formatNumber(user.profitLossBalance||0),
+   
         exposure: formatNumber(user.exposerLimit||0),
         availableBalance: formatNumber(user.credit||0+user.exposerLimit||0),
         uSt: user.status,
@@ -233,7 +233,7 @@ const ClientList = () => {
                     <th>Credit Reference</th>
                     <th>Balance</th>
                     <th>Client (P/L)</th>
-                    <th>My (P/L)</th>
+                   
                     <th>Exposure</th>
                     <th>Exposure Limit</th>
                     <th>Available Balance</th>
