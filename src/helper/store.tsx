@@ -7,6 +7,7 @@ import Sport from "./Sport";
 import FancyBetData from "./FancyBetData";
 import BannerStore from "./BannerStore";
 import BetsResult from "./BetsResult";
+import userCommission from "./UserCommissionStore";
 
 
 const rootReducer = {
@@ -15,6 +16,7 @@ const rootReducer = {
   BannerStore,
   socket,
   BetsResult,
+  userCommission,
   FancyBetData,
   Permissions: permissionReducer,
 };

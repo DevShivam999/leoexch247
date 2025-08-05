@@ -28,6 +28,7 @@ const UserTableRow = ({
   const location = useLocation();
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [SingleUserCommission, setSingleUserCommission] = useState(false);
   const [showExposureLimitModal, setShowExposureLimitModal] = useState(false);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
   const [showPasswordLimitModal, setShowPasswordLimitModal] = useState(false);
@@ -53,6 +54,20 @@ const UserTableRow = ({
     reset: true,
     ts_password: "",
   });
+  const [CommissionData, setCommissionData] = useState({
+    fancyTypeCommission: "",
+    fancyCommission: "",
+    bookmakerTypeCommission: "",
+    bookmakerCommission: "",
+    matchOddsTypeCommission:"",
+    matchOddsCommission:"",
+    myCommissionSession: "",
+    mySessionType: "",
+    myBookmakerCommission: "",
+    myBookmakerType: "",
+    password: "",
+    id:""
+  });
 
   const depositModalRef = useRef<HTMLDivElement>(null);
   const withdrawModalRef = useRef<HTMLDivElement>(null);
@@ -61,6 +76,7 @@ const UserTableRow = ({
   const passwordModalRef = useRef<HTMLDivElement>(null);
   const statusModalRef = useRef<HTMLDivElement>(null);
   const sportsModalRef = useRef<HTMLDivElement>(null);
+  const SingleUserCommissionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -113,6 +129,13 @@ const UserTableRow = ({
       ) {
         setShowSportsSettingsModal(false);
       }
+      if (
+        SingleUserCommissionRef.current &&
+        !SingleUserCommissionRef.current.contains(event.target as Node) &&
+        SingleUserCommission
+      ) {
+        setSingleUserCommission(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -127,6 +150,7 @@ const UserTableRow = ({
     showPasswordLimitModal,
     showChangeStatusModal,
     showSportsSettingsModal,
+    SingleUserCommission,
   ]);
 
   //@ts-ignore
@@ -189,6 +213,44 @@ const UserTableRow = ({
       });
     }
   }, [submitusermatch]);
+  const fetchCommission = async (user:string) => {
+    try {
+      const res = await instance.get(`/user/minmax-bet-new?numeric_id=${user}`);
+      const data = res.data?.result?.user;
+
+      if (Array.isArray(data)) {
+        const updatedData: any = {};
+
+        data.forEach((item) => {
+         
+          switch (item.marketType?.toLowerCase()) {
+            case "bookmaker":
+              updatedData.bookmakerCommission = item.comm_in?.toString() || "0";
+              break;
+           
+            case "fancy":
+              updatedData.fancyCommission = item.comm_out?.toString() || "0";
+
+              break;
+            case "match odds":
+              updatedData.matchOddsCommission = item.comm_in?.toString() || "0";
+              break;
+          }
+        });
+
+        setCommissionData((prev) => ({
+          ...prev,
+          ...updatedData,
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to fetch commission:", err);
+    }
+  };
+
+  useEffect(() => {
+    SingleUserCommission&&fetchCommission(CommissionData.password);
+  }, [SingleUserCommission]);
 
   const fnShowModel = (
     pid: string,
@@ -210,7 +272,6 @@ const UserTableRow = ({
   };
 
   const DepositApiCall = async () => {
-    
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
     }
@@ -248,7 +309,35 @@ const UserTableRow = ({
       setmodelLoading(false);
     }
   };
-
+  const CommissionDataApi = async () => {
+     if (String(parent_name.transaction_password) != userDetails.ts_password) {
+      return Tp();
+    }
+    if(modelLoading) return
+      setmodelLoading(true);
+    try {
+      await instance.post("/user/minmax-bet-new", {
+        data: CommissionData,
+        userId: CommissionData.id,
+      });
+      success()
+    } catch (error) {
+      ErrorHandler({ err: error, dispatch, pathname: location.pathname });
+    }finally{
+      
+      setmodelLoading(false);
+      setSingleUserCommission(false);
+                      SetmodelError(null);
+                      setDetails({
+                        id: "",
+                        pid: "",
+                        amount: 0,
+                        newAmount: 0,
+                        remark: "",
+                        ts_password: "",
+                      });
+    }
+  };
   const withdrawApiCall = async () => {
     if (String(parent_name.transaction_password) != userDetails.ts_password) {
       return Tp();
@@ -292,13 +381,14 @@ const UserTableRow = ({
   };
 
   const newPassword = async () => {
-    if(modelLoading) return
-setmodelLoading(true)
+ 
     if (
       parent_name.transaction_password.toString() != userPassword.ts_password
     ) {
       return Tp();
     }
+       if (modelLoading) return;
+    setmodelLoading(true);
     try {
       if (userPassword.password != userPassword.rePassword)
         return Tp("password mismatch");
@@ -327,8 +417,8 @@ setmodelLoading(true)
         pathname: location.pathname,
         setError: SetmodelError,
       });
-    }finally{
-      setmodelLoading(false)
+    } finally {
+      setmodelLoading(false);
     }
   };
 
@@ -346,12 +436,13 @@ setmodelLoading(true)
   };
   const [creditLimit, setCreditLimit] = useState(0);
   const CreditLimit = async () => {
-    if(modelLoading) return
-setmodelLoading(true)
+    if (modelLoading) return;
+    setmodelLoading(true);
     if (userDetails.ts_password != String(parent_name.transaction_password)) {
       return Tp();
     }
     try {
+     
       await instance.post("/admin/credit-reference", {
         amount: creditLimit,
         userid: userDetails.id,
@@ -377,14 +468,14 @@ setmodelLoading(true)
         pathname: location.pathname,
         setError: SetmodelError,
       });
-    }finally{
-      setmodelLoading(false)
+    } finally {
+      setmodelLoading(false);
     }
   };
 
   const ExposerLimitApi = async () => {
-    if(modelLoading) return
-setmodelLoading(true)
+    if (modelLoading) return;
+    setmodelLoading(true);
     if (userDetails.ts_password != String(parent_name.transaction_password)) {
       return Tp();
     }
@@ -414,9 +505,15 @@ setmodelLoading(true)
         pathname: location.pathname,
         setError: SetmodelError,
       });
-    }finally{
-      setmodelLoading(false)
+    } finally {
+      setmodelLoading(false);
     }
+  };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setCommissionData({ ...CommissionData, [name]: value });
   };
 
   return (
@@ -787,6 +884,164 @@ setmodelLoading(true)
                     className="btn modal-red-btn"
                   >
                     Withdraw
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      {SingleUserCommission && (
+        <>
+          {" "}
+          <div className="modal-backdrop show"></div>
+          <div
+            className={`modal fade modal-one SingleUserCommission ${
+              SingleUserCommission ? "show" : ""
+            }`}
+            style={{ display: SingleUserCommission ? "block" : "none" }}
+            id="SingleUserCommission"
+            tabIndex={-1}
+            aria-labelledby="SingleUserCommission"
+            aria-hidden={!SingleUserCommission}
+          >
+            <div className="modal-dialog" ref={SingleUserCommissionRef}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h1
+                    className="modal-title"
+                    style={{ color: `${modelError ? "red" : "black"}` }}
+                    id="SingleUserCommission"
+                  >
+                    {modelError ? modelError : "Commission"}
+                  </h1>
+                  <button
+                    type="button"
+                    className="modal-close"
+                    onClick={() => {
+                      setSingleUserCommission(false);
+                      SetmodelError(null);
+                      setDetails({
+                        id: "",
+                        pid: "",
+                        amount: 0,
+                        newAmount: 0,
+                        remark: "",
+                        ts_password: "",
+                      });
+                    }}
+                    aria-label="Close"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <div className="row">
+                    
+                
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Session Commission</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        name="fancyCommission"
+                        value={CommissionData.fancyCommission}
+                        onChange={(e) => handleChange(e)}
+                      />
+                    </div>
+                   
+                   
+                    <div className="col-4 mb-3">
+                      <label className="form-label">
+                        Bookmaker Commission{" "}
+                      </label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        name="bookmakerCommission"
+                        value={CommissionData.bookmakerCommission}
+                        onChange={(e) => handleChange(e)}
+                      />
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">
+                        MatchOdds Commission{" "}
+                      </label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="text"
+                        name="matchOddsCommission"
+                        value={CommissionData.matchOddsCommission}
+                        onChange={(e) => handleChange(e)}
+                      />
+                    </div>
+                    
+
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Remark</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <textarea
+                        name=""
+                        id=""
+                        value={userDetails.remark}
+                        onChange={(e) =>
+                          setDetails((p) => ({
+                            ...p,
+                            remark: e.target.value,
+                          }))
+                        }
+                        className="mgray-input-box form-control text-end"
+                        rows={5}
+                      ></textarea>
+                    </div>
+                    <div className="col-4 mb-3">
+                      <label className="form-label">Transaction Password</label>
+                    </div>
+                    <div className="col-8 mb-3">
+                      <input
+                        type="password"
+                        value={userDetails.ts_password}
+                        onChange={(e) =>
+                          setDetails((p) => ({
+                            ...p,
+                            ts_password: e.target.value,
+                          }))
+                        }
+                        className="mgray-input-box form-control text-end"
+                        placeholder=""
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn modal-back-btn"
+                    onClick={() => {
+                      setSingleUserCommission(false);
+                      SetmodelError(null);
+                      setDetails({
+                        id: "",
+                        pid: "",
+                        amount: 0,
+                        newAmount: 0,
+                        remark: "",
+                        ts_password: "",
+                      });
+                    }}
+                  >
+                    <i className="fas fa-undo"></i> Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={()=>CommissionDataApi()}
+                    className="btn modal-red-btn"
+                  >
+                    Submit
                   </button>
                 </div>
               </div>
@@ -1332,7 +1587,7 @@ setmodelLoading(true)
         <td>{userInfo.balance}</td>
 
         <ColorTd amount={parseFloat(userInfo.clientPL.replace(/,/g, ""))} />
-     
+        
         <ColorTd amount={parseFloat(userInfo.exposure.replace(/,/g, ""))} />
         <ColorTd
           amount={parseInt(userInfo.exposerLimitRef.replace(/,/g, "")) || 0}
@@ -1416,7 +1671,15 @@ setmodelLoading(true)
             >
               P
             </button>
-
+            <button
+              className="btn-listin-button"
+              onClick={() => {
+                (setSingleUserCommission(true),
+                  setCommissionData((p) => ({ ...p, password: userInfo.numeric_id,id:userInfo.id })));
+              }}
+            >
+              CM
+            </button>
             <button
               className="btn-listin-button"
               onClick={() =>
