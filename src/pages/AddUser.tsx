@@ -25,8 +25,8 @@ const AddUser = () => {
     userPasswordUpdate: false,
     eventEnableDisable: false,
     reportHideShow: false,
-    acceptDeclineWalletDeposit: false,
-    acceptDeclineWalletWithdraw: false,
+    acceptWalletDepositRequest: false,
+    acceptWalletWithdrawRequest: false,
   });
     useMemo(() => {
       if (Permissions.permissions) {
@@ -83,6 +83,8 @@ const AddUser = () => {
       return Tp()
     }
 
+    console.log(permissions);
+    
     try {
       await instance.post(`/user/add-account`, {
         username: clientName,
@@ -101,8 +103,8 @@ const AddUser = () => {
           userPasswordUpdate: permissions.userPasswordUpdate,
           eventEnableDisable: permissions.eventEnableDisable,
           reportHideShow: permissions.reportHideShow,
-          acceptWalletDeposit: permissions.acceptDeclineWalletDeposit,
-          acceptWalletWithdraw: permissions.acceptDeclineWalletWithdraw,
+          acceptWalletDeposit: permissions.acceptWalletDepositRequest,
+          acceptWalletWithdraw: permissions.acceptWalletWithdrawRequest,
         },
       });
       navigate("/list-of-clients");
