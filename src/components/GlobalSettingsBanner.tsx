@@ -11,8 +11,8 @@ const GlobalSettingsBanner = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dispatch = useAppDispatch();
 
-  const RECOMMENDED_WIDTH = 3059;
-  const RECOMMENDED_HEIGHT = 626;
+  // const RECOMMENDED_WIDTH = 3059;
+  // const RECOMMENDED_HEIGHT = 626;
 
   const sendBanner = async () => {
     if (!file) {
@@ -54,13 +54,15 @@ const GlobalSettingsBanner = () => {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        const { width, height } = img;
-        if (width !== RECOMMENDED_WIDTH || height !== RECOMMENDED_HEIGHT) {
-          Tp(`Image must be exactly ${RECOMMENDED_WIDTH} × ${RECOMMENDED_HEIGHT} pixels`);
-          resolve(false);
-        } else {
-          resolve(true);
-        }
+        // const { width, height } = img;
+        resolve(true);
+
+        // if (width !== RECOMMENDED_WIDTH || height !== RECOMMENDED_HEIGHT) {
+        //   Tp(`Image must be exactly ${RECOMMENDED_WIDTH} × ${RECOMMENDED_HEIGHT} pixels`);
+        //   resolve(false);
+        // } else {
+        //   resolve(true);
+        // }
       };
       img.onerror = () => {
         Tp("Invalid image file");
@@ -77,7 +79,7 @@ const GlobalSettingsBanner = () => {
     }
 
     const selectedFile = e.target.files[0];
-    
+
     // Check file type
     if (!selectedFile.type.startsWith("image/")) {
       Tp("Please select an image file (JPEG, PNG, etc.)");
@@ -108,10 +110,10 @@ const GlobalSettingsBanner = () => {
       <label className="form-label">
         Update HomePage Banner:
         <span className="text-danger ms-2">
-          Required size: {RECOMMENDED_WIDTH} × {RECOMMENDED_HEIGHT} pixels
+          {/* Required size: {RECOMMENDED_WIDTH} × {RECOMMENDED_HEIGHT} pixels */}
         </span>
       </label>
-      
+
       <input
         type="file"
         ref={fileInputRef}
@@ -125,7 +127,7 @@ const GlobalSettingsBanner = () => {
         <div className="mt-3">
           <div className="d-flex justify-content-between align-items-center">
             <p className="mb-1">Selected file: {file?.name}</p>
-            <button 
+            <button
               className="btn btn-sm btn-outline-danger"
               onClick={resetForm}
               disabled={isUploading}
@@ -134,28 +136,32 @@ const GlobalSettingsBanner = () => {
             </button>
           </div>
           <div className="image-preview mt-2 border p-2">
-            <img 
-              src={previewUrl} 
-              alt="Banner Preview" 
+            <img
+              src={previewUrl}
+              alt="Banner Preview"
               className="img-fluid"
               style={{ maxHeight: "200px" }}
             />
             <div className="text-center mt-2 text-muted">
-              Preview (actual size: {RECOMMENDED_WIDTH} × {RECOMMENDED_HEIGHT})
+              {/* Preview (actual size: {RECOMMENDED_WIDTH} × {RECOMMENDED_HEIGHT}) */}
             </div>
           </div>
         </div>
       )}
 
       <div className="text-end mt-3">
-        <button 
-          className="btn modal-submit-btn" 
+        <button
+          className="btn modal-submit-btn"
           onClick={sendBanner}
           disabled={!file || isUploading}
         >
           {isUploading ? (
             <>
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
               Uploading...
             </>
           ) : (
