@@ -174,7 +174,7 @@ const UserTableRow = ({
 
   async function fetchData() {
     try {
-      success();
+      // success();
       const data = await instance.post(
         `user/sports-setting?numeric_id=${user.numeric_id}`,
         {
@@ -208,11 +208,12 @@ const UserTableRow = ({
   useEffect(() => {
     if (showSportsSettingsModal) {
       fetchData().then(() => {
-        success();
         setShowSportsSettingsModal((p) => !p);
       });
+      success();
     }
   }, [submitusermatch]);
+
   const fetchCommission = async (user:string) => {
     try {
       const res = await instance.get(`/user/minmax-bet-new?numeric_id=${user}`);

@@ -37,26 +37,36 @@ const MiddNav = ({
               <ul className="accordion-inner-ul">
                 {item.children.map((child, childIdx) => (
                   <React.Fragment key={child.label}>
-                 {child.label!="Site Panel"&&child.label!="Id Request"&&child.label!="Bonus"&& <li
-                    key={childIdx}
-                    className={`accordion-inner-item ${
-                      location.pathname === child.to ? "active" : ""
-                    }`}
-                    
-                  >
-                   <button style={{backgroundColor:"transparent",border:"0px",width:"100%"}} disabled={child.label=="Site Panel"}>
-                     <Link
-                      to={
-                        child.label == "Account's Statement" && p
-                          ? `/account-statement/${p}`
-                          : child.to
-                      }
-                      className="accordion-inner-link"
-                    >
-                      {child.label}
-                    </Link>
-                   </button>
-                  </li>}
+                    {child.label != "Site Panel" &&
+                      child.label != "Id Request" &&
+                      child.label != "Bonus" && (
+                        <li
+                          key={childIdx}
+                          className={`accordion-inner-item ${
+                            location.pathname === child.to ? "active" : ""
+                          }`}
+                        >
+                          <button
+                            style={{
+                              backgroundColor: "transparent",
+                              border: "0px",
+                              width: "100%",
+                            }}
+                            disabled={child.label == "Site Panel"}
+                          >
+                            <Link
+                              to={
+                                child.label == "Account's Statement" && p
+                                  ? `/account-statement/${p}`
+                                  : child.to
+                              }
+                              className="accordion-inner-link"
+                            >
+                              {child.label}
+                            </Link>
+                          </button>
+                        </li>
+                      )}
                   </React.Fragment>
                 ))}
               </ul>

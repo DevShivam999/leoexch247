@@ -15,8 +15,8 @@ const AdminLoginPage: React.FC = () => {
   useEffect(() => {
     document.title = "Login";
   }, []);
-  const [loading,setLoading]=useState(false)
-  const navigation=useNavigate()
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigate();
   const dispatch = useDispatch();
   const {
     register,
@@ -24,35 +24,38 @@ const AdminLoginPage: React.FC = () => {
     formState: { errors },
   } = useForm<ILoginFormInputs>();
   const onSubmit: SubmitHandler<ILoginFormInputs> = async (data) => {
-    if(loading) return
-    setLoading(true)
-   try {
-     const login = await Login_Api(data);
-   
-    if(!login) return
-   
-    if (login.result) {
-      
-        dispatch(setUser({user:JSON.parse(localStorage.getItem("user") || "")}));
-        dispatch(setToken({token:JSON.parse(localStorage.getItem("token") || "")}));
-    
-      if (login.data) {
-        let location = localStorage.getItem("Location");
-        localStorage.removeItem("Location");
-        location = location != "/login" ? (location ?? "/") : "/";
+    if (loading) return;
+    setLoading(true);
+    try {
+      const login = await Login_Api(data);
 
-        window.location.pathname = location;
-      } else {
-        navigation("/firstLogin")
+      if (!login) return;
+
+      if (login.result) {
+        dispatch(
+          setUser({ user: JSON.parse(localStorage.getItem("user") || "") })
+        );
+        dispatch(
+          setToken({ token: JSON.parse(localStorage.getItem("token") || "") })
+        );
+
+        if (login.data) {
+          let location = localStorage.getItem("Location");
+          localStorage.removeItem("Location");
+          location = location != "/login" ? (location ?? "/") : "/";
+
+          window.location.pathname = location;
+        } else {
+          navigation("/firstLogin");
+        }
       }
+    } catch (error) {
+      console.log("====================================");
+      console.log(error);
+      console.log("====================================");
+    } finally {
+      setLoading(false);
     }
-   } catch (error) {
-    console.log('====================================');
-    console.log(error);
-    console.log('====================================');
-   }finally{
-     setLoading(false)
-   }
   };
 
   return (
@@ -116,14 +119,14 @@ const AdminLoginPage: React.FC = () => {
             </div>
           </form>
         </div>
-        <div className="log-copys">
+        {/* <div className="log-copys">
           <p className="login-text">
             © <span>Leoexch247</span>
             <a href="mailto:info@starexch.com" className="mail-link">
               info@Leoexch247.com
             </a>
           </p>
-        </div>
+        </div> */}
       </div>
     </section>
   );

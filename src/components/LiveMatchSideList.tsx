@@ -913,8 +913,7 @@ const LiveMatchSideList = React.memo(
                                           />
                                         </td>
                                         <td>{bet.user.username}</td>
-                                        <td>{bet.match.countryCode}</td>
-                                        <td></td>
+                                         <td>{bet.match.name}</td>
                                         <td>{bet.oddsType}</td>
                                         <td>{bet.betAmount}</td>
                                         <td>

@@ -3,10 +3,24 @@ import type { UserData } from "../pages/UserDetails";
 import UserProfileSport from "./UserProfileSport";
 import type { RootState } from "../helper/store";
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 
 const UserProfile = ({ userData }: { userData: UserData }) => {
-  const socket=useSelector((p:RootState)=>p.socket.socket)
+  const socket = useSelector((p: RootState) => p.socket.socket);
   const { id } = useParams();
+  const [copied, setCopied] = useState(false);
+  const copyToClipboard = () => {
+    const text = `https://Leoexch247.com/ReferBy/${userData?.referralCode}`;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000); // 2 sec baad reset
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
   return (
     <div className="pro-tabs-inner-content">
       <div className="container-fluid">
@@ -14,13 +28,21 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
           <h1 className="heading-one">Profile Detail</h1>
           <div className="refcode-row">
             <div className="ref-code-box">
-              https://Leoexch247.com/ReferBy/{userData?.referralCode}
-              <span className="copy">tap-to-copy</span>
+              {`https://Leoexch247.com/ReferBy/${userData?.referralCode}`}
+              <span className="copy" onClick={copyToClipboard}>
+                {copied ? "copied!" : "tap-to-copy"}
+              </span>
             </div>
             <div className="ref-use text-success">ACTIVE</div>
-            <button type="button" className="red-button" onClick={()=>socket.emit("logout_user",{
-              numeric_id:id
-            })}>
+            <button
+              type="button"
+              className="red-button"
+              onClick={() =>
+                socket.emit("logout_user", {
+                  numeric_id: id,
+                })
+              }
+            >
               <i className="fas fa-sign-in-alt"></i> LOGOUT
             </button>
           </div>
@@ -46,7 +68,7 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
                     <td>:</td>
                     <td>https://Leoexch247.com</td>
                   </tr>
-                
+
                   <tr>
                     <td>Exposure</td>
                     <td>:</td>

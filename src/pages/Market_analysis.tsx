@@ -69,7 +69,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
         <div className="page-heading-box">
           <h1 className="heading-one">Market Analysis</h1>
         </div>
-        <small>You can view your cricket card books from sports menu.</small>
+        <h6>You can view your cricket card books from sports menu.</h6>
       </div>
 
       <ul

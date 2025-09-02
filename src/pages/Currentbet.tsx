@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import { useDispatch } from "react-redux";
@@ -9,7 +9,6 @@ import { useAppSelector } from "../hook/hook";
 import ErrorHandler from "../utils/ErrorHandle";
 import SearchCom from "../components/SearchCom";
 import { success } from "../utils/Tp";
-
 
 export const formatDateTime = (dateTimeString: string): string => {
   try {
@@ -35,7 +34,7 @@ const CurrentBet: React.FC = () => {
   const [limit, setLimit] = useState<number>(25);
   const [activeTab, setActiveTab] = useState<"SPORTS" | "CASINO">("SPORTS");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [allDelete, setAllDelete] = useState(false);
+  const [allDelete, _] = useState(false);
 
   const [allBets, setAllBets] = useState<BetData[]>([]);
   const [currentBets, setCurrentBets] = useState<BetData[]>([]);
@@ -46,6 +45,27 @@ const CurrentBet: React.FC = () => {
   const navigation = useNavigate();
   const { user, token } = useAppSelector((p: RootState) => p.changeStore);
   const dispatch = useDispatch();
+
+  // --- Select All checkbox (with indeterminate)
+  const headerCbRef = useRef<HTMLInputElement>(null);
+  const allChecked = useMemo(
+    () => currentBets.length > 0 && currentBets.every((b) => !!b.isSelect),
+    [currentBets]
+  );
+  const someChecked = useMemo(
+    () =>
+      currentBets.length > 0 &&
+      currentBets.some((b) => !!b.isSelect) &&
+      !currentBets.every((b) => !!b.isSelect),
+    [currentBets]
+  );
+  useEffect(() => {
+    if (headerCbRef.current) {
+      headerCbRef.current.indeterminate = someChecked;
+    }
+  }, [someChecked]);
+  // -------------------------------------------
+
   const fetchCurrentBets = async () => {
     setLoading(true);
     setError(null);
@@ -61,7 +81,7 @@ const CurrentBet: React.FC = () => {
       const response = await instance.get(
         `betting/current-bets?page=1&offset=0&limit=${limit}&numeric_id=${
           user.numeric_id
-        }`,
+        }`
       );
 
       const fetchedData = response.data.results;
@@ -72,8 +92,13 @@ const CurrentBet: React.FC = () => {
         setHasLoadedData(true);
       }
     } catch (err) {
-    
-            ErrorHandler({err,dispatch,navigation,pathname:location.pathname,setError})
+      ErrorHandler({
+        err,
+        dispatch,
+        navigation,
+        pathname: location.pathname,
+        setError,
+      });
       setAllBets([]);
       setCurrentBets([]);
     } finally {
@@ -83,7 +108,7 @@ const CurrentBet: React.FC = () => {
   const handleDeleteBet = (
     id: string,
     oddsType: string,
-    orderId: string | null,
+    orderId: string | null
   ) => {
     socket.socket.emit("deleteBetsOrders", {
       matchId: id,
@@ -95,12 +120,11 @@ const CurrentBet: React.FC = () => {
   };
 
   const applyFiltersToData = (data: BetData[]) => {
-   
     let filtered = [...data];
 
     if (betType !== "All") {
       filtered = filtered.filter((bet) => {
-        return betType === "Matched" ? (bet as any).status === "matched" : true; 
+        return betType === "Matched" ? (bet as any).status === "matched" : true;
       });
     }
 
@@ -125,7 +149,7 @@ const CurrentBet: React.FC = () => {
 
     if (searchTerm.trim() !== "") {
       filtered = filtered.filter((bet: BetData) =>
-        bet.user?.username?.toLowerCase().includes(searchTerm.toLowerCase()),
+        bet.user?.username?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -139,23 +163,27 @@ const CurrentBet: React.FC = () => {
   const handleAllDelete = () => {
     try {
       for (let i = 0; i < currentBets.length; i++) {
-      if (currentBets[i].isSelect) {
-        handleDeleteBet(
-          currentBets[i].matchId,
-          currentBets[i].oddsType,
-          currentBets[i]._id,
-        );
+        if (currentBets[i].isSelect) {
+          handleDeleteBet(
+            currentBets[i].matchId,
+            currentBets[i].oddsType,
+            currentBets[i]._id
+          );
+        }
       }
-    }
-    success("All bets are Delete")
+      success("All bets are Delete");
     } catch (error) {
-      ErrorHandler({err:error,dispatch,navigation,pathname:location.pathname,setError})
-     console.log(error);
-      
+      ErrorHandler({
+        err: error,
+        dispatch,
+        navigation,
+        pathname: location.pathname,
+        setError,
+      });
+      console.log(error);
     }
   };
   const handleSearchChange = (newSearchTerm: string) => {
-   
     setSearchTerm(newSearchTerm);
 
     if (allBets.length > 0) {
@@ -183,7 +211,7 @@ const CurrentBet: React.FC = () => {
   const handleIndividualBetSelect = (betId: string) => {
     setCurrentBets((prev) => {
       const updatedData = prev.map((bet) =>
-        bet._id === betId ? { ...bet, isSelect: !bet.isSelect } : bet,
+        bet._id === betId ? { ...bet, isSelect: !bet.isSelect } : bet
       );
 
       return updatedData;
@@ -191,15 +219,13 @@ const CurrentBet: React.FC = () => {
   };
   useEffect(() => {
     if (hasLoadedData) {
-     
       fetchCurrentBets();
     }
-   
-  }, [limit]); 
-  useEffect(()=>{
-allDelete&&setCurrentBets(p=>p.map(o=>({...o,isSelect:true})))
-  },[allDelete])
-;
+  }, [limit]);
+  useEffect(() => {
+    allDelete &&
+      setCurrentBets((p) => p.map((o) => ({ ...o, isSelect: true })));
+  }, [allDelete]);
   return (
     <section className="mian-content">
       <div className="current-bets-page">
@@ -278,8 +304,10 @@ allDelete&&setCurrentBets(p=>p.map(o=>({...o,isSelect:true})))
                 <label htmlFor="showEntries">entries</label>
               </div>
             </div>
-             <SearchCom handleChange={handleSearchChange} type="Search UserName" />
-           
+            <SearchCom
+              handleChange={handleSearchChange}
+              type="Search UserName"
+            />
           </div>
 
           <ul
@@ -341,9 +369,21 @@ allDelete&&setCurrentBets(p=>p.map(o=>({...o,isSelect:true})))
                     <thead>
                       <tr>
                         {/* THE FIX IS HERE: Ensure no whitespace between <th> tags */}
-                        {currentBets.length>0&&<th>
-                          <input type="checkbox" onChange={()=>setAllDelete(p=>!p)} />
-                        </th>}
+                        {currentBets.length > 0 && (
+                          <th>
+                            <input
+                              ref={headerCbRef}
+                              type="checkbox"
+                              checked={allChecked}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setCurrentBets((prev) =>
+                                  prev.map((o) => ({ ...o, isSelect: checked }))
+                                );
+                              }}
+                            />
+                          </th>
+                        )}
                         <th>Event Type</th>
                         <th>Event Name</th>
                         <th>User Name</th>
@@ -403,14 +443,14 @@ allDelete&&setCurrentBets(p=>p.map(o=>({...o,isSelect:true})))
                                 {formatDateTime(bet.updated)}
                               </td>
                               <td style={{ backgroundColor: "transparent" }}>
-                                {bet.user_ip.replace("::ffff:","")}
+                                {bet.user_ip.replace("::ffff:", "")}
 
                                 <button
                                   onClick={() =>
                                     handleDeleteBet(
                                       bet.matchId,
                                       bet.oddsType,
-                                      bet._id,
+                                      bet._id
                                     )
                                   }
                                   className="px-2 ms-2"

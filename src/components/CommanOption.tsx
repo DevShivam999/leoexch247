@@ -7,7 +7,7 @@ const CommanOption = () => {
       <option value="Pending">Pending</option>
       <option value="Approved">Approved</option>
       <option value="Rejected">Decline</option>
-      <option value="Processing">Processing</option>
+      {/* <option value="Processing">Processing</option> */}
     </>
   );
 };

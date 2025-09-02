@@ -114,6 +114,13 @@ const EventPL: React.FC = () => {
               <input
                 id="fromDate"
                 type="date"
+                value={
+                  typeof fromDate === "string"
+                    ? fromDate
+                    : fromDate
+                      ? fromDate.toISOString().slice(0, 10)
+                      : ""
+                }
                 className="form-control"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFromDate(e.target.value)
@@ -127,6 +134,13 @@ const EventPL: React.FC = () => {
               <input
                 id="toDate"
                 type="date"
+                value={
+                  typeof toDate === "string"
+                    ? toDate
+                    : toDate
+                      ? toDate.toISOString().slice(0, 10)
+                      : ""
+                }
                 className="form-control"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setToDate(e.target.value)

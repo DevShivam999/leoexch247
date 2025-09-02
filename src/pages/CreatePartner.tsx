@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import FilteredList from "../components/FilterList";
 import { Link, useNavigate } from "react-router-dom";
 import instance from "../services/AxiosInstance";
@@ -10,51 +10,77 @@ import { Tp } from "../utils/Tp";
 
 const CreatePartner = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const dispatch=useDispatch()
-  const navigate=useNavigate()
-  const [user,setUser]=useState<{username:string,_id:string,numeric_id:number,status:boolean,roles:string[]}[]|null>(null)
-    const Api=async()=>{
-      try {
-        const {data}=await instance.get("/user/getpartnerList")
-        setUser(data.data)
-      } catch (error) {
-        
-              ErrorHandler({err:error,dispatch,navigation:navigate,pathname:location.pathname})
-      }
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<
+    | {
+        username: string;
+        _id: string;
+        numeric_id: number;
+        status: boolean;
+        roles: string[];
+      }[]
+    | null
+  >(null);
+  const Api = async () => {
+    try {
+      const { data } = await instance.get("/user/getpartnerList");
+      setUser(data.data);
+    } catch (error) {
+      ErrorHandler({
+        err: error,
+        dispatch,
+        navigation: navigate,
+        pathname: location.pathname,
+      });
     }
-    useEffect(()=>{
-      Api()
-    },[])
+  };
+  useEffect(() => {
+    Api();
+  }, []);
 
-
-    const handleUserAction=async(id:string,action:string)=>{
-      await instance.post("user/status",{
-        status:action,userId:id
-      })
-      await Api()
-    }
-    const Permission=useAppSelector((p:RootState)=>p.Permissions)
+  const handleUserAction = async (id: string, action: string) => {
+    await instance.post("user/status", {
+      status: action,
+      userId: id,
+    });
+    await Api();
+  };
+  const Permission = useAppSelector((p: RootState) => p.Permissions);
 
   const filterByUsername = useCallback(
     (partner: { username: string }) => {
       return partner.username.toLowerCase().includes(searchTerm.toLowerCase());
     },
-    [searchTerm],
+    [searchTerm]
   );
+
+  // -------- FIXED SEARCH FILTER --------
+  const filteredUsers = useMemo(() => {
+    const list = user || [];
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((p) => p.username?.toLowerCase().includes(q));
+  }, [user, searchTerm]);
+  // -------------------------------------
 
   // Step 3: Handle search input change
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
-   const exportPDF = async () => {
-  if(user&&user.length>0){
+
+  const exportPDF = async () => {
+    if (filteredUsers && filteredUsers.length > 0) {
       const { PdfFile } = await import("../utils/PdfFile");
-      const data =user.map(p=>({username:p.username,status:p.status}))
-    await PdfFile(data, "Partner List");
-  }
+      const data = filteredUsers.map((p) => ({
+        username: p.username,
+        status: p.status,
+      }));
+      await PdfFile(data, "Partner List");
+    }
   };
 
-  const userInfo=useAppSelector((p:RootState)=>p.changeStore.user)
+  const userInfo = useAppSelector((p: RootState) => p.changeStore.user);
   return (
     <section className="main-content">
       <div className="create-partner-page">
@@ -62,7 +88,15 @@ const CreatePartner = () => {
           <div className="page-heading">
             <div className="page-heading-box">
               <h1 className="heading-one">Partner List</h1>
-              <Link to={`${userInfo.roles[0]=="owner_admin"&&Permission.permissions?.addUser?"/add-partner":"/create-partner"}`} onClick={()=>userInfo.roles[0]!="owner_admin"&&!Permission.permissions?.addUser&&Tp("You don't have permission to create users")} className="button-teen">
+              <Link
+                to={`${userInfo.roles[0] == "owner_admin" && Permission.permissions?.addUser ? "/add-partner" : "/create-partner"}`}
+                onClick={() =>
+                  userInfo.roles[0] != "owner_admin" &&
+                  !Permission.permissions?.addUser &&
+                  Tp("You don't have permission to create users")
+                }
+                className="button-teen"
+              >
                 Add Account
               </Link>
             </div>
@@ -99,14 +133,23 @@ const CreatePartner = () => {
               </thead>
               <tbody>
                 <FilteredList
-                  items={user||[]}
+                  items={user || []}
                   filterFunction={filterByUsername}
                   renderItem={(partner) => (
-                  
                     <tr key={partner._id}>
                       <td>{partner.username}</td>
                       <td>
-                      <button className={`btn btn-${partner.status?"primary":"warning"}`}onClick={()=>handleUserAction(partner._id,!partner.status?"1":"0")}>{partner.status?"Active":"InActive"}</button>
+                        <button
+                          className={`btn btn-${partner.status ? "primary" : "warning"}`}
+                          onClick={() =>
+                            handleUserAction(
+                              partner._id,
+                              !partner.status ? "1" : "0"
+                            )
+                          }
+                        >
+                          {partner.status ? "Active" : "InActive"}
+                        </button>
                       </td>
                     </tr>
                   )}

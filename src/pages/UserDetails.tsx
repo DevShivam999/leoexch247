@@ -443,7 +443,7 @@ const UserDetails = () => {
                             <option value="All">All</option>
                             <option value="4">Cricket</option>
                             <option value="2">Tennis</option>
-                            <option value="1">footbal</option>
+                            <option value="1">football</option>
                             <option value="All">Virtual</option>
                             <option value="All">Ball by Ball</option>
                           </select>

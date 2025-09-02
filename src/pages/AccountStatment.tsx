@@ -300,7 +300,7 @@ const AccountStatement = () => {
 
                 {!modalLoading && !modalError && modalContent && (
                   <>
-                    <div className="d-flex gap-2 mb-3">
+                    {/* <div className="d-flex gap-2 mb-3">
                       <div className="form-check">
                         <input
                           className="form-check-input"
@@ -329,7 +329,7 @@ const AccountStatement = () => {
                         />
                         <label className="form-check-label">Deleted</label>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="">
                       <table className="table table-lay-black-one">

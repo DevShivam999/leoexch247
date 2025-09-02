@@ -37,7 +37,7 @@ const GameReport: React.FC = () => {
 
   const [accountType, setAccountType] = useState<string>("Game Report");
   const [gameTypeFilter, setGameTypeFilter] = useState<string>("All");
-  const [clientType, setClientType] = useState<string>("All");
+  const [clientType, _] = useState<string>("All");
   const [fromDate, setFromDate] = useState<string>("2025-05-01");
   const [toDate, setToDate] = useState<string>("2025-05-30");
   const [page, setPage] = useState<number>(1);
@@ -59,7 +59,7 @@ const GameReport: React.FC = () => {
         dispatch,
         navigation,
         pathname: location.pathname,
-        setError
+        setError,
       });
     } finally {
       setLoading(false);
@@ -71,7 +71,9 @@ const GameReport: React.FC = () => {
     fetchGameReportData();
   }, [page]);
 
-  const handleLoadData = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleLoadData = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     e.preventDefault();
     fetchGameReportData();
   };
@@ -154,7 +156,7 @@ const GameReport: React.FC = () => {
                 <option value="Football">Football</option>
               </select>
             </div>
-            <div className="col-md-2 mb-3">
+            {/* <div className="col-md-2 mb-3">
               <label htmlFor="clientType" className="lable-two">
                 Client Type
               </label>
@@ -173,7 +175,7 @@ const GameReport: React.FC = () => {
                 <option value="Master">Master</option>
                 <option value="Hyper">Hyper</option>
               </select>
-            </div>
+            </div> */}
             <div className="col-md-2 mb-3">
               <label htmlFor="fromDate" className="lable-two">
                 From
@@ -233,17 +235,29 @@ const GameReport: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {reportData.results.map((item:any) => (
+                    {reportData.results.map((item: any) => (
                       <tr key={item._id.id}>
                         <td>{item._id.numeric_id}</td>
                         <td>{item._id.username}</td>
                         <td>{getRoleName(item._id.role)}</td>
-                        <td className="text-success">{formatCurrency(item.TotalWon)}</td>
-                        <td className="text-danger">{formatCurrency(Math.abs(item.TotalLoss))}</td>
-                        <td className={item.PL >= 0 ? "text-success" : "text-danger"}>
+                        <td className="text-success">
+                          {formatCurrency(item.TotalWon)}
+                        </td>
+                        <td className="text-danger">
+                          {formatCurrency(Math.abs(item.TotalLoss))}
+                        </td>
+                        <td
+                          className={
+                            item.PL >= 0 ? "text-success" : "text-danger"
+                          }
+                        >
                           {formatCurrency(item.PL)}
                         </td>
-                        <td className={item.UplinePl >= 0 ? "text-success" : "text-danger"}>
+                        <td
+                          className={
+                            item.UplinePl >= 0 ? "text-success" : "text-danger"
+                          }
+                        >
                           {formatCurrency(item.UplinePl)}
                         </td>
                       </tr>
