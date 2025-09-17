@@ -25,6 +25,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
       setMatches(apiResponse.results);
     }
   }, [apiResponse]);
+
   const getBetStatus = async () => {
     const updatedMatches = await Promise.all(
       matches.map(async (match) => {
@@ -42,6 +43,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
     setMatches(updatedMatches);
     setLoading(false);
   };
+
   useEffect(() => {
     if (matches.length > 0) {
       getBetStatus();
@@ -72,11 +74,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
         <h6>You can view your cricket card books from sports menu.</h6>
       </div>
 
-      <ul
-        className="nav nav-pills mb-3 nav-pills-one"
-        id="pills-tab"
-        role="tablist"
-      >
+      <ul className="nav nav-pills mb-3 nav-pills-one" id="pills-tab" role="tablist">
         <li className="nav-item" role="presentation">
           <button
             className={`nav-link ${activeTab === "sports" ? "active" : ""}`}
@@ -92,28 +90,11 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
             <i className="fas fa-trophy"></i> SPORTS
           </button>
         </li>
-        {/* <li className="nav-item" role="presentation">
-          <button
-            className={`nav-link ${activeTab === "casino" ? "active" : ""}`}
-            id="pills-CASINO-tab"
-            data-bs-toggle="pill"
-            data-bs-target="#pills-CASINO"
-            type="button"
-            role="tab"
-            aria-controls="pills-CASINO"
-            aria-selected={activeTab === "casino"}
-            onClick={() => setActiveTab("casino")}
-          >
-            <i className="fas fa-coins"></i> CASINO
-          </button>
-        </li> */}
       </ul>
 
       <div className="tab-content" id="pills-tabContent">
         <div
-          className={`tab-pane fade ${
-            activeTab === "sports" ? "show active" : ""
-          }`}
+          className={`tab-pane fade ${activeTab === "sports" ? "show active" : ""}`}
           id="pills-SPORTS"
           role="tabpanel"
           aria-labelledby="pills-SPORTS-tab"
@@ -123,7 +104,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
             {matches.length > 0 ? (
               matches.map((match, marketIndex: number) => (
                 <div
-                  key={`${match._id}-matchods-${marketIndex}`}
+                  key={`${match._id}-match-${marketIndex}`}
                   className="match-card-item"
                 >
                   <div className="table-one-header">
@@ -136,22 +117,26 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
                           {match.eventName}
                         </Link>
                         (
-                        {match.fancy &&
-                        match.fancy.length > 0 &&
-                        match.fancy[0][0]?.name
+                        {match.fancy && match.fancy.length > 0
                           ? "Fancy Details"
-                          : match.matchODs &&
-                              match.matchODs.length > 0 &&
-                              match.matchODs[0][0]?.marketName
-                            ? match.matchODs[0][0].marketName
-                            : match.bookmaker &&
-                              match.bookmaker.length > 0 &&
-                              match.bookmaker[0][0]?.marketName}
+                          : match.matchODs && match.matchODs.length > 0
+                          ? match.matchODs[0][0]?.marketName
+                          : match.bookmaker && match.bookmaker.length > 0
+                          ? match.bookmaker[0][0]?.marketName
+                          : ""}
                         )
                       </div>
                     </div>
                     <div className="table-one-header-right">
-                      <div className="date">Mar 22, 2025</div>
+                      <div className="date">
+                        {match.opendate
+                          ? new Date(match.opendate).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })
+                          : "-"}
+                      </div>
                       <div className="dropdown">
                         <button
                           className="btn bet-lock-drop dropdown-toggle"
@@ -162,7 +147,6 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
                         >
                           Bet Lock
                         </button>
-
                         <ul className="dropdown-menu">
                           <li>
                             <span
@@ -180,129 +164,86 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
                   </div>
 
                   <div className="odds-tables-wrapper">
-                    {!match?.fancy &&
-                      match.matchODs &&
-                      match.matchODs.length > 0 && (
-                        <table className="table-one table">
-                          <tbody>
-                            {match.matchODs.map((marketArray, marketIndex) => (
-                              <tr key={`${match._id}-matchods-${marketIndex}`}>
-                                <th>
-                                  <strong>
-                                    {marketArray[0]?.marketName ||
-                                      `Market ${marketIndex + 1}`}
-                                  </strong>
-                                </th>
-                                {marketArray.map((odd, index) => (
-                                  <td
-                                    key={`${
-                                      odd.marketId
-                                    }-matchods-${index}-${new Date().getTime()}`}
-                                  >
-                                    {odd.name}
-                                    <span
-                                      className={
-                                        odd.amount > 0
-                                          ? "text-green"
-                                          : "text-red"
-                                      }
-                                    >
-                                      {odd.amount.toLocaleString()}
-                                    </span>
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
-                    {!match?.fancy &&
-                      match?.bookmaker &&
-                      match.bookmaker.length > 0 && (
-                        <table className="table-one table">
-                          <thead>
-                            <tr>
+                    {/* 1) Match Odds */}
+                    {match.matchODs && match.matchODs.length > 0 && (
+                      <table className="table-one table">
+                        <tbody>
+                          {match.matchODs.map((marketArray, idx) => (
+                            <tr key={`${match._id}-matchod-${idx}`}>
                               <th>
-                                <strong>Matchodds</strong>
+                                <strong>
+                                  {marketArray[0]?.marketName ||
+                                    `Market ${idx + 1}`}
+                                </strong>
                               </th>
-
-                              {match.bookmaker[0] &&
-                                match.bookmaker[0].map((odd, index) => (
-                                  <td key={`match-odd-header-${index}`}>
-                                    {odd.name}
-                                  </td>
-                                ))}
+                              {marketArray.map((odd, i) => (
+                                <td key={`${odd.marketId}-mo-${i}`}>
+                                  {odd.name}
+                                  <span
+                                    className={odd.amount > 0 ? "text-green" : "text-red"}
+                                  >
+                                    {odd.amount.toLocaleString()}
+                                  </span>
+                                </td>
+                              ))}
                             </tr>
-                          </thead>
-                          <tbody>
-                            {match.bookmaker.map((marketArray, marketIndex) => (
-                              <tr key={`${match._id}-matchods-${marketIndex}`}>
-                                <th>
-                                  <strong>
-                                    {marketArray[0]?.marketName ||
-                                      `Market ${marketIndex + 1}`}
-                                  </strong>
-                                </th>
-                                {marketArray.map((odd, index) => (
-                                  <td
-                                    key={`${
-                                      odd.marketId
-                                    }-matchods-${index}-${new Date().getTime()}`}
-                                  >
-                                    {odd.name}
-                                    <span
-                                      className={
-                                        odd.amount > 0
-                                          ? "text-green"
-                                          : "text-red"
-                                      }
-                                    >
-                                      {odd.amount.toLocaleString()}
-                                    </span>
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
 
-                    {!match?.matchODs &&
-                      match.fancy &&
-                      match.fancy.length > 0 && (
-                        <table className="table-one table mt-3">
-                          <tbody>
-                            {match.fancy.map((marketArray, marketIndex) => (
-                              <tr key={`${match._id}-fancy-${marketIndex}`}>
-                                <th>
-                                  <strong>
-                                    {marketArray[0]?.name ||
-                                      `Market ${marketIndex + 1}`}
-                                  </strong>
-                                </th>
-                                {marketArray.map((odd) => (
-                                  <td
-                                    key={`${
-                                      odd.marketId
-                                    }-fancy-${marketIndex}-${new Date().getTime()}`}
+                    {/* 2) Bookmaker (Fixed: no duplication) */}
+                    {match.bookmaker && match.bookmaker.length > 0 && (
+                      <table className="table-one table">
+                        <tbody>
+                          {match.bookmaker.map((marketArray, idx) => (
+                            <tr key={`${match._id}-bookmaker-${idx}`}>
+                              <th>
+                                <strong>
+                                  {marketArray[0]?.marketName || "Bookmaker"}
+                                </strong>
+                              </th>
+                              {marketArray.map((odd, i) => (
+                                <td key={`${odd.marketId}-bm-${i}`}>
+                                  {odd.name}
+                                  <span
+                                    className={odd.amount > 0 ? "text-green" : "text-red"}
                                   >
-                                    {/* {odd.name}  */}
-                                    <span
-                                      className={
-                                        odd.amount > 0
-                                          ? "text-green"
-                                          : "text-red"
-                                      }
-                                    >
-                                      {odd.amount.toLocaleString()}
-                                    </span>
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
+                                    {odd.amount.toLocaleString()}
+                                  </span>
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+
+                    {/* 3) Fancy */}
+                    {match.fancy && match.fancy.length > 0 && (
+                      <table className="table-one table mt-3">
+                        <tbody>
+                          {match.fancy.map((marketArray, idx) => (
+                            <tr key={`${match._id}-fancy-${idx}`}>
+                              <th>
+                                <strong>
+                                  {marketArray[0]?.name || `Market ${idx + 1}`}
+                                </strong>
+                              </th>
+                              {marketArray.map((odd, i) => (
+                                <td key={`${odd.marketId}-fn-${i}`}>
+                                  <span
+                                    className={odd.amount > 0 ? "text-green" : "text-red"}
+                                  >
+                                    {odd.amount.toLocaleString()}
+                                  </span>
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
                 </div>
               ))
@@ -313,9 +254,7 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
         </div>
 
         <div
-          className={`tab-pane fade ${
-            activeTab === "casino" ? "show active" : ""
-          }`}
+          className={`tab-pane fade ${activeTab === "casino" ? "show active" : ""}`}
           id="pills-CASINO"
           role="tabpanel"
           aria-labelledby="pills-CASINO-tab"

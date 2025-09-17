@@ -32,7 +32,8 @@ export interface MatchResult {
   matchODs?: Odd[][];
   fancy?: FancyOdd[][];
   bookmaker?: Odd[][];
-  BetStatus?: boolean
+  BetStatus?: boolean;
+   opendate?: string;
 }
 
 export interface ApiResponse {
@@ -261,6 +262,7 @@ interface CurrentBetRunner {
   selectionId: number;
 }
 
+// src/types/app.d.ts
 export interface CurrentBet {
   _id: string;
   orderId: string;
@@ -275,25 +277,34 @@ export interface CurrentBet {
   eventId: number;
   isDeleted: boolean;
   marketName: string;
-  match: CurrentBetMatch;
+  match: { _id: string; name: string };
   matchId: number;
   oddsType: string;
   orderCategory: string;
-  orderType: string;
+  orderType: "Back" | "Lay";
   rate: number;
   runnerName: string;
-  runners: CurrentBetRunner[];
+  runners: { name: string; amount: number; selectionId: number }[];
   sessionOrderRun: number;
   size: number;
-  status: string;
+  status: "Winner" | "Loser" | "Void" | string;
   updated: string;
-  user: CurrentBetUser;
+  user: { _id: string; username: string; displayName: string; numeric_id: number };
   user_ip: string;
   amount: string;
   __v: number;
   matchName: string;
   username: string;
+
+  teamSession: {
+    selectionId: string;
+    amount: number;
+    lossAmount: number;
+    name: string;
+  };
+  sessionRunner: string;
 }
+
 
 interface ProfitLossReportData {
   PL: number;
@@ -564,8 +575,7 @@ interface Sessions {
   status: string;
   created: string;
   selectionId: string
-  winnerRun:number
-  marketId:string
+  winnerRun: number
 }
 interface Runner {
   selectionId: number
@@ -580,7 +590,7 @@ interface MatchSession {
   name: string
   marketId: string;
   isResult: boolean
-  matchResultStatus:string
+  matchResultStatus: string
   matchId: string;
   marketData: MarketData[]
 }
@@ -590,9 +600,9 @@ interface BannerState {
   loading: boolean;
   error: string | null;
 }
- interface IBanner {
+interface IBanner {
   _id: string;
   image: string;
-  is_active:boolean
+  is_active: boolean
   type?: string;
 }

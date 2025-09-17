@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import instance from "../services/AxiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../helper/store";
@@ -33,24 +33,24 @@ function GlobalSettingsPage() {
         matchoddsMax: 100000,
       },
       // {
-      //   type: "Diamond Casino",
-      //   status: false,
-      //   matchoddsMin: 100,
-      //   matchoddsMax: 100000,
-      //   bookmakerMin: null,
-      //   bookmakerMax: null,
-      //   fancyMin: null,
-      //   fancyMax: null,
+      //  type: "Diamond Casino",
+      //  status: false,
+      //  matchoddsMin: 100,
+      //  matchoddsMax: 100000,
+      //  bookmakerMin: null,
+      //  bookmakerMax: null,
+      //  fancyMin: null,
+      //  fancyMax: null,
       // },
       // {
-      //   type: "Toss",
-      //   status: false,
-      //   matchoddsMin: 100,
-      //   matchoddsMax: 100000,
-      //   bookmakerMin: null,
-      //   bookmakerMax: null,
-      //   fancyMin: null,
-      //   fancyMax: null,
+      //  type: "Toss",
+      //  status: false,
+      //  matchoddsMin: 100,
+      //  matchoddsMax: 100000,
+      //  bookmakerMin: null,
+      //  bookmakerMax: null,
+      //  fancyMin: null,
+      //  fancyMax: null,
       // },
     ],
     betDelays: [
@@ -82,6 +82,7 @@ function GlobalSettingsPage() {
     ],
     transactionPassword: "",
   });
+  const [isLoading, setIsloading] = useState(false);
   const user = useSelector((p: RootState) => p.changeStore.user);
   const transactionPassword = useAppSelector(
     (p: RootState) => p.Permissions.transactionPassword
@@ -104,9 +105,7 @@ function GlobalSettingsPage() {
             {
               type: "Cricket",
               status: !!api.individualsports.find((x: any) =>
-                x.sportsType === "cricket" &&
-               
-                x.status == "active"
+                x.sportsType === "cricket" && x.status == "active"
                   ? true
                   : false
               ),
@@ -124,8 +123,7 @@ function GlobalSettingsPage() {
             {
               type: "Soccer",
               status: !!api.individualsports.find((x: any) =>
-                x.sportsType === "football" &&
-                x.status == "active"
+                x.sportsType === "football" && x.status == "active"
                   ? true
                   : false
               ),
@@ -139,15 +137,11 @@ function GlobalSettingsPage() {
                   (x: any) =>
                     x.sportsType === "football" && x.marketType === "Match Odds"
                 )?.max ?? 100000,
-             
             },
             {
               type: "Tennis",
               status: !!api.individualsports.find((x: any) =>
-                x.sportsType === "tennis" &&
-                x.status == "active"
-                  ? true
-                  : false
+                x.sportsType === "tennis" && x.status == "active" ? true : false
               ),
               matchoddsMin:
                 api.individualsports.find(
@@ -159,60 +153,59 @@ function GlobalSettingsPage() {
                   (x: any) =>
                     x.sportsType === "tennis" && x.marketType === "Match Odds"
                 )?.max ?? 100000,
-             
             },
             // {
-            //   type: "Diamond Casino",
-            //   status: !!api.user.find((x: any) =>
-            //     x.sportsType === "casino1" &&
-            //     marketTypeMap.includes(x.marketType) &&
-            //     x.status == "active"
-            //       ? true
-            //       : false,
-            //   ),
-            //   matchoddsMin:
-            //     api.user.find(
-            //       (x: any) =>
-            //         x.sportsType === "casino1" && x.marketType === "Match Odds",
-            //     )?.min ?? 100,
-            //   matchoddsMax:
-            //     api.user.find(
-            //       (x: any) =>
-            //         x.sportsType === "casino1" && x.marketType === "Match Odds",
-            //     )?.max ?? 100000,
-            //   bookmakerMin: null,
-            //   bookmakerMax: null,
-            //   fancyMin: null,
-            //   fancyMax: null,
+            //  type: "Diamond Casino",
+            //  status: !!api.user.find((x: any) =>
+            //   x.sportsType === "casino1" &&
+            //   marketTypeMap.includes(x.marketType) &&
+            //   x.status == "active"
+            //    ? true
+            //    : false,
+            //  ),
+            //  matchoddsMin:
+            //   api.user.find(
+            //    (x: any) =>
+            //     x.sportsType === "casino1" && x.marketType === "Match Odds",
+            //   )?.min ?? 100,
+            //  matchoddsMax:
+            //   api.user.find(
+            //    (x: any) =>
+            //     x.sportsType === "casino1" && x.marketType === "Match Odds",
+            //   )?.max ?? 100000,
+            //  bookmakerMin: null,
+            //  bookmakerMax: null,
+            //  fancyMin: null,
+            //  fancyMax: null,
             // },
             // {
-            //   type: "Toss",
-            //   status: !!api.user.find((x: any) =>
+            //  type: "Toss",
+            //  status: !!api.user.find((x: any) =>
+            //   x.sportsType === "cricket" &&
+            //   (x.marketType === "To Win the Toss Match Odds" ||
+            //    x.marketType === "To Win The Toss Match Odds") &&
+            //   x.status == "active"
+            //    ? true
+            //    : false,
+            //  ),
+            //  matchoddsMin:
+            //   api.user.find(
+            //    (x: any) =>
             //     x.sportsType === "cricket" &&
             //     (x.marketType === "To Win the Toss Match Odds" ||
-            //       x.marketType === "To Win The Toss Match Odds") &&
-            //     x.status == "active"
-            //       ? true
-            //       : false,
-            //   ),
-            //   matchoddsMin:
-            //     api.user.find(
-            //       (x: any) =>
-            //         x.sportsType === "cricket" &&
-            //         (x.marketType === "To Win the Toss Match Odds" ||
-            //           x.marketType === "To Win The Toss Match Odds"),
-            //     )?.min ?? 100,
-            //   matchoddsMax:
-            //     api.user.find(
-            //       (x: any) =>
-            //         x.sportsType === "cricket" &&
-            //         (x.marketType === "To Win the Toss Match Odds" ||
-            //           x.marketType === "To Win The Toss Match Odds"),
-            //     )?.max ?? 100000,
-            //   bookmakerMin: null,
-            //   bookmakerMax: null,
-            //   fancyMin: null,
-            //   fancyMax: null,
+            //      x.marketType === "To Win The Toss Match Odds"),
+            //   )?.min ?? 100,
+            //  matchoddsMax:
+            //   api.user.find(
+            //    (x: any) =>
+            //     x.sportsType === "cricket" &&
+            //     (x.marketType === "To Win the Toss Match Odds" ||
+            //      x.marketType === "To Win The Toss Match Odds"),
+            //   )?.max ?? 100000,
+            //  bookmakerMin: null,
+            //  bookmakerMax: null,
+            //  fancyMin: null,
+            //  fancyMax: null,
             // },
           ],
           betDelays: [
@@ -282,8 +275,6 @@ function GlobalSettingsPage() {
     fetchSettings();
   }, [user.numeric_id]);
 
-
-
   const handleBetDelayChange = (
     index: number,
     field: string,
@@ -310,7 +301,9 @@ function GlobalSettingsPage() {
     if (settings.transactionPassword != String(transactionPassword)) {
       return Tp();
     }
-    // Map UI state to API format
+    if (isLoading) return;
+    setIsloading(true);
+
     const sportsTypeMap: Record<string, string> = {
       Cricket: "cricket",
       Soccer: "football",
@@ -319,7 +312,6 @@ function GlobalSettingsPage() {
       // Toss: "cricket",
     };
 
-    // Helper to get delay for a market
     const getDelay = (type: string, market: string) => {
       const delayObj = settings.betDelays.find((d) => d.type === type);
       if (!delayObj) return 0;
@@ -329,36 +321,33 @@ function GlobalSettingsPage() {
       return 0;
     };
 
-    // Build markets array
     const markets: any[] = [];
     settings.minMaxBets.forEach((bet) => {
       const sportsType = sportsTypeMap[bet.type];
       // Match Odds
-        markets.push({
-          sportsType,
-         marketType:"Match Odds",
-          status: bet.status ? "active" : "inactive",
-          bet_delay: getDelay(bet.type, "matchodds"),
-        });
-      
-        markets.push({
-          sportsType,
-          marketType: bet.type === "Diamond Casino" ? "casino1" : "Bookmaker",
-          status: bet.status ? "active" : "inactive",
-          bet_delay: getDelay(bet.type, "bookmaker"),
-        });
-     
-        markets.push({
-          sportsType,
-          marketType: "fancy",
-          status: bet.status ? "active" : "inactive",
-          bet_delay: getDelay(bet.type, "fancy"),
-        });
-      
+      markets.push({
+        sportsType,
+        marketType: "Match Odds",
+        status: bet.status ? "active" : "inactive",
+        bet_delay: getDelay(bet.type, "matchodds"),
+      });
+
+      markets.push({
+        sportsType,
+        marketType: bet.type === "Diamond Casino" ? "casino1" : "Bookmaker",
+        status: bet.status ? "active" : "inactive",
+        bet_delay: getDelay(bet.type, "bookmaker"),
+      });
+
+      markets.push({
+        sportsType,
+        marketType: "fancy",
+        status: bet.status ? "active" : "inactive",
+        bet_delay: getDelay(bet.type, "fancy"),
+      });
     });
 
     try {
-      // Send updated settings to the server
       await instance.post("/user/bulkUpdateMarketsForAll", {
         userId: user._id,
         whatsappNo: settings.whatsappNo,
@@ -369,12 +358,11 @@ function GlobalSettingsPage() {
       success();
     } catch (err) {
       ErrorHandler({ err, dispatch, navigation, pathname: location.pathname });
+    } finally {
+      setIsloading(false);
     }
   };
 
- 
-
- 
   return (
     <section className="mian-content">
       <div className="gobal-settings-page">
@@ -382,13 +370,12 @@ function GlobalSettingsPage() {
           <div className="dark-page-heading">
             <div className="page-heading-box">
               <h1 className="heading-one-inner">Global Settings</h1>
-            
             </div>
           </div>
           <div className="row justify-content-center">
             <div className="col-md-8 my-2">
               {/* Contact Settings */}
-             <GlobalContactNav/>
+              <GlobalContactNav />
 
               <div className="table-responsive">
                 <table className="table-teen table">
@@ -493,7 +480,6 @@ function GlobalSettingsPage() {
                 </table>
               </div>
 
-             
               <div className="glo-botamtra">
                 <label className="form-label">Transaction Password</label>
                 <input
@@ -511,14 +497,12 @@ function GlobalSettingsPage() {
                   Update
                 </button>
               </div>
-             
             </div>
           </div>
         </div>
       </div>
 
       {/* Whatsapp No. Modal */}
-     
     </section>
   );
 }

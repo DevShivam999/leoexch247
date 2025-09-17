@@ -22,17 +22,32 @@ instance.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
+instance.interceptors.request.use((cfg) => {
+  const full = new URL(cfg.url ?? "", cfg.baseURL ?? window.location.origin);
+  if (cfg.params)
+    Object.entries(cfg.params).forEach(([k, v]) =>
+      full.searchParams.set(k, String(v))
+    );
+  console.log("[AXIOS-REQ]", cfg.method?.toUpperCase(), full.toString());
+  return cfg;
+});
 instance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      console.error("Unauthorized, redirecting to login...");
-    }
-    return Promise.reject(error);
+  (res) => {
+    console.log("[AXIOS-RES]", res.status, res.config.url);
+    return res;
   },
+  (err) => {
+    console.log(
+      "[AXIOS-ERR]",
+      err?.response?.status,
+      err?.config?.url,
+      err?.message
+    );
+    return Promise.reject(err);
+  }
 );
 
 export default instance;

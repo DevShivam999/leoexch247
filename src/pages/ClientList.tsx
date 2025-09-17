@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import UserTableRow from "../components/UserTableRow";
 import { useLocation, useNavigate } from "react-router-dom";
 import FilteredList from "../components/FilterList";
@@ -10,34 +10,87 @@ import { useAppSelector } from "../hook/hook";
 import ErrorHandler from "../utils/ErrorHandle";
 import { Tp } from "../utils/Tp";
 import BottomNav from "../components/BottomNav";
+import {  toggleIsActive } from "../helper/IsActiveSlice"
+
 const ClientList = () => {
-  const [users, setUsers] = useState([]);
+  type UserType = {
+    id: string;
+    username: string;
+    position: string;
+    creditReference: string | number;
+    exposerLimitRef: string | number;
+    balance: string | number;
+    clientPL: string | number;
+    exposure: string | number;
+    availableBalance: string | number;
+    uSt: any;
+    bSt: any;
+    accountType: string;
+    isActive: boolean;
+    numeric_id: number;
+    pid: string;
+  };
+
+  const [users, setUsers] = useState<UserType[]>([]);
   const [parent, setParent] = useState({
     parent_balance: 0,
     parent_credit: 0,
     parent_name: "",
     transaction_password: 0,
   });
-  const [showActiveUsers, setShowActiveUsers] = useState(true);
+  // const [showActiveUsers, setShowActiveUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [entriesToShow, setEntriesToShow] = useState(1);
   const [loading, setLoading] = useState(true);
   const [exportdata, setexportdata] = useState([]);
   const [betHistoryPage, setBetHistoryPage] = useState(1);
   const [betHistoryTotal, setBetHistoryTotal] = useState(1);
-  const [Limit,setLimit]=useState(10)
+  const [Limit, setLimit] = useState(10);
+  // const [isActive, setIsActive] = useState(true);
+  const isActive = useAppSelector(s => s.ui.isActive); // or selectIsActive(s)
   const navigation = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
 
   const Permissions = useAppSelector((p: RootState) => p.Permissions);
   const user = useAppSelector((p: RootState) => p.changeStore.user);
+  const parseNumber = (val: any) => {
+    if (typeof val === "number") return val;
+    if (typeof val === "string") return Number(val.replace(/,/g, "")) || 0;
+    return 0;
+  };
+
+  const totals = users.reduce(
+    (acc, u) => {
+      acc.creditReference += parseNumber(u.creditReference);
+      acc.balance += parseNumber(u.balance);
+      acc.clientPL += parseNumber(u.clientPL);
+      acc.exposure += parseNumber(u.exposure);
+      acc.exposerLimitRef += parseNumber(u.exposerLimitRef);
+      acc.availableBalance += parseNumber(u.availableBalance);
+      return acc;
+    },
+    {
+      creditReference: 0,
+      balance: 0,
+      clientPL: 0,
+      exposure: 0,
+      exposerLimitRef: 0,
+      availableBalance: 0,
+    }
+  );
 
   const permissions = Permissions?.permissions;
   const fetchUsers = async (numeric_id: number) => {
     try {
+      // let status = "";
+      // if (isActive == true) {
+      //   status = "block";
+      // } else {
+      //   status = "unblock";
+      // }
       const response = await instance.get(
-        `users?page=${searchTerm.length>0?0:entriesToShow}&sortBy=&search=${searchTerm}&numeric_id=${numeric_id}&role=&username=&status=&limit=${searchTerm.length>0?"":Limit}`
+        `users?page=${searchTerm.length > 0 ? 0 : entriesToShow}&sortBy=&search=${searchTerm}&numeric_id=${numeric_id}&role=&username=&status=${isActive}&limit=${searchTerm.length > 0 ? "" : Limit}`
       );
       const transformed = transformUserData(response.data.results);
 
@@ -78,11 +131,12 @@ const ClientList = () => {
 
     const searchParams = new URLSearchParams(location.search);
     const id = searchParams.get("id");
-    if(id){
-      setEntriesToShow(1)
+    if (id) {
+      setEntriesToShow(1);
     }
     fetchUsers(Number(!id ? user.numeric_id : id));
-  }, [entriesToShow, showActiveUsers,,Limit, location.search,searchTerm]);
+  }, [entriesToShow, isActive, , Limit, location.search, searchTerm]);
+  // }, [entriesToShow, showActiveUsers, , Limit, location.search, searchTerm]);
 
   const transformUserData = (users: any) => {
     return users.map((user: any) => {
@@ -90,16 +144,17 @@ const ClientList = () => {
         typeof num === "number" ? num.toLocaleString("en-IN") : num;
 
       return {
-       id: user._id,
-        username: user.username||"",
+        id: user._id,
+        username: user.username,
         position: user.commperrole || "User",
-        creditReference: formatNumber(user?.credit||0),
-        exposerLimitRef: formatNumber(user?.exposerLimitRef||0),
-         balance: formatNumber(user.credit||0),
-        clientPL: formatNumber(user.profitLossBalance||0),
-   
-        exposure: formatNumber(user.exposerLimit||0),
-        availableBalance: formatNumber(user.credit||0+user.exposerLimit||0),
+        creditReference: formatNumber(user?.credit || 0),
+        exposerLimitRef: formatNumber(user?.exposerLimitRef || 0),
+        balance: formatNumber(user.credit),
+        clientPL: formatNumber(user.profitLossBalance),
+        exposure: formatNumber(user.exposerLimit || 0),
+        availableBalance: formatNumber(
+          user.credit + user.profitLossBalance + user.exposerLimit || 0
+        ),
         uSt: user.status,
         bSt: user.betStatus,
         accountType: user.roles[0],
@@ -114,15 +169,14 @@ const ClientList = () => {
     document.title = "Client List";
   }, []);
 
-  const filterFunction = useCallback(
-    (user: any) => {
-      const matchesSearch = user.username
-      const matchesStatus = showActiveUsers ? user.isActive : !user.isActive;
-      return matchesSearch && matchesStatus;
-    },
-    [showActiveUsers, location.search]
-  );
-  
+  // const filterFunction = useCallback(
+  //   (user: any) => {
+  //     const matchesSearch = user.username;
+  //     const matchesStatus = showActiveUsers ? user.isActive : !user.isActive;
+  //     return matchesSearch && matchesStatus;
+  //   },
+  //   [showActiveUsers, location.search]
+  // );
 
   return (
     <section className="main-content ">
@@ -135,7 +189,7 @@ const ClientList = () => {
                 onClick={() =>
                   permissions?.addUser
                     ? navigation("/add-Client")
-                    : Tp("you not have  permission  to create the user")
+                    : Tp("you do not have permission to create the user")
                 }
                 className="button-teen"
               >
@@ -172,18 +226,47 @@ const ClientList = () => {
 
                   <div className="switch-button">
                     <span id="PointDetail" className="font-weight-bold Text-15">
-                      <label className="switch1 vertical-align-middle">
+                      {/* <label className="switch1 vertical-align-middle">
                         <input
                           type="checkbox"
                           id="chkisActiveUsers"
                           name="rbtn"
                           className="px"
-                          checked={showActiveUsers}
+                          checked={isActive}
                           onChange={() => setShowActiveUsers((prev) => !prev)}
                         />
                         <div className="slider1 round1">
-                          <span className="on">Active</span>
-                          <span className="off">In-Active</span>
+                          <span
+                            className="on"
+                            onClick={() => {
+                              setIsActive(false);
+                            }}
+                          >
+                            Active
+                          </span>
+                          <span
+                            className="off"
+                            onClick={() => {
+                              setIsActive(true);
+                            }}
+                          >
+                            In-Active
+                          </span>
+                        </div>
+                      </label> */}
+                      <label className="switch1 vertical-align-middle">
+                        <input
+                          type="checkbox"
+                          className="px"
+                          checked={isActive}
+                          // onChange={() => setIsActive((prev) => !prev)} // Toggle state correctly
+                          onChange={() => dispatch(toggleIsActive())} // Toggle using redux correctly
+                        />
+                        <div className="slider1 round1">
+                          <span className="on">{isActive ? "Active" : ""}</span>
+                          <span className="off">
+                            {!isActive ? "In-Active" : ""}
+                          </span>
                         </div>
                       </label>
                     </span>
@@ -208,10 +291,7 @@ const ClientList = () => {
                     <select
                       className="form-select"
                       aria-label="Default select example"
-                      onChange={(e) =>
-                      (  setLimit(parseInt(e.target.value))
-                        ,setEntriesToShow(1))
-                      }
+                      onChange={(e) => setLimit(parseInt(e.target.value))}
                     >
                       <option value="10">10</option>
                       <option value="25">25</option>
@@ -226,14 +306,14 @@ const ClientList = () => {
               </div>
 
               <table className="table table-bordered text-center">
-               <thead>
+                <thead>
                   <tr>
                     <th>UserName</th>
                     <th>Profile</th>
                     <th>Credit Reference</th>
                     <th>Balance</th>
                     <th>Client (P/L)</th>
-                   
+
                     <th>Exposure</th>
                     <th>Exposure Limit</th>
                     <th>Available Balance</th>
@@ -242,13 +322,84 @@ const ClientList = () => {
                     <th>Account Type</th>
                     <th>Action</th>
                   </tr>
+                  {/* ---- Totals Row ---- */}
+                  <tr className="table-secondary fw-bold">
+                    <td colSpan={2} className="text-end">
+                      Total
+                    </td>
+                    <td>
+                      {totals.creditReference.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </td>
+                    <td>
+                      {totals.balance.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </td>
+                    <td
+                      className={
+                        totals.clientPL < 0 ? "text-red" : "text-green"
+                      }
+                    >
+                      {totals.clientPL.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </td>
+                    <td>
+                      {totals.exposure.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </td>
+                    <td>
+                      {totals.exposerLimitRef.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </td>
+                    <td>
+                      {totals.availableBalance.toLocaleString("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </td>
+                    <td colSpan={4}></td>
+                  </tr>
+                  {/* ------------------- */}
                 </thead>
                 <tbody>
-                  <FilteredList
+                  {/* <FilteredList
                     items={users}
                     filterFunction={filterFunction}
                     renderItem={(user) => (
-                      <UserTableRow 
+                      <UserTableRow
+                        parent_name={parent}
+                        key={user?.id}
+                        user={user}
+                        fetchUsers={fetchUsers}
+                      />
+                    )}
+                  /> */}
+                  <FilteredList
+                    items={users}
+                    renderItem={(user) => (
+                      <UserTableRow
                         parent_name={parent}
                         key={user?.id}
                         user={user}

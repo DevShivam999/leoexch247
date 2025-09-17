@@ -47,18 +47,12 @@ const EventPL: React.FC = () => {
     fetchEventPLData();
   };
   const totals = useMemo(() => {
-    const overallProfitLoss = eventData?.data.reduce(
-      (acc, cal) => acc + cal.profitLoss,
-      0
-    )||0;
-    const overallCommission = eventData?.data.reduce(
-      (acc, cal) => acc + cal.commission,
-      0
-    )||0;
-    const overallTotalPL = eventData?.data.reduce(
-      (acc, cal) => acc + cal.totalPL,
-      0
-    )||0;
+    const overallProfitLoss =
+      eventData?.data.reduce((acc, cal) => acc + cal.profitLoss, 0) || 0;
+    const overallCommission =
+      eventData?.data.reduce((acc, cal) => acc + cal.commission, 0) || 0;
+    const overallTotalPL =
+      eventData?.data.reduce((acc, cal) => acc + cal.totalPL, 0) || 0;
     return {
       overallProfitLoss,
       overallCommission,
@@ -114,6 +108,7 @@ const EventPL: React.FC = () => {
               <input
                 id="fromDate"
                 type="date"
+                className="form-control"
                 value={
                   typeof fromDate === "string"
                     ? fromDate
@@ -121,7 +116,6 @@ const EventPL: React.FC = () => {
                       ? fromDate.toISOString().slice(0, 10)
                       : ""
                 }
-                className="form-control"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setFromDate(e.target.value)
                 }
@@ -134,6 +128,7 @@ const EventPL: React.FC = () => {
               <input
                 id="toDate"
                 type="date"
+                className="form-control"
                 value={
                   typeof toDate === "string"
                     ? toDate
@@ -141,7 +136,6 @@ const EventPL: React.FC = () => {
                       ? toDate.toISOString().slice(0, 10)
                       : ""
                 }
-                className="form-control"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setToDate(e.target.value)
                 }

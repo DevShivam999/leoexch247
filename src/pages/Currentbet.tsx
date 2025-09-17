@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import { useDispatch } from "react-redux";
@@ -31,16 +31,22 @@ export const formatDateTime = (dateTimeString: string): string => {
 const CurrentBet: React.FC = () => {
   const [betType, setBetType] = useState<string>("All");
   const [marketType, setMarketType] = useState<string>("All");
+
+  // pagination
+  const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(25);
+  const [total, setTotal] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
   const [activeTab, setActiveTab] = useState<"SPORTS" | "CASINO">("SPORTS");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [allDelete, _] = useState(false);
 
   const [allBets, setAllBets] = useState<BetData[]>([]);
   const [currentBets, setCurrentBets] = useState<BetData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasLoadedData, setHasLoadedData] = useState<boolean>(false);
+
   const socket = useAppSelector((p: RootState) => p.socket);
   const navigation = useNavigate();
   const { user, token } = useAppSelector((p: RootState) => p.changeStore);
@@ -69,28 +75,38 @@ const CurrentBet: React.FC = () => {
   const fetchCurrentBets = async () => {
     setLoading(true);
     setError(null);
-
     try {
       if (!user || !token) {
         navigation("/login");
-        console.warn("User or token not found. Cannot fetch current bets.");
-        setLoading(false);
         return;
       }
 
+      const offset = (page - 1) * limit;
+
       const response = await instance.get(
-        `betting/current-bets?page=1&offset=0&limit=${limit}&numeric_id=${
-          user.numeric_id
-        }`
+        `betting/current-bets?page=${page}&offset=${offset}&limit=${limit}&numeric_id=${user.numeric_id}`
       );
 
-      const fetchedData = response.data.results;
-      if (fetchedData != allBets) {
-        setAllBets(fetchedData);
+      const fetchedData: BetData[] = response.data.results || [];
+      // reset selection flags on fresh fetch to avoid stale selections
+      setAllBets(fetchedData.map((b) => ({ ...b, isSelect: false })));
 
-        applyFiltersToData(fetchedData);
-        setHasLoadedData(true);
-      }
+      // server pagination (fallback if not provided)
+      const srvTotal = Number(response.data.total ?? 0);
+      const srvPerPage = Number(response.data.perPage ?? limit);
+      const srvPage = Number(response.data.page ?? page);
+      const srvTotalPages = Number(
+        response.data.totalPagesCount ??
+          (srvPerPage ? Math.ceil(srvTotal / srvPerPage) : 1)
+      );
+
+      if (!Number.isNaN(srvTotal)) setTotal(srvTotal);
+      if (!Number.isNaN(srvPerPage)) setLimit(srvPerPage);
+      if (!Number.isNaN(srvPage)) setPage(srvPage);
+      if (!Number.isNaN(srvTotalPages))
+        setTotalPages(Math.max(1, srvTotalPages || 1));
+
+      setHasLoadedData(true);
     } catch (err) {
       ErrorHandler({
         err,
@@ -101,21 +117,27 @@ const CurrentBet: React.FC = () => {
       });
       setAllBets([]);
       setCurrentBets([]);
+      setTotal(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
-  const handleDeleteBet = (
+
+  type BetAction = "delete" | "void";
+
+  const handleBetAction = (
+    action: BetAction,
     id: string,
     oddsType: string,
     orderId: string | null
   ) => {
     socket.socket.emit("deleteBetsOrders", {
       matchId: id,
-      oddsType: oddsType,
+      oddsType,
       selectionId: null,
-      type: "void",
-      orderId: orderId,
+      type: action, // "delete" or "void"
+      orderId,
     });
   };
 
@@ -123,9 +145,9 @@ const CurrentBet: React.FC = () => {
     let filtered = [...data];
 
     if (betType !== "All") {
-      filtered = filtered.filter((bet) => {
-        return betType === "Matched" ? (bet as any).status === "matched" : true;
-      });
+      filtered = filtered.filter((bet) =>
+        betType === "Matched" ? (bet as any).status === "matched" : true
+      );
     }
 
     if (marketType !== "All") {
@@ -157,35 +179,12 @@ const CurrentBet: React.FC = () => {
   };
 
   const handleLoadClick = () => {
+    setPage(1);
     fetchCurrentBets();
   };
 
-  const handleAllDelete = () => {
-    try {
-      for (let i = 0; i < currentBets.length; i++) {
-        if (currentBets[i].isSelect) {
-          handleDeleteBet(
-            currentBets[i].matchId,
-            currentBets[i].oddsType,
-            currentBets[i]._id
-          );
-        }
-      }
-      success("All bets are Delete");
-    } catch (error) {
-      ErrorHandler({
-        err: error,
-        dispatch,
-        navigation,
-        pathname: location.pathname,
-        setError,
-      });
-      console.log(error);
-    }
-  };
   const handleSearchChange = (newSearchTerm: string) => {
     setSearchTerm(newSearchTerm);
-
     if (allBets.length > 0) {
       applyFiltersToData(allBets);
     }
@@ -193,39 +192,71 @@ const CurrentBet: React.FC = () => {
 
   useEffect(() => {
     fetchCurrentBets();
-    socket.socket.on("deleteBetsOrders", (data) => {
-      if (data.status) {
+
+    // refresh after server confirms row action
+    socket.socket.on("deleteBetsOrders", (data: any) => {
+      if (data?.status) {
         fetchCurrentBets();
       }
     });
 
-    let remove = setInterval(() => {
+    const remove = setInterval(() => {
       fetchCurrentBets();
     }, 15000);
 
     return () => {
       clearInterval(remove);
+      socket.socket.off("deleteBetsOrders");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleIndividualBetSelect = (betId: string) => {
-    setCurrentBets((prev) => {
-      const updatedData = prev.map((bet) =>
+    setCurrentBets((prev) =>
+      prev.map((bet) =>
         bet._id === betId ? { ...bet, isSelect: !bet.isSelect } : bet
-      );
-
-      return updatedData;
-    });
+      )
+    );
   };
+
+  // Delete all selected rows in the current view
+  const handleAllDelete = () => {
+    try {
+      const selected = currentBets.filter((b) => b.isSelect);
+      if (selected.length === 0) return;
+
+      selected.forEach((b) =>
+        handleBetAction("delete", b.matchId, b.oddsType, b._id)
+      );
+      success("All selected bets deleted");
+    } catch (err) {
+      ErrorHandler({
+        err,
+        dispatch,
+        navigation,
+        pathname: location.pathname,
+        setError,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (allBets.length > 0) {
+      applyFiltersToData(allBets);
+    }
+  }, [allBets]);
+
   useEffect(() => {
     if (hasLoadedData) {
       fetchCurrentBets();
     }
-  }, [limit]);
-  useEffect(() => {
-    allDelete &&
-      setCurrentBets((p) => p.map((o) => ({ ...o, isSelect: true })));
-  }, [allDelete]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit]);
+
+  // pagination range
+  const fromRow = total === 0 ? 0 : (page - 1) * limit + 1;
+  const toRow = total === 0 ? 0 : Math.min(page * limit, total);
+
   return (
     <section className="mian-content">
       <div className="current-bets-page">
@@ -246,7 +277,10 @@ const CurrentBet: React.FC = () => {
                 className="form-select"
                 aria-label="Choose Type"
                 value={betType}
-                onChange={(e) => setBetType(e.target.value)}
+                onChange={(e) => {
+                  setPage(1);
+                  setBetType(e.target.value);
+                }}
               >
                 <option value="All">All</option>
                 <option value="Matched">Matched</option>
@@ -262,7 +296,10 @@ const CurrentBet: React.FC = () => {
                 className="form-select"
                 aria-label="Market Type"
                 value={marketType}
-                onChange={(e) => setMarketType(e.target.value)}
+                onChange={(e) => {
+                  setPage(1);
+                  setMarketType(e.target.value);
+                }}
               >
                 <option value="All">All</option>
                 <option value="Matchodds">Matchodds</option>
@@ -293,7 +330,10 @@ const CurrentBet: React.FC = () => {
                   className="form-select"
                   aria-label="Show entries"
                   value={limit}
-                  onChange={(e) => setLimit(Number(e.target.value))}
+                  onChange={(e) => {
+                    setPage(1);
+                    setLimit(Number(e.target.value));
+                  }}
                 >
                   <option value="25">25</option>
                   <option value="50">50</option>
@@ -328,22 +368,16 @@ const CurrentBet: React.FC = () => {
                 <i className="fas fa-trophy"></i> SPORTS
               </button>
             </li>
-            {/* <li className="nav-item" role="presentation">
-              <button
-                className={`nav-link ${activeTab === "CASINO" ? "active" : ""}`}
-                id="pills-CASINO-tab"
-                type="button"
-                role="tab"
-                aria-controls="pills-CASINO"
-                aria-selected={activeTab === "CASINO"}
-                onClick={() => setActiveTab("CASINO")}
-              >
-                <i className="fas fa-coins"></i> CASINO
-              </button>
-            </li> */}
-            {allDelete && (
+
+            {/* Show All Delete only if at least one bet is selected */}
+            {currentBets.some((b) => b.isSelect) && (
               <li className="nav-item" role="presentation">
-                <button onClick={() => handleAllDelete()}>All Delete</button>
+                <button
+                  onClick={handleAllDelete}
+                  className="btn btn-danger ms-2"
+                >
+                  All Delete
+                </button>
               </li>
             )}
           </ul>
@@ -362,14 +396,12 @@ const CurrentBet: React.FC = () => {
 
               {error && <div className="alert alert-danger my-3">{error}</div>}
 
-              {/* Show table when data has been loaded */}
               {!loading && !error && hasLoadedData && (
-                <div className="table-responsive">
-                  <table className="table-lay-black-one table">
-                    <thead>
-                      <tr>
-                        {/* THE FIX IS HERE: Ensure no whitespace between <th> tags */}
-                        {currentBets.length > 0 && (
+                <>
+                  <div className="table-responsive">
+                    <table className="table-lay-black-one table">
+                      <thead>
+                        <tr>
                           <th>
                             <input
                               ref={headerCbRef}
@@ -383,97 +415,188 @@ const CurrentBet: React.FC = () => {
                               }}
                             />
                           </th>
+                          <th>Event Type</th>
+                          <th>Event Name</th>
+                          <th>User Name</th>
+                          <th>Runner Name</th>
+                          <th>Bet Type</th>
+                          <th>User Rate</th>
+                          <th>Amount</th>
+                          <th>Bet Time</th>
+                          <th>Match Date</th>
+                          <th>IP</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentBets.length > 0 ? (
+                          <>
+                            {currentBets.map((bet, index: number) => (
+                              <tr
+                                key={bet._id || index}
+                                className={`${
+                                  bet.orderType === "Back"
+                                    ? "black-bg"
+                                    : "lay-bg"
+                                }`}
+                              >
+                                <th>
+                                  <input
+                                    type="checkbox"
+                                    checked={!!bet.isSelect}
+                                    onChange={() =>
+                                      handleIndividualBetSelect(bet._id)
+                                    }
+                                  />
+                                </th>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.orderType}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.match.name}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.user.username}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.sessionRunner ?? bet.runnerName}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.oddsType}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.rate}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.betAmount}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {formatDateTime(bet.created)}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {formatDateTime(bet.updated)}
+                                </td>
+                                <td style={{ backgroundColor: "transparent" }}>
+                                  {bet.user_ip.replace("::ffff:", "")}
+                                  <button
+                                    onClick={() =>
+                                      handleBetAction(
+                                        "delete",
+                                        bet.matchId,
+                                        bet.oddsType,
+                                        bet._id
+                                      )
+                                    }
+                                    className="px-2 ms-2 btn btn-sm btn-danger"
+                                  >
+                                    Delete
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleBetAction(
+                                        "void",
+                                        bet.matchId,
+                                        bet.oddsType,
+                                        bet._id
+                                      )
+                                    }
+                                    className="px-2 ms-2 btn btn-sm btn-warning"
+                                  >
+                                    Void
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </>
+                        ) : (
+                          <tr>
+                            <td colSpan={11} className="text-center">
+                              {searchTerm
+                                ? `No bets found matching "${searchTerm}"`
+                                : "No current bets found for Sports."}
+                            </td>
+                          </tr>
                         )}
-                        <th>Event Type</th>
-                        <th>Event Name</th>
-                        <th>User Name</th>
-                        <th>Runner Name</th>
-                        <th>Bet Type</th>
-                        <th>User Rate</th>
-                        <th>Amount</th>
-                        <th>Bet Time</th>
-                        <th>Match Date</th>
-                        <th>IP</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentBets.length > 0 ? (
-                        <>
-                          {currentBets.map((bet, index: number) => (
-                            <tr
-                              key={bet._id || index} // Using bet._id for key if available, otherwise index (less ideal but fallback)
-                              className={`${
-                                bet.orderType === "Back" ? "black-bg" : "lay-bg"
-                              }`}
-                            >
-                              <th>
-                                <input
-                                  type="checkbox"
-                                  checked={bet.isSelect}
-                                  onChange={() =>
-                                    handleIndividualBetSelect(bet._id)
-                                  }
-                                />
-                              </th>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.orderType}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.match.name}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.user.username}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.sessionRunner}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.oddsType}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.rate}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.betAmount}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {formatDateTime(bet.created)}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {formatDateTime(bet.updated)}
-                              </td>
-                              <td style={{ backgroundColor: "transparent" }}>
-                                {bet.user_ip.replace("::ffff:", "")}
+                      </tbody>
+                    </table>
+                  </div>
 
-                                <button
-                                  onClick={() =>
-                                    handleDeleteBet(
-                                      bet.matchId,
-                                      bet.oddsType,
-                                      bet._id
-                                    )
-                                  }
-                                  className="px-2 ms-2"
-                                >
-                                  Delete
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                  {/* Pagination footer */}
+                  <div className="d-flex flex-wrap justify-content-between align-items-center mt-3">
+                    <div className="text-muted small mb-2">
+                      {total > 0 ? (
+                        <>
+                          Showing <strong>{fromRow}</strong> to{" "}
+                          <strong>{toRow}</strong> of <strong>{total}</strong>{" "}
+                          entries
                         </>
                       ) : (
-                        <tr>
-                          <td colSpan={11} className="text-center">
-                            {/* Adjusted colSpan */}
-                            {searchTerm
-                              ? `No bets found matching "${searchTerm}"`
-                              : "No current bets found for Sports."}
-                          </td>
-                        </tr>
+                        <>No entries</>
                       )}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+
+                    <nav aria-label="CurrentBets pagination" className="mb-2">
+                      <ul className="pagination mb-0">
+                        <li
+                          className={`page-item ${page === 1 ? "disabled" : ""}`}
+                        >
+                          <button
+                            className="page-link"
+                            onClick={() => setPage(1)}
+                            aria-label="First"
+                          >
+                            «
+                          </button>
+                        </li>
+                        <li
+                          className={`page-item ${page === 1 ? "disabled" : ""}`}
+                        >
+                          <button
+                            className="page-link"
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            aria-label="Previous"
+                          >
+                            Prev
+                          </button>
+                        </li>
+
+                        <li className="page-item disabled">
+                          <span className="page-link">
+                            Page {page} of {totalPages}
+                          </span>
+                        </li>
+
+                        <li
+                          className={`page-item ${
+                            page >= totalPages ? "disabled" : ""
+                          }`}
+                        >
+                          <button
+                            className="page-link"
+                            onClick={() =>
+                              setPage((p) => Math.min(totalPages, p + 1))
+                            }
+                            aria-label="Next"
+                          >
+                            Next
+                          </button>
+                        </li>
+                        <li
+                          className={`page-item ${
+                            page >= totalPages ? "disabled" : ""
+                          }`}
+                        >
+                          <button
+                            className="page-link"
+                            onClick={() => setPage(totalPages)}
+                            aria-label="Last"
+                          >
+                            »
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </>
               )}
 
               {!loading && !error && !hasLoadedData && (

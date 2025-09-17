@@ -8,9 +8,11 @@ import { useState } from "react";
 const UserProfile = ({ userData }: { userData: UserData }) => {
   const socket = useSelector((p: RootState) => p.socket.socket);
   const { id } = useParams();
+
   const [copied, setCopied] = useState(false);
+
   const copyToClipboard = () => {
-    const text = `https://Leoexch247.com/ReferBy/${userData?.referralCode}`;
+    const text = `https://goldexch.com/ReferBy/${userData?.referralCode}`;
     navigator.clipboard
       .writeText(text)
       .then(() => {
@@ -28,7 +30,7 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
           <h1 className="heading-one">Profile Detail</h1>
           <div className="refcode-row">
             <div className="ref-code-box">
-              {`https://Leoexch247.com/ReferBy/${userData?.referralCode}`}
+              {`https://goldexch.com/ReferBy/${userData?.referralCode}`}
               <span className="copy" onClick={copyToClipboard}>
                 {copied ? "copied!" : "tap-to-copy"}
               </span>
@@ -66,7 +68,7 @@ const UserProfile = ({ userData }: { userData: UserData }) => {
                     <td>{userData?.balance}</td>
                     <td>Siteurl</td>
                     <td>:</td>
-                    <td>https://Leoexch247.com</td>
+                    <td>https://goldexch.com</td>
                   </tr>
 
                   <tr>

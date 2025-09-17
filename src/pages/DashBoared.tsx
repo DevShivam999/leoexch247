@@ -6,6 +6,7 @@ import type { DashBoardType } from "../types/vite-env";
 import instance from "../services/AxiosInstance";
 import useAppDispatch, { useAppSelector } from "../hook/hook";
 import ErrorHandler from "../utils/ErrorHandle";
+import { setIsActive } from "../helper/IsActiveSlice"
 
 const DashBoard = () => {
   const [User, setuser] = useState({
@@ -78,8 +79,11 @@ const DashBoard = () => {
                         {User.active_user} <i className="fas fa-sync"></i>
                       </h3>
                       <Link
-                        to=""
-                        onClick={() => setclick((p) => !p)}
+                        to="list-of-clients"
+                        onClick={() => {
+                          setclick((p) => !p);
+                          dispatch(setIsActive(true))
+                        }}
                         className=""
                       >
                         Click here
@@ -100,7 +104,7 @@ const DashBoard = () => {
                         {User.online_users} <i className="fas fa-sync"></i>
                       </h3>
                       <Link
-                        to=""
+                        to="/online-users"
                         onClick={() => setclick((p) => !p)}
                         className=""
                       >
@@ -123,8 +127,11 @@ const DashBoard = () => {
                         <i className="fas fa-sync"></i>
                       </h3>
                       <Link
-                        to=""
-                        onClick={() => setclick((p) => !p)}
+                        to="list-of-clients"
+                         onClick={() => {
+                          setclick((p) => !p);
+                          dispatch(setIsActive(false))
+                        }}
                         className=""
                       >
                         Click here

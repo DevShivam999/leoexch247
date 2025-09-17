@@ -39,6 +39,7 @@ const MatchList = lazy(() => import("../pages/MatchList"));
 const MatchInfo = lazy(() => import("../pages/MatchInfo"));
 const FancyCricketSettings = lazy(() => import("../pages/FancyMatchSettingAtUser"));
 const UserCommission = lazy(() => import("../pages/CommissionUser"));
+const OnlineUsers = lazy(()=>import("../pages/OnlineUser"))
 
 export const routeConfig = [
  { path: "/", element: <DashBoard /> },
@@ -79,6 +80,8 @@ export const routeConfig = [
  { path: "/matchInfo/:id", element: <MatchInfo /> },
  { path: "/UserSettings/:id", element: <FancyCricketSettings /> },
  { path: "/UserCommission/:id", element: <UserCommission /> },
+ { path: "/online-users", element: <OnlineUsers /> },
+
  // { path: "/bonus", element: <Bonus /> },
  { path: "*", element: <NotFound /> },
 ];

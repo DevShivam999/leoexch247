@@ -29,14 +29,14 @@ const UserProfileBetHistory = ({
               {bet.match?.name.includes("Cricket") ? "Cricket" : bet.oddsType}
             </td>
 
-            <td>{bet.match?.name||bet.runnerName}</td>
+            <td>{bet.match?.name || bet.runnerName}</td>
             <td>{userData}</td>
-            <td>{bet.runnerName}</td>
+            <td>{bet.runnerName != "" ? bet.runnerName : bet.sessionRunner}</td>
             <td>
               {bet.orderType} ({bet.oddsType})
             </td>
 
-            <td>{bet.rate}</td>
+            <td>{`${bet.rate}/${bet.size}`}</td>
             <td>{bet.betAmount}</td>
             <td>{new Date(bet.created).toLocaleTimeString()}</td>
 
@@ -48,7 +48,7 @@ const UserProfileBetHistory = ({
               }
             >
               {bet.status === "Winner"
-                ? bet.betAmount * (bet.rate - 1)
+                ? bet.teamSession.lossAmount
                 : -bet.betAmount}
             </td>
           </tr>

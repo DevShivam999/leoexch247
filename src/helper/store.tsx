@@ -8,6 +8,7 @@ import FancyBetData from "./FancyBetData";
 import BannerStore from "./BannerStore";
 import BetsResult from "./BetsResult";
 import userCommission from "./UserCommissionStore";
+import uiReducer from "./IsActiveSlice";
 
 
 const rootReducer = {
@@ -18,6 +19,7 @@ const rootReducer = {
   BetsResult,
   userCommission,
   FancyBetData,
+  ui: uiReducer,
   Permissions: permissionReducer,
 };
 

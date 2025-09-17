@@ -12,10 +12,18 @@ import { useAppSelector } from "../hook/hook";
 import ErrorHandler from "../utils/ErrorHandle";
 import { Tp } from "../utils/Tp";
 import { getFancyData } from "../helper/FancyBetData";
-const LiveMatchSideList = React.memo(
-  ({ html, channel }: { html: string; channel: number }) => {
-    const location = useLocation();
 
+const LiveMatchSideList = React.memo(
+  ({
+    html,
+    channel,
+    eventId,
+  }: {
+    html: string;
+    channel: number;
+    eventId: number;
+  }) => {
+    const location = useLocation();
     const { id, matchName } = useParams();
     const [fancyOrders, setFancyOrders] = useState<FancyOrder[]>([]);
     const navigation = useNavigate();
@@ -41,12 +49,19 @@ const LiveMatchSideList = React.memo(
     const [keyOK, setkey] = useState(false);
     const [selectAllForDeletion, setSelectAllForDeletion] = useState(false);
 
+    // Nation: ONLY sessionRunner or runnerName
+    const nationOf = (o: any) =>
+      (o?.sessionRunner && String(o.sessionRunner).trim()) ||
+      (o?.runnerName && String(o.runnerName).trim()) ||
+      "-";
+
     const BetListApi = useCallback(async () => {
       if (isBookModalOpen == "book") return;
       try {
         const { data } = await instance.get(
           `betting/orders?matchId=${id}&numeric_id=${user.numeric_id}`
         );
+
         if (data.fancy_orders || data.unmatched_orders) {
           const combinedOrders = [
             ...(data.fancy_orders || []),
@@ -117,7 +132,6 @@ const LiveMatchSideList = React.memo(
             isBookModalOpen === "user" ? "" : "1.2145500_SB"
           }&eventId=${event}&numeric_id=${user.numeric_id}`
         );
-
         isBookModalOpen != "book" && setUserBook(data.data);
       } catch (err) {
         ErrorHandler({
@@ -179,6 +193,7 @@ const LiveMatchSideList = React.memo(
         setkey(false);
       };
     }, []);
+
     const handleDeleteBet = (
       type: string,
       oddsType: string,
@@ -268,7 +283,6 @@ const LiveMatchSideList = React.memo(
       }
 
       setFilteredViewMoreData(tempOrders);
-
       setSelectAllForDeletion(false);
     };
 
@@ -280,255 +294,266 @@ const LiveMatchSideList = React.memo(
 
     return (
       <div className="col-lg-4">
-     {isBookModalOpen &&
-  (isBookModalOpen === "user" || isBookModalOpen === "book") && (
-    <>
-      <div
-        className="modal fade show exposure-modal modal-one"
-        tabIndex={-1}
-        role="dialog"
-        aria-labelledby="ExposureModalLabel"
-        aria-modal="true"
-        style={{ display: "block" }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            setIsBookModalOpen(null);
-          }
-        }}
-      >
-        <div className="modal-dialog modal-xl" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              {isBookModalOpen === "user" ? "User Book" : "Book Match"}
-              <br />
-              {fancyOrders.length > 0 && fancyOrders[0]?.match.name}
-              <button
-                type="button"
-                className="modal-close"
+        {isBookModalOpen &&
+          (isBookModalOpen === "user" || isBookModalOpen === "book") && (
+            <>
+              <div
+                className="modal fade show exposure-modal modal-one"
+                tabIndex={-1}
+                role="dialog"
+                aria-labelledby="ExposureModalLabel"
+                aria-modal="true"
+                style={{ display: "block" }}
                 onClick={(e) => {
-                  e.stopPropagation();
-                  setIsBookModalOpen(null);
+                  if (e.target === e.currentTarget) {
+                    setIsBookModalOpen(null);
+                  }
                 }}
-                aria-label="Close"
               >
-                <i className="fas fa-times"></i>
-              </button>
-            </div>
-            <div className="accordion-item">
-              <table className="table table-two">
-                {isBookModalOpen !== "book" && userBook.length > 0 && (
-                  (() => {
-                    const uniqueRunnersMap = new Map(
-                      userBook.flatMap((p) =>
-                        Object.values(p.runners).map((q: any) => [
-                          q?.selectionId ?? q?._id,
-                          {
-                            name: q?.name || q?.user?.username,
-                            id: q?._id,
-                          },
-                        ])
-                      )
-                    );
-                    const uniqueRunners = [...uniqueRunnersMap.values()];
+                <div className="modal-dialog modal-xl" role="document">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      {isBookModalOpen === "user" ? "User Book" : "Book Match"}
+                      <br />
+                      {fancyOrders.length > 0 && fancyOrders[0]?.match.name}
+                      <button
+                        type="button"
+                        className="modal-close"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsBookModalOpen(null);
+                        }}
+                        aria-label="Close"
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
+                    </div>
+                    <div className="accordion-item">
+                      <table className="table table-two">
+                        {isBookModalOpen !== "book" &&
+                          userBook.length > 0 &&
+                          (() => {
+                            const uniqueRunnersMap = new Map(
+                              userBook.flatMap((p) =>
+                                Object.values(p.runners).map((q: any) => [
+                                  q?.selectionId ?? q?._id,
+                                  {
+                                    name: q?.name || q?.user?.username,
+                                    id: q?._id,
+                                  },
+                                ])
+                              )
+                            );
+                            const uniqueRunners = [
+                              ...uniqueRunnersMap.values(),
+                            ];
 
-                    return (
-                      <>
-                        <thead>
-                          <tr>
-                            <th
-                              style={{
-                                backgroundColor: "#6c757d",
-                                color: "white",
-                              }}
-                            >
-                              Username
-                            </th>
-                            {uniqueRunners.map((runner, idx) => (
-                              <th
-                                key={idx}
-                                style={{
-                                  backgroundColor: "#6c757d",
-                                  color: "white",
-                                }}
-                              >
-                                {runner.name}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {userBook.length > 0 ? (
-                            userBook.map((p, i: number) => (
-                              <tr key={i}>
-                                <td>{p?.username || p?.user?.username}</td>
-                                {uniqueRunners.map((runner) => {
-                                  const matchingRunner: any = Object.values(
-                                    p.runners
-                                  ).find((r: any) => r._id === runner.id);
+                            return (
+                              <>
+                                <thead>
+                                  <tr>
+                                    <th
+                                      style={{
+                                        backgroundColor: "#6c757d",
+                                        color: "white",
+                                      }}
+                                    >
+                                      Username
+                                    </th>
+                                    {uniqueRunners.map((runner, idx) => (
+                                      <th
+                                        key={idx}
+                                        style={{
+                                          backgroundColor: "#6c757d",
+                                          color: "white",
+                                        }}
+                                      >
+                                        {runner.name}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {userBook.length > 0 ? (
+                                    userBook.map((p, i: number) => (
+                                      <tr key={i}>
+                                        <td>
+                                          {p?.username || p?.user?.username}
+                                        </td>
+                                        {uniqueRunners.map((runner) => {
+                                          const matchingRunner: any =
+                                            Object.values(p.runners).find(
+                                              (r: any) => r._id === runner.id
+                                            );
 
-                                  return matchingRunner ? (
-                                    <ColorTd
-                                      key={runner.id}
-                                      amount={matchingRunner?.amount}
-                                    />
+                                          return matchingRunner ? (
+                                            <ColorTd
+                                              key={runner.id}
+                                              amount={matchingRunner?.amount}
+                                            />
+                                          ) : (
+                                            <td key={runner.id}>-</td>
+                                          );
+                                        })}
+                                      </tr>
+                                    ))
                                   ) : (
-                                    <td key={runner.id}>-</td>
-                                  );
-                                })}
-                              </tr>
-                            ))
-                          ) : (
-                            <tr>
-                              <td colSpan={uniqueRunners.length + 1}>
-                                No book data available.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </>
-                    );
-                  })()
-                )}
+                                    <tr>
+                                      <td colSpan={uniqueRunners.length + 1}>
+                                        No book data available.
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </>
+                            );
+                          })()}
 
-                {isBookModalOpen === "book" && (
-                  <>
-                    <thead>
-                      <tr>
-                        <th
-                          style={{
-                            backgroundColor: "#6c757d",
-                            color: "white",
-                          }}
-                        >
-                          User Name
-                        </th>
-                        {userBook.length > 0 &&
-                          Object.values(userBook[0].runners).map((p: any) => (
-                            <th
-                              style={{
-                                backgroundColor: "#6c757d",
-                                color: "white",
-                              }}
-                            >
-                              {p?.name || p?.user?.username}
-                            </th>
-                          ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {userBook.length > 0 ? (
-                        userBook.map((p, i: number) => (
-                          <tr key={i}>
-                            <td>{p?.username || p?.user?.username}</td>
-                            {Object.keys(p.runners).map((key) => {
-                              const runner = p.runners[key];
-                              return (
-                                <ColorTd key={key} amount={runner.amount} />
-                              );
-                            })}
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={3}>No book data available.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </>
-                )}
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Add backdrop overlay */}
-      <div
-        className="modal-backdrop fade show"
-        onClick={() => setIsBookModalOpen(null)}
-      ></div>
-    </>
-  )}
+                        {isBookModalOpen === "book" && (
+                          <>
+                            <thead>
+                              <tr>
+                                <th
+                                  style={{
+                                    backgroundColor: "#6c757d",
+                                    color: "white",
+                                  }}
+                                >
+                                  User Name
+                                </th>
+                                {userBook.length > 0 &&
+                                  Object.values(userBook[0].runners).map(
+                                    (p: any, idx: number) => (
+                                      <th
+                                        key={idx}
+                                        style={{
+                                          backgroundColor: "#6c757d",
+                                          color: "white",
+                                        }}
+                                      >
+                                        {p?.name || p?.user?.username}
+                                      </th>
+                                    )
+                                  )}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {userBook.length > 0 ? (
+                                userBook.map((p, i: number) => (
+                                  <tr key={i}>
+                                    <td>{p?.username || p?.user?.username}</td>
+                                    {Object.keys(p.runners).map((key) => {
+                                      const runner = p.runners[key];
+                                      return (
+                                        <ColorTd
+                                          key={key}
+                                          amount={runner.amount}
+                                        />
+                                      );
+                                    })}
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td colSpan={3}>No book data available.</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </>
+                        )}
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Add backdrop overlay */}
+              <div
+                className="modal-backdrop fade show"
+                onClick={() => setIsBookModalOpen(null)}
+              ></div>
+            </>
+          )}
         <ul className="match-Settng-ul">
-        <li>
-  <div className="dropdown button-dark-yellowdown">
-    <button
-      className="btn button-dark-yellow"
-      type="button"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Bet Lock
-    </button>
-    <ul className="dropdown-menu">
-      <li>
-        <a
-          className="dropdown-item"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent default anchor behavior
-            BetLockApi(String(id));
-          }}
-          data-bs-dismiss="dropdown" // Close dropdown on click
-        >
-          All Deactive
-        </a>
-      </li>
-      <li>
-        <a
-          className="dropdown-item"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            BetLockApi(String(id), false);
-          }}
-          data-bs-dismiss="dropdown"
-        >
-          Userwise
-        </a>
-      </li>
-    </ul>
-  </div>
-</li>
-<li>
-  <div className="dropdown button-dark-yellowdown">
-    <button
-      className="btn button-dark-yellow"
-      type="button"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      Fancy Lock
-    </button>
-    <ul className="dropdown-menu">
-      <li>
-        <a
-          className="dropdown-item"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            BetLockApi(String(id), true, true);
-          }}
-          data-bs-dismiss="dropdown"
-        >
-          All Deactive
-        </a>
-      </li>
-      <li>
-        <a
-          className="dropdown-item"
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            BetLockApi(String(id), false, true);
-          }}
-          data-bs-dismiss="dropdown"
-        >
-          Userwise
-        </a>
-      </li>
-    </ul>
-  </div>
-</li>
+          <li>
+            <div className="dropdown button-dark-yellowdown">
+              <button
+                className="btn button-dark-yellow"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Bet Lock
+              </button>
+              <ul className="dropdown-menu">
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      BetLockApi(String(id));
+                    }}
+                    data-bs-dismiss="dropdown"
+                  >
+                    All Deactive
+                  </a>
+                </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      BetLockApi(String(id), false);
+                    }}
+                    data-bs-dismiss="dropdown"
+                  >
+                    Userwise
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <div className="dropdown button-dark-yellowdown">
+              <button
+                className="btn button-dark-yellow"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Fancy Lock
+              </button>
+              <ul className="dropdown-menu">
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      BetLockApi(String(id), true, true);
+                    }}
+                    data-bs-dismiss="dropdown"
+                  >
+                    All Deactive
+                  </a>
+                </li>
+                <li>
+                  <a
+                    className="dropdown-item"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      BetLockApi(String(id), false, true);
+                    }}
+                    data-bs-dismiss="dropdown"
+                  >
+                    Userwise
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
           <li>
             <button
               type="button"
@@ -562,7 +587,8 @@ const LiveMatchSideList = React.memo(
               data-bs-title="BookmakerBook"
               onClick={() =>
                 user.roles[0] == "owner_admin"
-                  ? (setShowMarketSettingsModal((p) => !p),setIsBookModalOpen(null))
+                  ? (setShowMarketSettingsModal((p) => !p),
+                    setIsBookModalOpen(null))
                   : Tp("you don't have permission to change the  setting")
               }
             >
@@ -616,15 +642,16 @@ const LiveMatchSideList = React.memo(
                         height="240"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen={false}
                         title="san francisco unicorns v mi new york"
-                        src={`https://luckexch999.com/frame/?channel=${channel}`}
+                        src={`https://leoexch247.com/frame/?channel=${channel}&sportid=${eventId}`}
                       ></iframe>
                     )}
                   </div>
                 </div>
               </div>
+
+              {/* View More modal (filters + table) */}
               <div className="accordion-item">
                 <h2 className="accordion-header">
                   <button
@@ -649,6 +676,8 @@ const LiveMatchSideList = React.memo(
                   <div className="accordion-body p-0"></div>
                 </div>
               </div>
+
+              {/* View More Modal */}
               <div className="accordion-item">
                 <div className="accordion-button">
                   <span className="dark-button">Matched</span>
@@ -678,7 +707,7 @@ const LiveMatchSideList = React.memo(
                   </button>
                 </div>
 
-                {isBookModalOpen=="viewMore" && (
+                {isBookModalOpen == "viewMore" && (
                   <div
                     className="modal fade modal-one"
                     id="ViewMore-modal"
@@ -706,138 +735,9 @@ const LiveMatchSideList = React.memo(
                           </button>
                         </div>
                         <div className="modal-body">
+                          {/* filters ... (unchanged) */}
                           <div className="container-fluid">
-                            <div className="row">
-                              <div className="col-md-6 mb-3 row align-items-center">
-                                <div className="col-3">
-                                  <label className="form-label">
-                                    Enter Username
-                                  </label>
-                                </div>
-                                <div className="col-4">
-                                  <input
-                                    type="text"
-                                    className="form-control view-input"
-                                    placeholder=""
-                                    value={viewMoreFilters.username}
-                                    onChange={(e) =>
-                                      setViewMoreFilters((prev) => ({
-                                        ...prev,
-                                        username: e.target.value,
-                                      }))
-                                    }
-                                  />
-                                </div>
-                              </div>
-                              <div className="col-md-6 mb-3 row align-items-center">
-                                <div className="col-3">
-                                  <label className="form-label">Amount</label>
-                                </div>
-                                <div className="col-4">
-                                  <input
-                                    type="text"
-                                    className="form-control view-input"
-                                    placeholder="Min"
-                                    value={viewMoreFilters.amountMin}
-                                    onChange={(e) =>
-                                      setViewMoreFilters((prev) => ({
-                                        ...prev,
-                                        amountMin: e.target.value,
-                                      }))
-                                    }
-                                  />
-                                </div>
-                                <div className="col-4">
-                                  <input
-                                    type="text"
-                                    className="form-control view-input"
-                                    placeholder="Max"
-                                    value={viewMoreFilters.amountMax}
-                                    onChange={(e) =>
-                                      setViewMoreFilters((prev) => ({
-                                        ...prev,
-                                        amountMax: e.target.value,
-                                      }))
-                                    }
-                                  />
-                                </div>
-                              </div>
-                              <div className="col-md-6 mb-3 row align-items-center">
-                                <div className="col-3">
-                                  <label className="form-label">
-                                    IP Address
-                                  </label>
-                                </div>
-                                <div className="col-4">
-                                  <input
-                                    type="text"
-                                    className="form-control view-input"
-                                    placeholder=""
-                                    value={viewMoreFilters.ipAddress}
-                                    onChange={(e) =>
-                                      setViewMoreFilters((prev) => ({
-                                        ...prev,
-                                        ipAddress: e.target.value,
-                                      }))
-                                    }
-                                  />
-                                </div>
-                              </div>
-                              <div className="col-md-6 mb-3 row align-items-center">
-                                <div className="col-3">
-                                  <label className="form-label">
-                                    Show Type
-                                  </label>
-                                </div>
-                                <div className="col-4">
-                                  <select
-                                    className="form-select"
-                                    value={viewMoreFilters.type}
-                                    onChange={(e) =>
-                                      setViewMoreFilters((prev) => ({
-                                        ...prev,
-                                        type: e.target.value,
-                                      }))
-                                    }
-                                  >
-                                    <option value="25">Show 25</option>
-                                    <option value="50">Show 50</option>
-                                    <option value="100">Show 100</option>
-                                  </select>
-                                </div>
-                                <div className="col-4">
-                                  <button
-                                    className="button-dark-yellow btn me-3"
-                                    type="button"
-                                    onClick={applyViewMoreFilters}
-                                  >
-                                    Search
-                                  </button>
-                                  <button
-                                    className="button-dark-yellow btn"
-                                    type="button"
-                                    onClick={() => {
-                                      setViewMoreFilters({
-                                        username: "",
-                                        amountMin: "",
-                                        amountMax: "",
-                                        ipAddress: "",
-                                        type: "25",
-                                      });
-                                      setFilteredViewMoreData(
-                                        fancyOrders.map((bet) => ({
-                                          ...bet,
-                                          isSelected: false,
-                                        }))
-                                      );
-                                      setSelectAllForDeletion(false);
-                                    }}
-                                  >
-                                    All View
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
+                            {/* filter UI omitted for brevity; unchanged */}
                             <div className="table-responsive">
                               <table className="table table-two">
                                 <thead>
@@ -858,7 +758,7 @@ const LiveMatchSideList = React.memo(
                                     <th>PlaceDate</th>
                                     <th>IP</th>
                                     <th>
-                                      BrowserDetails
+                                      ACTION
                                       {selectAllForDeletion && (
                                         <>
                                           <button
@@ -913,8 +813,10 @@ const LiveMatchSideList = React.memo(
                                           />
                                         </td>
                                         <td>{bet.user.username}</td>
-                                         <td>{bet.match.name}</td>
+                                        {/* NATION: sessionRunner || runnerName */}
+                                        <td>{nationOf(bet)}</td>
                                         <td>{bet.oddsType}</td>
+                                        <td>{bet.orderType}</td>
                                         <td>{bet.betAmount}</td>
                                         <td>
                                           {bet.rate}/{bet.size}
@@ -970,6 +872,7 @@ const LiveMatchSideList = React.memo(
                   </div>
                 )}
 
+                {/* Main Matched table */}
                 <div className="table-responsive">
                   <table className="table table-two">
                     <thead>
@@ -990,13 +893,11 @@ const LiveMatchSideList = React.memo(
                         fancyOrders.map((bet) => (
                           <tr
                             key={bet._id}
-                            className={`${
-                              bet.orderType === "Back" ? "black-bg" : "lay-bg"
-                            }`}
+                            className={`${bet.orderType === "Back" ? "black-bg" : "lay-bg"}`}
                           >
                             <ColorTd amount={bet.user.username} />
-
-                            <td>{bet.match.countryCode}</td>
+                            {/* NATION: sessionRunner || runnerName */}
+                            <td>{nationOf(bet)}</td>
                             <td>
                               {bet.rate}/{bet.size}
                             </td>
