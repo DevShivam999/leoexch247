@@ -1,13 +1,19 @@
 import WiningMatchChild from "./WiningMatchChild";
 
+type WiningMatchT = {
+  marketId: string | number;
+  market: string;
+  runners?: any[];
+};
+
 const WiningMatchDetails = ({
   WiningMatch,
   SHOW,
 }: {
-  WiningMatch: any[];
+  WiningMatch: WiningMatchT[];
   SHOW: string;
 }) => {
-  const filteredMatches = WiningMatch.filter((item: any) => {
+  const filteredMatches = WiningMatch.filter((item) => {
     if (SHOW === "Match") return item.market === "MATCH_ODDS";
     if (SHOW === "Tie") return item.market === "TIED_MATCH";
     if (SHOW === "NotMatch")
@@ -17,8 +23,11 @@ const WiningMatchDetails = ({
 
   return (
     <>
-      {filteredMatches.map((item: any, index: number) => (
-        <WiningMatchChild key={`${item.market}-${index}`} WiningMatch={item} />
+      {filteredMatches.map((item) => (
+        <WiningMatchChild
+          key={item.marketId ?? item.market}
+          WiningMatch={item}
+        />
       ))}
     </>
   );

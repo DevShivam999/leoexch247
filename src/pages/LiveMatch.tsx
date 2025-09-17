@@ -16,11 +16,11 @@ import ErrorHandler from "../utils/ErrorHandle";
 export const getGameTypeName2 = (gameId: string): string => {
   switch (gameId.toLowerCase()) {
     case "cricket":
-      return "1";
-    case "tennis":
-      return "2";
-    case "football":
       return "4";
+    case "tennis":
+      return "1";
+    case "football":
+      return "2";
     case "horse":
       return "7";
     case "greyhound":
@@ -38,14 +38,14 @@ const LineMatch = () => {
   const user = useAppSelector((p: RootState) => p.changeStore);
   const [fancyData, setFancyData] = useState<any | null>(null);
   const [BookMakerData, setBookMakerData] = useState<any[]>([]);
-  const [Total, setTotal] = useState<any | null>(null);
+  const [Total, setTotal] = useState<any[]>([]);
   const [html, setHtmlContent] = useState<null | string>(null);
   const [loadingIn, setShowLoading] = useState(true);
   const navigation = useNavigate();
   const [name, setName] = useState({
     name: "",
     created: new Date(),
-    channel: 0,     // <- this is the TV channel id (diamond_id for eventId=4, else matchId)
+    channel: 0,
     eventId: 0,
   });
   const dispatch = useDispatch();
@@ -53,34 +53,24 @@ const LineMatch = () => {
   const SportName = async () => {
     const mId = String(id ?? "");
     try {
-      // 1) fetch match meta
       const matchRes = await instance.get("/betting/match", {
-        params: { matchId: mId, _: Date.now() },
-      });
-
-      // (optional) related markets
-      await instance.get("/user/getMatchRelatedMarket", {
         params: { matchId: mId, _: Date.now() },
       });
 
       const data = matchRes.data as {
         name: string;
-        openDate?: string;    // sometimes camelCase
-        opendate?: string;    // sometimes lowercase
-        channel?: number;
-        defaltsetting?: any;
-        blockStatus?: any;
+        openDate?: string;
+        opendate?: string;
         matchId: number | string;
         eventId: number;
         diamond_id?: number | string;
       };
 
-      // TV channel id: eventId===4 -> diamond_id || matchId; else matchId
       const matchIdNum = Number(data?.matchId);
       const diamondIdNum = Number(data?.diamond_id);
       const tvChannel =
         data?.eventId === 4
-          ? (diamondIdNum || matchIdNum) // if diamond_id missing/0 -> fallback to matchId
+          ? (diamondIdNum || matchIdNum)
           : matchIdNum;
 
       setName({
@@ -89,17 +79,7 @@ const LineMatch = () => {
         channel: Number.isFinite(tvChannel) ? tvChannel : 0,
         eventId: data?.eventId ?? 0,
       });
-
-      // ...rest mapping code as you had...
     } catch (err) {
-      // fallback fetch for debugging visibility
-      try {
-        const url = new URL("/betting/match", window.location.origin);
-        url.searchParams.set("matchId", String(id ?? ""));
-        url.searchParams.set("_", String(Date.now()));
-        await fetch(url.toString(), { credentials: "include" });
-      } catch {}
-
       ErrorHandler({ err, dispatch, navigation, pathname: location.pathname });
     } finally {
       setShowLoading(false);
@@ -121,15 +101,15 @@ const LineMatch = () => {
       eventId: getGameTypeName2(matchName || ""),
       numeric_id: userwith.numeric_id,
     });
-    socket.emit("rates", {
-      matchId: id,
-      eventId: getGameTypeName2(matchName || ""),
-      numeric_id: userwith.numeric_id,
-    });
-    socket.emit("summerexposer", {
-      matchId: id,
-      numeric_id: userwith.numeric_id,
-    });
+
+    // Emit exposer immediately + every 5s
+    const sendExposer = () =>
+      socket.emit("summerexposer", {
+        matchId: id,
+        numeric_id: userwith.numeric_id,
+      });
+    sendExposer();
+    const exposerInterval = setInterval(sendExposer, 5000);
 
     socket.on("sessionData", (data) => {
       setFancyData(data.data);
@@ -145,7 +125,8 @@ const LineMatch = () => {
           const existingRunner =
             existingIndex !== -1
               ? prev[existingIndex].runners.find(
-                  (r: any) => r.selectionId === newRunner.selectionId
+                  (r: any) =>
+                    String(r.selectionId) === String(newRunner.selectionId)
                 )
               : null;
 
@@ -169,102 +150,126 @@ const LineMatch = () => {
       });
     });
 
+    // Odds update
     socket.on("matchOddsData", (data) => {
-      id == data.matchId &&
-        setTotal((prevTotal: any) => {
-          const incomingMarket = data.data;
-          const currentMarkets = Array.isArray(prevTotal) ? prevTotal : [];
+      if (id != data.matchId) return;
 
-          if (currentMarkets.length === 0) {
-            const initialRunners = incomingMarket.runners.map((r: any) => ({
-              ...r,
-              userbet: 0,
-            }));
-            return [{ ...incomingMarket, runners: initialRunners }];
-          }
+      setTotal((prevTotal: any[]) => {
+        const incomingMarket = data.data;
+        const currentMarkets = Array.isArray(prevTotal) ? prevTotal : [];
 
-          const existingMarketIndex = currentMarkets.findIndex(
-            (market: any) => market.marketId === incomingMarket.marketId
+        if (currentMarkets.length === 0) {
+          const initialRunners = incomingMarket.runners.map((r: any) => ({
+            ...r,
+            userbet: 0,
+          }));
+          return [{ ...incomingMarket, runners: initialRunners }];
+        }
+
+        const existingMarketIndex = currentMarkets.findIndex(
+          (market: any) =>
+            String(market.marketId) === String(incomingMarket.marketId)
+        );
+
+        if (existingMarketIndex === -1) {
+          const newMarketRunners = incomingMarket.runners.map((r: any) => ({
+            ...r,
+            userbet: 0,
+          }));
+          return [
+            ...currentMarkets,
+            { ...incomingMarket, runners: newMarketRunners },
+          ];
+        } else {
+          const updatedRunners = incomingMarket.runners.map((newR: any) => {
+            const prevRunner = currentMarkets[existingMarketIndex].runners.find(
+              (pr: any) =>
+                String(pr.selectionId) === String(newR.selectionId)
+            );
+            return {
+              ...newR,
+              userbet: prevRunner?.userbet ?? 0,
+            };
+          });
+
+          const newState = currentMarkets.map((market: any, index: number) =>
+            index === existingMarketIndex
+              ? { ...incomingMarket, runners: updatedRunners }
+              : market
           );
 
-          if (existingMarketIndex === -1) {
-            const newMarketRunners = incomingMarket.runners.map((r: any) => ({
-              ...r,
-              userbet: 0,
-            }));
-            return [
-              ...currentMarkets,
-              { ...incomingMarket, runners: newMarketRunners },
-            ];
-          } else {
-            const updatedRunners = incomingMarket.runners.map((newR: any) => {
-              const prevRunner = currentMarkets[
-                existingMarketIndex
-              ].runners.find(
-                (pr: any) =>
-                  pr.name?.toLowerCase().trim() ===
-                    newR.name?.toLowerCase().trim() ||
-                  pr.selectionId === newR.selectionId
-              );
-              return {
-                ...newR,
-                userbet: prevRunner?.userbet ?? newR.userbet,
-              };
-            });
-
-            const newState = currentMarkets.map((market: any, index: number) =>
-              index === existingMarketIndex
-                ? { ...incomingMarket, runners: updatedRunners }
-                : market
-            );
-
-            return newState;
-          }
-        });
-    });
-
-    socket.on("rates", (newData) => {
-      if (
-        !Total ||
-        Total.length === 0 ||
-        matchName === "greyhound" ||
-        matchName === "horse"
-      )
-        return;
-      //@ts-ignore
-      if (newData.length > 0) {
-        for (let i = 0; i < newData.length; i++) {
-          const element = newData[i];
-          setTotal((prevBookMakerData: any) => {
-            if (matchName != "greyhound" && matchName != "horse") {
-              if (prevBookMakerData != null && prevBookMakerData.length > 0) {
-                const updatedMarketData =
-                  element.marketId == prevBookMakerData?.marketId &&
-                  element.market == prevBookMakerData?.marketId;
-
-                if (!updatedMarketData) {
-                  //@ts-ignore
-                  return [...prevBookMakerData, element];
-                } else if (updatedMarketData)
-                  return prevBookMakerData.map((market: any) =>
-                    element.marketId === market?.marketId &&
-                    element.market == market?.marketId
-                      ? element
-                      : market
-                  );
-                else {
-                  return [...[prevBookMakerData], element];
-                }
-              } else {
-                return prevBookMakerData;
-              }
-            } else {
-              return prevBookMakerData;
-            }
-          });
+          return newState;
         }
-      }
+      });
     });
+
+    // Exposer update
+ socket.on("summerexposer", (data) => {
+  if (!data || data.length === 0) return;
+
+  const exposerMarkets = Array.isArray(data) ? data : [data];
+
+  // 1) Update Total (MATCH_ODDS etc.)
+  setTotal((prevMarkets: any[]) => {
+    if (!prevMarkets || prevMarkets.length === 0) return prevMarkets;
+
+    return prevMarkets.map((market) => {
+      const exposerMarket = exposerMarkets.find(
+        (em: any) => String(em.marketId) === String(market.marketId)
+      );
+      if (!exposerMarket) return market;
+
+      const updatedRunners = market.runners.map((runner: any) => {
+        const exposerRunner = exposerMarket.runners.find(
+          (er: any) => String(er.selectionId) === String(runner.selectionId)
+        );
+        return {
+          ...runner,
+          userbet:
+            exposerRunner != null
+              ? exposerRunner.amount
+              : runner.userbet ?? 0,
+        };
+      });
+
+      return {
+        ...market,
+        runners: updatedRunners,
+      };
+    });
+  });
+
+  // 2) Update BookMakerData
+  setBookMakerData((prevMarkets: any[]) => {
+    if (!prevMarkets || prevMarkets.length === 0) return prevMarkets;
+
+    return prevMarkets.map((market) => {
+      const exposerMarket = exposerMarkets.find(
+        (em: any) => String(em.marketId) === String(market.marketId)
+      );
+      if (!exposerMarket) return market;
+
+      const updatedRunners = market.runners.map((runner: any) => {
+        const exposerRunner = exposerMarket.runners.find(
+          (er: any) => String(er.selectionId) === String(runner.selectionId)
+        );
+        return {
+          ...runner,
+          userbet:
+            exposerRunner != null
+              ? exposerRunner.amount
+              : runner.userbet ?? 0,
+        };
+      });
+
+      return {
+        ...market,
+        runners: updatedRunners,
+      };
+    });
+  });
+});
+
 
     SportName();
 
@@ -284,25 +289,16 @@ const LineMatch = () => {
       setHtmlContent(cleanHtml);
     });
 
-    const interval = setInterval(() => {
-      socket.emit("summerexposer", {
-        matchId: id,
-        eventId: getGameTypeName2(matchName || ""),
-        numeric_id: user.user.numeric_id,
-      });
-    }, 1000);
-
     return () => {
       setShowLoading(true);
       setFancyData(null);
       setTotal([]);
       setBookMakerData([]);
-      clearInterval(interval);
+      clearInterval(exposerInterval);
       socket.emit("leaveRoom", { matchId: id });
     };
   }, [socket, id]);
 
-  // SCORE iframe: ALWAYS matchId (route param)
   const scoreUrl =
     name.eventId && id
       ? `https://leoexch247.com/score?eventid=${id}&sportid=${name.eventId}`
@@ -359,7 +355,7 @@ const LineMatch = () => {
         (fancyData && fancyData.length > 0) ? (
           <LiveMatchSideList
             html={html || ""}
-            channel={name.channel}      // <- TV channel id (diamond_id for eventId=4; else matchId)
+            channel={name.channel}
             eventId={name.eventId}
           />
         ) : (

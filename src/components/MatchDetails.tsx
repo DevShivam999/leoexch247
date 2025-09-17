@@ -20,23 +20,19 @@ const CricketMatchDetails = React.memo(
         const { data } = await instance(
           `/betting/session-summary?matchId=${id}`
         );
+
         if (fancyData != null) {
           for (let i = 0; i < data.length; i++) {
             const element = data[i];
-            //@ts-ignore
-            setFancyData((data: any) =>
-              data.map((prevBookMakerData: any) => {
+            setFancyData((prevData: any) =>
+              prevData.map((prevBookMakerData: any) => {
                 const updatedMarketData =
                   element.marketId === prevBookMakerData.marketId;
 
                 if (updatedMarketData) {
                   const newRunnerData =
                     element.selectionId == prevBookMakerData.SelectionId;
-                  //   //@ts-ignore
-                  //   (newR) =>
-                  //     newR.name.toString().toLowerCase().trim() ==
-                  //     prevRunner.RunnerName.toString().toLowerCase().trim()
-                  // );
+
                   if (newRunnerData) {
                     return {
                       ...prevBookMakerData,
@@ -54,10 +50,16 @@ const CricketMatchDetails = React.memo(
       } catch (error) {
         console.log(error);
       }
-    }
+    };
 
     useEffect(() => {
-      Api();
+      Api(); // ✅ first call immediately when match page open
+
+      const interval = setInterval(() => {
+        Api(); // ✅ call again every 5 seconds
+      }, 10000);
+
+      return () => clearInterval(interval); // ✅ cleanup on unmount or id change
     }, [id]);
 
     const groupedData = groupByGtype(fancyData);
@@ -72,15 +74,27 @@ const CricketMatchDetails = React.memo(
                 <div className="col-6 team-name-detalis">
                   <h3 className="runners-name"></h3>
                 </div>
-              {gtype!="oddeven"&&  <div className="col-6 row m-0 p-0">
-                 {gtype!="khado"&& <div className="col-3 lay lay-back-box">
-                    <span className="odds-black-lay">{gtype=="fancy1"?"Lay":"No"}</span>
-                  </div>}
-                  <div className={`${gtype=="khado"?"col-6":"col-3"} lay-back-box back`}>
-                    <span className="odds-black-lay">{gtype=="fancy1"||gtype=="khado"?"Back":"Yes"}</span>
+                {gtype != "oddeven" && (
+                  <div className="col-6 row m-0 p-0">
+                    {gtype != "khado" && (
+                      <div className="col-3 lay lay-back-box">
+                        <span className="odds-black-lay">
+                          {gtype == "fancy1" ? "Lay" : "No"}
+                        </span>
+                      </div>
+                    )}
+                    <div
+                      className={`${
+                        gtype == "khado" ? "col-6" : "col-3"
+                      } lay-back-box back`}
+                    >
+                      <span className="odds-black-lay">
+                        {gtype == "fancy1" || gtype == "khado" ? "Back" : "Yes"}
+                      </span>
+                    </div>
+                    <div className="col-6"></div>
                   </div>
-                  <div className="col-6"></div>
-                </div>}
+                )}
               </div>
 
               <div className="row">
