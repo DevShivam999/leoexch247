@@ -87,10 +87,14 @@ const LiveSportNav = () => {
                                           key={matchIdx}
                                         >
                                           <Link
-                                            to={`/live-market/${sp.comp_name}/${match.id}`}
+                                            to={`/live-market/${sp.comp_name}/${
+                                              match.matchId || match.id
+                                            }`}
                                             className={`accordion-inner-link ${
                                               location.pathname ===
-                                              `/live-market/${sp.comp_name}/${match.id}`
+                                              `/live-market/${sp.comp_name}/${
+                                                match.matchId || match.id
+                                              }`
                                                 ? "active"
                                                 : ""
                                             }`}
@@ -132,15 +136,27 @@ const LiveSportNav = () => {
                                     key={matchIdx}
                                   >
                                     <Link
-                                      to={`/live-market/${sp.comp_name}/${match.id}`}
+                                      to={`/live-market/${sp.comp_name}/${
+                                        match.matchId || match.id
+                                      }`}
                                       className={`accordion-inner-link ${
                                         location.pathname ===
-                                        `/live-market/${sp.comp_name}/${match.id}`
+                                        `/live-market/${sp.comp_name}/${
+                                          match.matchId || match.id
+                                        }`
                                           ? "active"
                                           : ""
                                       }`}
                                     >
-                                      {`${String(new Date(match.openDate || "").getHours()).padStart(2, "0")}:${String(new Date(match.openDate || "").getMinutes()).padStart(2, "0")}`}
+                                      {`${String(
+                                        new Date(
+                                          match.openDate || ""
+                                        ).getHours()
+                                      ).padStart(2, "0")}:${String(
+                                        new Date(
+                                          match.openDate || ""
+                                        ).getMinutes()
+                                      ).padStart(2, "0")}`}{" "}
                                       {match.name} ({match.countryCode})
                                     </Link>
                                   </li>

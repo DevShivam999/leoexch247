@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-
 import { useAppSelector } from "../hook/hook";
 import type { RootState } from "../helper/store";
 import { navMenu } from "../utils/nav.services";
@@ -9,35 +8,38 @@ import { useDispatch } from "react-redux";
 import { removeUser } from "../helper/Changes";
 import { getSport } from "../helper/Sport";
 
-const LeftNav = () => {
+const LeftNav: React.FC = () => {
   const { socket } = useAppSelector((p: RootState) => p.socket);
-
   const { user } = useAppSelector((p: RootState) => p.changeStore);
   const Permissions = useAppSelector((p: RootState) => p.Permissions);
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (!user) {
       dispatch(removeUser());
     }
-     socket.emit("competitionData", {});
+
+    if (!socket) return;
+
+    // Emit once
+    socket.emit("competitionData", {});
     socket.emit("competitionDataHRGR", {});
 
+    // Common handler
+    const handleSportData = (data: any) => {
+      dispatch(getSport({ sport: data }));
+    };
 
-socket.on("competitionData", (data) => {
-  dispatch(getSport({sport:data}))
-  
-});
+    socket.on("competitionData", handleSportData);
+    socket.on("competitionDataHRGR", handleSportData);
 
-socket.on("competitionDataHRGR", (data) => {
-    dispatch(getSport({sport:data}))
- 
-});
+    return () => {
+      socket.off("competitionData", handleSportData);
+      socket.off("competitionDataHRGR", handleSportData);
+    };
+  }, [user, socket, dispatch]);
 
-
-  }, []);
-  let p = user;
-
-  if (p) p = p?.numeric_id;
+  const userId = user?.numeric_id;
 
   return (
     <section
@@ -51,17 +53,16 @@ socket.on("competitionDataHRGR", (data) => {
       <ul className="left-navbar accordion" id="left-navbar">
         {navMenu.map((item, idx) => (
           <React.Fragment key={idx}>
-            {item.label == "Wallet" ? (
-              (Permissions.permissions?.acceptWalletWithdrawRequest ||
-                Permissions.permissions?.acceptWalletWithdrawRequest) && (
-                <MiddNav idx={idx} item={item} p={p} />
+            {item.label === "Wallet" ? (
+              Permissions.permissions?.acceptWalletWithdrawRequest && (
+                <MiddNav idx={idx} item={item} p={userId} />
               )
             ) : (
-              <MiddNav idx={idx} item={item} p={p} />
+              <MiddNav idx={idx} item={item} p={userId} />
             )}
           </React.Fragment>
         ))}
-        <LiveSportNav  />
+        <LiveSportNav />
       </ul>
     </section>
   );

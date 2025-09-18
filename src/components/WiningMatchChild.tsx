@@ -3,6 +3,7 @@ import { useAppSelector } from "../hook/hook";
 import formatNumberShort from "../utils/NumberFormate";
 
 type PriceSize = { price?: number; size?: number };
+
 type Runner = {
   selectionId: string | number;
   name: string;
@@ -29,10 +30,8 @@ type Runner = {
 
 type WiningMatchT = {
   marketId: string | number;
-  market: string;
+  marketName: string; // ✅ consistent now
   runners?: Runner[];
-
-  // market-level socket keys
   min?: number | string;
   maxb?: number | string;
   max?: number | string;
@@ -101,12 +100,18 @@ const WiningMatchChild = ({ WiningMatch }: { WiningMatch: WiningMatchT }) => {
       ? `Min:${finalMin}`
       : null;
 
-  const priceOrDash = (v?: number) => (v == null || Number(v) === 0 ? "-" : v);
-  const sizeOrDash = (v?: number) => (v == null || Number(v) === 0 ? "-" : v);
+  const priceOrDash = (v?: number) =>
+    v == null || Number(v) === 0 ? "-" : String(v);
+  const sizeOrDash = (v?: number) =>
+    v == null || Number(v) === 0 ? "-" : String(v);
 
   return (
-    <div className="match-market-2 " key={WiningMatch?.market}>
-      <div className="market-name">{WiningMatch?.market}</div>
+    <div
+      className="match-market-2"
+      key={String(WiningMatch?.marketId)}
+    >
+      {/* ✅ use marketName instead of market */}
+      <div className="market-name">{WiningMatch?.marketName}</div>
 
       <div className="row align-items-center m-0">
         <div className="col-7 team-name-detalis">
@@ -128,11 +133,15 @@ const WiningMatchChild = ({ WiningMatch }: { WiningMatch: WiningMatchT }) => {
           const atl = p?.ex?.availableToLay ?? [];
 
           return (
-            <div className="row border-top-gray market-odds-row  m-0" key={p.selectionId}>
+            <div
+              className="row border-top-gray market-odds-row m-0"
+              key={`${String(WiningMatch?.marketId)}-${String(p.selectionId)}`}
+            >
               <div className="col-7 team-name-detalis">
                 <a className="team-name">{p.name}</a>
                 <div
-                  style={{fontWeight: "bold",
+                  style={{
+                    fontWeight: "bold",
                     color: p?.userbet
                       ? p.userbet > 0
                         ? "green"
@@ -140,13 +149,17 @@ const WiningMatchChild = ({ WiningMatch }: { WiningMatch: WiningMatchT }) => {
                       : "black",
                   }}
                 >
-                  {/* ✅ Now exposure/userbet always patched via summerexposer */}
-                   {p?.userbet === undefined || p?.userbet === 0 ? "-" : Number(p.userbet).toFixed(2)}
+                  {typeof p.userbet === "number" && !isNaN(p.userbet)
+                    ? p.userbet.toFixed(2)
+                    : "-"}
                 </div>
               </div>
 
-              <div className="col-5 row p-0 m-0" style={{ position: "relative" }}>
-                {((atb?.length ?? 0) > 0) || ((atl?.length ?? 0) > 0) ? (
+              <div
+                className="col-5 row p-0 m-0"
+                style={{ position: "relative" }}
+              >
+                {(atb.length > 0 || atl.length > 0) ? (
                   <>
                     <div className="col-2 back2 odds-box-1">
                       <span className="odds-value">{priceOrDash(atb[2]?.price)}</span>
@@ -185,9 +198,9 @@ const WiningMatchChild = ({ WiningMatch }: { WiningMatch: WiningMatchT }) => {
                   </>
                 )}
 
-                {p?.status && p.status !== "ACTIVE" && (
+                {p?.status && p.status.toUpperCase() !== "ACTIVE" && (
                   <div
-                    className="col-12 suspended "
+                    className="col-12 suspended"
                     style={{
                       position: "absolute",
                       backgroundColor: "rgb(0 0 0 / 65%)",

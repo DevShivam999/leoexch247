@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { RootState } from "../helper/store";
@@ -26,8 +26,16 @@ export const getGameTypeName2 = (gameId: string): string => {
     case "greyhound":
       return "4339";
     default:
-      return `2378961`;
+      return "2378961";
   }
+};
+
+type Runner = { selectionId: string | number; userbet?: number; [k: string]: any };
+type Market = {
+  marketId: string | number;
+  marketName: string;
+  runners: Runner[];
+  [k: string]: any;
 };
 
 const LineMatch = () => {
@@ -35,12 +43,14 @@ const LineMatch = () => {
   const location = useLocation();
 
   const socket = useAppSelector((p: RootState) => p.socket.socket);
-  const user = useAppSelector((p: RootState) => p.changeStore);
-  const [fancyData, setFancyData] = useState<any | null>(null);
-  const [BookMakerData, setBookMakerData] = useState<any[]>([]);
-  const [Total, setTotal] = useState<any[]>([]);
-  const [html, setHtmlContent] = useState<null | string>(null);
+  const userState = useAppSelector((p: RootState) => p.changeStore);
+
+  const [fancyData, setFancyData] = useState<any[] | null>(null);
+  const [BookMakerData, setBookMakerData] = useState<Market[]>([]);
+  const [Total, setTotal] = useState<Market[]>([]);
+  const [html, setHtmlContent] = useState<string | null>(null);
   const [loadingIn, setShowLoading] = useState(true);
+
   const navigation = useNavigate();
   const [name, setName] = useState({
     name: "",
@@ -48,14 +58,42 @@ const LineMatch = () => {
     channel: 0,
     eventId: 0,
   });
+
   const dispatch = useDispatch();
 
-  const SportName = async () => {
+  // ---- lifecycle guards
+  const isAliveRef = useRef(true);
+  const latestMatchIdRef = useRef<string>("");
+  const activeMatchIdRef = useRef<string>(""); // 🚨 ensure handlers only update current match
+  const exposerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const currentMatchId = String(id ?? "");
+
+  // Reset when match changes
+  useEffect(() => {
+    setName({
+      name: matchName || "",
+      created: new Date(),
+      channel: 0,
+      eventId: 0,
+    });
+    setFancyData(null);
+    setBookMakerData([]);
+    setTotal([]);
+    setHtmlContent(null);
+    setShowLoading(true);
+  }, [currentMatchId, matchName]);
+
+  const SportName = useCallback(async () => {
     const mId = String(id ?? "");
+    latestMatchIdRef.current = mId;
+
     try {
       const matchRes = await instance.get("/betting/match", {
         params: { matchId: mId, _: Date.now() },
       });
+
+      if (!isAliveRef.current || latestMatchIdRef.current !== mId) return;
 
       const data = matchRes.data as {
         name: string;
@@ -68,10 +106,7 @@ const LineMatch = () => {
 
       const matchIdNum = Number(data?.matchId);
       const diamondIdNum = Number(data?.diamond_id);
-      const tvChannel =
-        data?.eventId === 4
-          ? (diamondIdNum || matchIdNum)
-          : matchIdNum;
+      const tvChannel = data?.eventId === 4 ? (diamondIdNum || matchIdNum) : matchIdNum;
 
       setName({
         name: data?.name ?? "",
@@ -80,86 +115,101 @@ const LineMatch = () => {
         eventId: data?.eventId ?? 0,
       });
     } catch (err) {
+      if (!isAliveRef.current) return;
       ErrorHandler({ err, dispatch, navigation, pathname: location.pathname });
     } finally {
-      setShowLoading(false);
+      if (isAliveRef.current) setShowLoading(false);
     }
-  };
+  }, [id, dispatch, navigation, location.pathname]);
 
   useEffect(() => {
-    if (user.user == null) {
+    isAliveRef.current = true;
+    const prevMatchId = activeMatchIdRef.current;
+    activeMatchIdRef.current = currentMatchId;
+
+    if (!userState.user) {
       navigation("/login");
+      return;
     }
+
     document.title = `🟢Live-${matchName}`;
 
-    const userwith = user.user;
+    if (!socket || !currentMatchId) return;
 
-    socket.emit("savefancyandbookmaker", { matchId: id });
+    // leave only previous match room
+    if (prevMatchId && prevMatchId !== currentMatchId) {
+      socket.emit("leaveRoom", { matchId: prevMatchId });
+    }
+
+    const userwith = userState.user;
+
+    // join new room
+    socket.emit("savefancyandbookmaker", { matchId: currentMatchId });
     socket.emit("connect_user", { userId: userwith.numeric_id });
     socket.emit("joinRoom", {
-      matchId: id,
+      matchId: currentMatchId,
       eventId: getGameTypeName2(matchName || ""),
       numeric_id: userwith.numeric_id,
     });
 
-    // Emit exposer immediately + every 5s
+    // exposer loop
+    if (exposerIntervalRef.current) clearInterval(exposerIntervalRef.current);
     const sendExposer = () =>
       socket.emit("summerexposer", {
-        matchId: id,
+        matchId: currentMatchId,
         numeric_id: userwith.numeric_id,
       });
     sendExposer();
-    const exposerInterval = setInterval(sendExposer, 5000);
+    exposerIntervalRef.current = setInterval(sendExposer, 5000);
 
-    socket.on("sessionData", (data) => {
-      setFancyData(data.data);
-    });
+    // --- handlers with match guard ---
+    const onSessionData = (data: any) => {
+      if (String(data?.matchId) !== activeMatchIdRef.current) return;
+      setFancyData(data?.data || []);
+    };
 
-    socket.on("bookOddsData", (data) => {
-      setBookMakerData((prev: any[]) => {
+    const onBookOddsData = (data: any) => {
+      if (String(data?.matchId) !== activeMatchIdRef.current) return;
+      const incoming = data?.data;
+      if (!incoming) return;
+
+      setBookMakerData((prev) => {
         const existingIndex = prev.findIndex(
-          (market) => market.marketName === data.data.marketName
+          (m) => String(m.marketName) === String(incoming.marketName)
         );
 
-        const updatedRunners = data.data.runners.map((newRunner: any) => {
+        const updatedRunners = (incoming.runners || []).map((newRunner: any) => {
           const existingRunner =
             existingIndex !== -1
               ? prev[existingIndex].runners.find(
-                  (r: any) =>
-                    String(r.selectionId) === String(newRunner.selectionId)
+                  (r: any) => String(r.selectionId) === String(newRunner.selectionId)
                 )
               : null;
 
-          return {
-            ...newRunner,
-            userbet: existingRunner?.userbet || 0,
-          };
+          return { ...newRunner, userbet: existingRunner?.userbet || 0 };
         });
 
-        const updatedMarket = {
-          ...data.data,
-          runners: updatedRunners,
-        };
+        const updatedMarket: Market = { ...incoming, runners: updatedRunners };
 
         if (existingIndex !== -1) {
-          const newMarkets = [...prev];
-          newMarkets[existingIndex] = updatedMarket;
-          return newMarkets;
+          const next = [...prev];
+          next[existingIndex] = updatedMarket;
+          return next;
         }
         return [...prev, updatedMarket];
       });
-    });
+    };
 
-    // Odds update
-    socket.on("matchOddsData", (data) => {
-      if (id != data.matchId) return;
-
-      setTotal((prevTotal: any[]) => {
-        const incomingMarket = data.data;
+    const onMatchOddsData = (data: any) => {
+      if (String(data?.matchId) !== activeMatchIdRef.current) return;
+      setTotal((prevTotal) => {
+        const incomingMarket: Market = data?.data;
         const currentMarkets = Array.isArray(prevTotal) ? prevTotal : [];
 
+        if (!incomingMarket) return currentMarkets;
+
         if (currentMarkets.length === 0) {
-          const initialRunners = incomingMarket.runners.map((r: any) => ({
+          const initialRunners = (incomingMarket.runners || []).map((r: any) => ({
             ...r,
             userbet: 0,
           }));
@@ -167,115 +217,85 @@ const LineMatch = () => {
         }
 
         const existingMarketIndex = currentMarkets.findIndex(
-          (market: any) =>
-            String(market.marketId) === String(incomingMarket.marketId)
+          (m) => String(m.marketId) === String(incomingMarket.marketId)
         );
 
         if (existingMarketIndex === -1) {
-          const newMarketRunners = incomingMarket.runners.map((r: any) => ({
+          const newMarketRunners = (incomingMarket.runners || []).map((r: any) => ({
             ...r,
             userbet: 0,
           }));
-          return [
-            ...currentMarkets,
-            { ...incomingMarket, runners: newMarketRunners },
-          ];
+          return [...currentMarkets, { ...incomingMarket, runners: newMarketRunners }];
         } else {
-          const updatedRunners = incomingMarket.runners.map((newR: any) => {
+          const updatedRunners = (incomingMarket.runners || []).map((newR: any) => {
             const prevRunner = currentMarkets[existingMarketIndex].runners.find(
-              (pr: any) =>
-                String(pr.selectionId) === String(newR.selectionId)
+              (pr: any) => String(pr.selectionId) === String(newR.selectionId)
+            );
+            return { ...newR, userbet: prevRunner?.userbet ?? 0 };
+          });
+
+          const next = currentMarkets.map((m, i) =>
+            i === existingMarketIndex ? { ...incomingMarket, runners: updatedRunners } : m
+          );
+          return next;
+        }
+      });
+    };
+
+    const onSummerExposer = (data: any) => {
+      if (String(data?.matchId) !== activeMatchIdRef.current) return;
+      if (!data || (Array.isArray(data) && data.length === 0)) return;
+
+      const exposerMarkets: any[] = Array.isArray(data) ? data : [data];
+
+      setTotal((prevMarkets) =>
+        prevMarkets.map((market) => {
+          const exposerMarket = exposerMarkets.find(
+            (em) => String(em.marketId) === String(market.marketId)
+          );
+          if (!exposerMarket) return market;
+
+          const updatedRunners = market.runners.map((runner: any) => {
+            const exposerRunner = (exposerMarket.runners || []).find(
+              (er: any) => String(er.selectionId) === String(runner.selectionId)
             );
             return {
-              ...newR,
-              userbet: prevRunner?.userbet ?? 0,
+              ...runner,
+              userbet: exposerRunner != null ? exposerRunner.amount : runner.userbet ?? 0,
             };
           });
 
-          const newState = currentMarkets.map((market: any, index: number) =>
-            index === existingMarketIndex
-              ? { ...incomingMarket, runners: updatedRunners }
-              : market
+          return { ...market, runners: updatedRunners };
+        })
+      );
+
+      setBookMakerData((prevMarkets) =>
+        prevMarkets.map((market) => {
+          const exposerMarket = exposerMarkets.find(
+            (em) => String(em.marketId) === String(market.marketId)
           );
+          if (!exposerMarket) return market;
 
-          return newState;
-        }
-      });
-    });
+          const updatedRunners = market.runners.map((runner: any) => {
+            const exposerRunner = (exposerMarket.runners || []).find(
+              (er: any) => String(er.selectionId) === String(runner.selectionId)
+            );
+            return {
+              ...runner,
+              userbet: exposerRunner != null ? exposerRunner.amount : runner.userbet ?? 0,
+            };
+          });
 
-    // Exposer update
- socket.on("summerexposer", (data) => {
-  if (!data || data.length === 0) return;
-
-  const exposerMarkets = Array.isArray(data) ? data : [data];
-
-  // 1) Update Total (MATCH_ODDS etc.)
-  setTotal((prevMarkets: any[]) => {
-    if (!prevMarkets || prevMarkets.length === 0) return prevMarkets;
-
-    return prevMarkets.map((market) => {
-      const exposerMarket = exposerMarkets.find(
-        (em: any) => String(em.marketId) === String(market.marketId)
+          return { ...market, runners: updatedRunners };
+        })
       );
-      if (!exposerMarket) return market;
+    };
 
-      const updatedRunners = market.runners.map((runner: any) => {
-        const exposerRunner = exposerMarket.runners.find(
-          (er: any) => String(er.selectionId) === String(runner.selectionId)
-        );
-        return {
-          ...runner,
-          userbet:
-            exposerRunner != null
-              ? exposerRunner.amount
-              : runner.userbet ?? 0,
-        };
-      });
+    const onScorecardData = (data: any) => {
+      if (String(data?.matchId) !== activeMatchIdRef.current) return;
 
-      return {
-        ...market,
-        runners: updatedRunners,
-      };
-    });
-  });
-
-  // 2) Update BookMakerData
-  setBookMakerData((prevMarkets: any[]) => {
-    if (!prevMarkets || prevMarkets.length === 0) return prevMarkets;
-
-    return prevMarkets.map((market) => {
-      const exposerMarket = exposerMarkets.find(
-        (em: any) => String(em.marketId) === String(market.marketId)
-      );
-      if (!exposerMarket) return market;
-
-      const updatedRunners = market.runners.map((runner: any) => {
-        const exposerRunner = exposerMarket.runners.find(
-          (er: any) => String(er.selectionId) === String(runner.selectionId)
-        );
-        return {
-          ...runner,
-          userbet:
-            exposerRunner != null
-              ? exposerRunner.amount
-              : runner.userbet ?? 0,
-        };
-      });
-
-      return {
-        ...market,
-        runners: updatedRunners,
-      };
-    });
-  });
-});
-
-
-    SportName();
-
-    socket.on("scorecardData", (data) => {
       const htmlString =
-        typeof data === "object" && data.scoreData
+        typeof data === "object" && data?.scoreData
           ? data.scoreData
           : typeof data === "string"
           ? data
@@ -287,31 +307,41 @@ const LineMatch = () => {
       });
 
       setHtmlContent(cleanHtml);
-    });
+    };
+
+    // attach
+    socket.on("sessionData", onSessionData);
+    socket.on("bookOddsData", onBookOddsData);
+    socket.on("matchOddsData", onMatchOddsData);
+    socket.on("summerexposer", onSummerExposer);
+    socket.on("scorecardData", onScorecardData);
+
+    SportName();
 
     return () => {
-      setShowLoading(true);
-      setFancyData(null);
-      setTotal([]);
-      setBookMakerData([]);
-      clearInterval(exposerInterval);
-      socket.emit("leaveRoom", { matchId: id });
+      isAliveRef.current = false;
+      if (exposerIntervalRef.current) {
+        clearInterval(exposerIntervalRef.current);
+        exposerIntervalRef.current = null;
+      }
+      socket.off("sessionData", onSessionData);
+      socket.off("bookOddsData", onBookOddsData);
+      socket.off("matchOddsData", onMatchOddsData);
+      socket.off("summerexposer", onSummerExposer);
+      socket.off("scorecardData", onScorecardData);
     };
-  }, [socket, id]);
+  }, [socket, currentMatchId, matchName, userState.user, SportName]);
 
   const scoreUrl =
     name.eventId && id
-      ? `https://leoexch247.com/score?eventid=${id}&sportid=${name.eventId}`
+      ? `https://leoexch247.com/score?eventid=${String(id)}&sportid=${name.eventId}`
       : "";
 
   return (
     <div className="container-fluid mt-3">
       <div className="row">
         <div className="col-8">
-          <h2
-            className="game-heading d-flex "
-            style={{ justifyContent: "space-between" }}
-          >
+          <h2 className="game-heading d-flex " style={{ justifyContent: "space-between" }}>
             <span>{name.name}</span>
             <span>
               {name.created.toDateString()} {name.created.toLocaleTimeString()}
@@ -333,31 +363,15 @@ const LineMatch = () => {
             </div>
           )}
 
-          {Total && Total.length > 0 && (
-            <WiningMatchDetails SHOW={"Match"} WiningMatch={Total} />
-          )}
-          {BookMakerData.length != 0 && (
-            <CricketBookmakerMatchDetails BookMakerData={BookMakerData} />
-          )}
-          {Total && Total.length > 0 && (
-            <WiningMatchDetails SHOW={"NotMatch"} WiningMatch={Total} />
-          )}
-          {fancyData && fancyData.length > 0 && (
-            <CricketMatchDetails id={id ?? ""} data={fancyData} />
-          )}
-          {Total && Total.length > 0 && (
-            <WiningMatchDetails SHOW={"Tie"} WiningMatch={Total} />
-          )}
+          {Total.length > 0 && <WiningMatchDetails SHOW="Match" WiningMatch={Total} />}
+          {BookMakerData.length > 0 && <CricketBookmakerMatchDetails BookMakerData={BookMakerData} />}
+          {Total.length > 0 && <WiningMatchDetails SHOW="NotMatch" WiningMatch={Total} />}
+          {fancyData && fancyData.length > 0 && <CricketMatchDetails id={id ?? ""} data={fancyData} />}
+          {Total.length > 0 && <WiningMatchDetails SHOW="Tie" WiningMatch={Total} />}
         </div>
 
-        {BookMakerData ||
-        (Total && Total.length > 0) ||
-        (fancyData && fancyData.length > 0) ? (
-          <LiveMatchSideList
-            html={html || ""}
-            channel={name.channel}
-            eventId={name.eventId}
-          />
+        {BookMakerData.length > 0 || Total.length > 0 || (fancyData && fancyData.length > 0) ? (
+          <LiveMatchSideList html={html || ""} channel={name.channel} eventId={name.eventId} />
         ) : (
           <>{loadingIn ? <Loading /> : "no have any  active market"}</>
         )}
