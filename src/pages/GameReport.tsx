@@ -8,9 +8,9 @@ export const getGameTypeName = (gameId: string): string => {
   switch (gameId) {
     case "4":
       return "Cricket";
-    case "2":
-      return "Tennis";
     case "1":
+      return "Tennis";
+    case "2":
       return "Football";
     case "7":
       return "Horse";
