@@ -139,20 +139,24 @@ const WiningMatchChild = ({ WiningMatch }: { WiningMatch: WiningMatchT }) => {
             >
               <div className="col-7 team-name-detalis">
                 <a className="team-name">{p.name}</a>
-                <div
-                  style={{
-                    fontWeight: "bold",
-                    color: p?.userbet
-                      ? p.userbet > 0
-                        ? "green"
-                        : "red"
-                      : "black",
-                  }}
-                >
-                  {typeof p.userbet === "number" && !isNaN(p.userbet)
-                    ? p.userbet.toFixed(2)
-                    : "-"}
-                </div>
+<div
+  style={{
+    fontWeight: "bold",
+    color:
+      typeof p.userbet === "number"
+        ? p.userbet > 0
+          ? "green"
+          : p.userbet < 0
+          ? "red"
+          : "black"
+        : "black",
+  }}
+>
+  {typeof p.userbet === "number" && !isNaN(p.userbet)
+    ? p.userbet.toFixed(2)
+    : "-"}   {/* ✅ now "-" instead of 0.00 */}
+</div>
+
               </div>
 
               <div

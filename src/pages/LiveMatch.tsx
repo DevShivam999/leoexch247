@@ -242,54 +242,59 @@ const LineMatch = () => {
       });
     };
 
-    const onSummerExposer = (data: any) => {
-      if (String(data?.matchId) !== activeMatchIdRef.current) return;
-      if (!data || (Array.isArray(data) && data.length === 0)) return;
+const onSummerExposer = (data: any) => {
+  if (!data || (Array.isArray(data) && data.length === 0)) return;
 
-      const exposerMarkets: any[] = Array.isArray(data) ? data : [data];
+  const exposerMarkets: any[] = Array.isArray(data) ? data : [data];
 
-      setTotal((prevMarkets) =>
-        prevMarkets.map((market) => {
-          const exposerMarket = exposerMarkets.find(
-            (em) => String(em.marketId) === String(market.marketId)
-          );
-          if (!exposerMarket) return market;
-
-          const updatedRunners = market.runners.map((runner: any) => {
-            const exposerRunner = (exposerMarket.runners || []).find(
-              (er: any) => String(er.selectionId) === String(runner.selectionId)
-            );
-            return {
-              ...runner,
-              userbet: exposerRunner != null ? exposerRunner.amount : runner.userbet ?? 0,
-            };
-          });
-
-          return { ...market, runners: updatedRunners };
-        })
+  // ---- update Match Odds / Total
+  setTotal((prevMarkets) =>
+    prevMarkets.map((market) => {
+      const exposerMarket = exposerMarkets.find(
+        (em) => String(em.marketId) === String(market.marketId)
       );
+      if (!exposerMarket) return market;
 
-      setBookMakerData((prevMarkets) =>
-        prevMarkets.map((market) => {
-          const exposerMarket = exposerMarkets.find(
-            (em) => String(em.marketId) === String(market.marketId)
-          );
-          if (!exposerMarket) return market;
+      const updatedRunners = market.runners.map((runner: any) => {
+        const exposerRunner = (exposerMarket.runners || []).find(
+          (er: any) => String(er.selectionId) === String(runner.selectionId)
+        );
 
-          const updatedRunners = market.runners.map((runner: any) => {
-            const exposerRunner = (exposerMarket.runners || []).find(
-              (er: any) => String(er.selectionId) === String(runner.selectionId)
-            );
-            return {
-              ...runner,
-              userbet: exposerRunner != null ? exposerRunner.amount : runner.userbet ?? 0,
-            };
-          });
+        if (exposerRunner) {
+          return { ...runner, userbet: exposerRunner.amount };
+        }
+        return runner; // don’t overwrite with 0
+      });
 
-          return { ...market, runners: updatedRunners };
-        })
+      return { ...market, runners: updatedRunners };
+    })
+  );
+
+  // ---- update Bookmaker
+  setBookMakerData((prevMarkets) =>
+    prevMarkets.map((market) => {
+      const exposerMarket = exposerMarkets.find(
+        (em) => String(em.marketId) === String(market.marketId)
       );
-    };
+      if (!exposerMarket) return market;
+
+      const updatedRunners = market.runners.map((runner: any) => {
+        const exposerRunner = (exposerMarket.runners || []).find(
+          (er: any) => String(er.selectionId) === String(runner.selectionId)
+        );
+
+        if (exposerRunner) {
+          return { ...runner, userbet: exposerRunner.amount };
+        }
+        return runner;
+      });
+
+      return { ...market, runners: updatedRunners };
+    })
+  );
+};
+
+
 
     const onScorecardData = (data: any) => {
       if (String(data?.matchId) !== activeMatchIdRef.current) return;
