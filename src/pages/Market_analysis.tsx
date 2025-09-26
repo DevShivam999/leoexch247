@@ -126,6 +126,14 @@ const CricketMatchOdds: React.FC<CricketMatchOddsProps> = ({ apiResponse }) => {
                           : ""}
                         )
                       </div>
+                      <div className="testevent">
+                        <Link
+                          to={`/matchInfo/${match.matchId}`}
+                          className="result-button"
+                        >
+                          Result
+                        </Link>
+                      </div>
                     </div>
                     <div className="table-one-header-right">
                       <div className="date">
