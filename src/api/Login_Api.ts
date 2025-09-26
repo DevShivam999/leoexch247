@@ -31,7 +31,7 @@ export const Login_Api = async (data: ILoginFormInputs) => {
       loginCount: response.data?.loginCount ?? 0,
       numeric_id: response.data?.numeric_id ?? null,
       phone: response.data?.phone ?? "",
-      profitLossBalance: -2629953.9499999597,
+      profitLossBalance: 0,
       profitLossCredit: 0,
       roles: response.data?.roles ?? ["user"],
       rummyToken:

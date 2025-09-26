@@ -13,22 +13,32 @@ const Nav: React.FC = () => {
   const User = useAppSelector((p: RootState) => p.changeStore.user);
   const dispatch = useDispatch();
   const navigation = useNavigate();
+  const { socket } = useAppSelector((p: RootState) => p.socket);
+  const Permissions = useAppSelector((p: RootState) => p.Permissions);
 
+  // ✅ Logout handler (manual logout)
   const Logout = () => {
+    if (socket && User) {
+      socket.emit("logout", { userId: User.numeric_id }); // tell server this user logged out
+    }
+
+    // clear redux + storage
     dispatch(removeUser());
+    localStorage.clear();
+
     navigation("/login");
   };
-
-  const { socket } = useAppSelector((p: RootState) => p.socket);
-  const  Permissions  = useAppSelector((p: RootState) => p.Permissions);
 
   useEffect(() => {
     if (!User) {
       navigation("/login");
+      return;
     }
 
+    // ✅ Ask server for live matches
     socket.emit("inplaymatches", { userId: User.numeric_id });
 
+    // ✅ Handle inplaymatches response
     const handleInplayMatches = (data: InplayMatchesData) => {
       let allLiveMarketItems: SubMenuItem[] = [];
 
@@ -55,15 +65,28 @@ const Nav: React.FC = () => {
       );
     };
 
-    socket.on("inplaymatches", handleInplayMatches);
+    // ✅ Handle forced logout from server
+    const handleLogout = (reason: any) => {
+      console.log("⚠️ Received logout event from server:", reason);
 
+      localStorage.clear();
+      dispatch(removeUser());
+
+      navigation("/login");
+    };
+
+    // Attach listeners
+    socket.on("inplaymatches", handleInplayMatches);
+    socket.on("logout", handleLogout);
+
+    // Cleanup on unmount
     return () => {
       socket.off("inplaymatches", handleInplayMatches);
+      socket.off("logout", handleLogout);
     };
-  }, [socket, setNav]);
+  }, [socket, User, navigation, dispatch]);
 
   let p = useAppSelector((p: RootState) => p.changeStore.user);
-
   if (p) p = p?.numeric_id;
 
   return (
@@ -89,13 +112,13 @@ const Nav: React.FC = () => {
             <ul className="menu-row">
               {nav.map((item, index) => (
                 <React.Fragment key={index}>
-                  {item.label == "Wallet" ? (
+                  {item.label === "Wallet" ? (
                     (Permissions.permissions?.acceptWalletWithdrawRequest ||
                       Permissions.permissions?.acceptWalletWithdrawRequest) && (
-                  <CommanNav item={item} p={p} index={index}/>
+                      <CommanNav item={item} p={p} index={index} />
                     )
                   ) : (
-                     <CommanNav item={item} p={p} index={index}/>
+                    <CommanNav item={item} p={p} index={index} />
                   )}
                 </React.Fragment>
               ))}
@@ -104,23 +127,21 @@ const Nav: React.FC = () => {
 
           <div className="rightmenu">
             <ul className="rightmenu-ul">
-       
               <li className="menu-item dropdown menu-dropbtn">
                 <button
                   className="btn dropdown-toggle menu-link"
-                  
                   role="button"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                   style={{ backgroundColor: "transparent !important" }}
                 >
                   <img src="/user.svg" alt="User icon" />
-                  {User?.firstName ?? "Leoexch247"}
+                  {User?.firstName ?? "Rouletteworlds"}
                 </button>
                 <ul className="dropdown-menu">
                   <li>
                     <Link className="dropdown-item" to="#">
-                      Bal. : <span>{User.credit-User.upCredit || 100000}</span>
+                      Bal. : <span>{User.credit - User.upCredit || 100000}</span>
                     </Link>
                   </li>
                   <li>
@@ -141,7 +162,7 @@ const Nav: React.FC = () => {
                       className="dropdown-item"
                       href={`https://api.whatsapp.com/send?phone=${User?.number}&text=&source=&data=&app_absent=`}
                     >
-                      <i className="fab fa-whatsapp text-success"></i> Leoexch247
+                      <i className="fab fa-whatsapp text-success"></i> Rouletteworlds
                     </a>
                   </li>
                   <li>
@@ -149,19 +170,11 @@ const Nav: React.FC = () => {
                       className="dropdown-item"
                       onClick={() => User !== null && Logout()}
                     >
-                      {User === null || User == "" ? "Login" : "Log out"}
+                      {User === null || User === "" ? "Login" : "Log out"}
                     </div>
                   </li>
                 </ul>
               </li>
-              {/* <form className="search-input-box">
-                <input
-                  name="searchSport"
-                  placeholder="All Client..."
-                  className="search-input"
-                />
-                <i className="fas fa-search-plus"></i>
-              </form> */}
             </ul>
           </div>
         </div>

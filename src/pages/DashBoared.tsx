@@ -76,7 +76,7 @@ const DashBoard = () => {
                     <div>
                       <p className="mb-0 text-secondary">Active User</p>
                       <h3 className="my-1">
-                        {User.active_user} <i className="fas fa-sync"></i>
+                        {User.active_user} 
                       </h3>
                       <Link
                         to="list-of-clients"
@@ -101,7 +101,7 @@ const DashBoard = () => {
                     <div>
                       <p className="mb-0 text-secondary">Online User</p>
                       <h3 className="my-1">
-                        {User.online_users} <i className="fas fa-sync"></i>
+                        {User.online_users} 
                       </h3>
                       <Link
                         to="/online-users"
@@ -124,7 +124,7 @@ const DashBoard = () => {
                       <p className="mb-0 text-secondary">InActive User</p>
                       <h3 className="my-1">
                         {User.inactive_user}
-                        <i className="fas fa-sync"></i>
+                        
                       </h3>
                       <Link
                         to="list-of-clients"
